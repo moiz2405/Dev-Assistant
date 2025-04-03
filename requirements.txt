@@ -1,0 +1,4 @@
+agno
+groq
+sqlalchemy
+duckduckgo-search
