@@ -1,0 +1,23 @@
+# WorkFlow : 
+
+# User_Input -> query_processor -> Required_Function_Call 
+
+# types of queries :
+
+#    1) Project_Setup - new or from existing repo 
+#    2) File_Handling - search , open and close a file by name in given directory
+#    3) App_Handling - Open and  close an app 
+#    4) Summarizer - Make a pdf as context and answers the users questions based on that context
+    
+# Subtasks_in_query :
+
+#     1) setup new project, setup existing project
+#     2) Search, Open and Close a file 
+#     3) Open and Close a App
+#     4) Gives summary of the given pdf or answers the users questions using the pdf as context
+
+# memory required? : 
+#     1) No 
+#     2) NO 
+#     3) No 
+#     4) Yes, temp 
