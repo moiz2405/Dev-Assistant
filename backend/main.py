@@ -2,7 +2,10 @@
 from app.functions.file_handler import search_file, open_file, move_file
 
 # Example: Searching for a file
-search_results = search_file("receipt.txt", "/home/user/Documents")
+# wsl path /home/moiz/myfolder/projects
+file_path = "/mnt/d/"
+
+search_results = search_file("one.txt", file_path)
 if search_results:
     print("Found files:", search_results)
     file_to_open = search_results[0]  # Automatically selects the first match
