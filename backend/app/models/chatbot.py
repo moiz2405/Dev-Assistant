@@ -11,11 +11,24 @@ class ProjectIdea(BaseModel):
     usecases: str = Field(...,description = "Give 3 one word usecases of the project idea")
     views: str = Field(..., description = "Provide your views on the idea and any improvements")
 
+class SuggestProjectIdea(BaseModel):
+    idea_name:str = Field(...,description = "give a unique and solid project idea name")
+    idea_requirement:str = Field(...,description = "give 3 purposes of suggesting this project idea")
+    business_model:str = Field(...,description = "explain how this can be made into a business model in 5 lines minimum")
+
+# file handling 
+class query_processor(BaseModel):
+    command:str = Field(...,description = "answer in OPEN or CLOSE or SEARCH based on user input , read user intention carefully")
+    file_name :str= Field(..., description = "extract the name of the file with the extension used")
+    path :str = Field(..., description= "extract the path from the user query")
+
+
 agent = Agent(
     model=Groq(id="llama-3.3-70b-versatile"),
-    description = "you evaluate project ideas given to you",
+    description = "you provide a project idea on the domain given by user",
     markdown=True,
-    response_model = ProjectIdea,
+    response_model=query_processor,
+    # response_model = ProjectIdea,
 )
 
 while(1):
