@@ -4,10 +4,12 @@
 
 # types of queries :
 
-#    1) Project_Setup - new or from existing repo 
-#    2) File_Handling - search , open and close a file by name in given directory
-#    3) App_Handling - Open and  close an app 
-#    4) Summarizer - Make a pdf as context and answers the users questions based on that context
+#    1) Github_Actions - List Repos, Clone a repo and setup that[ identify project type install dependencies and run], 
+        make current dir a git repo and push it to github.
+#    2) Project_Setup - setup a new project environment of diff types like Next.js , flask , install basic dependencies.
+#    3) File_Handling - search , open and close a file by name in given directory
+#    4) App_Handling - Open and  close an app 
+#    5) Summarizer - Make a pdf as context and answers the users questions based on that context
     
 # Subtasks_in_query :
 
