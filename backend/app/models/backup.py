@@ -4,10 +4,6 @@ from pydantic import BaseModel, Field
 from agno.agent import Agent, RunResponse
 from agno.models.groq import Groq
 
-# ───────────────────────────────
-# ENUMS FOR VALIDATED VALUES
-# ───────────────────────────────
-
 class QueryType(str, Enum):
     GENERAL = "GENERAL"
     FILE_HANDLING = "FILE_HANDLING"
@@ -21,34 +17,51 @@ class CommandType(str, Enum):
     DELETE = "DELETE"
     OTHER = "OTHER"
 
-# ───────────────────────────────
-# STRUCTURED MODELS FOR QUERY PROCESSING
-# ───────────────────────────────
-
 class QueryProcessor(BaseModel):
     """
-    Translated and structured output from user query.
+    Structured output parsed from user query.
     """
     type: QueryType = Field(
         ..., 
         description=(
-            "Type of query from: GENERAL, FILE_HANDLING (search/open/close a file), "
-            "PROJECT_SETUP (new/existing projects), SUMMARIZER (summarizing or answering from documents), APP (open/close apps)"
+            "Correctly determine the type of query:"
+            "1) FILE_HANDLING — if the query is about searching, opening, or closing a file."
+            "2) APP — if the query is about opening or closing an app."
+            "3) PROJECT_SETUP — if the query is about creating or setting up a new/existing project."
+            "4) SUMMARIZER — if the query asks to summarize or extract answers from a document (PDF, DOCX, etc)."
+            "5) GENERAL — if no clear task is mentioned, and it's a general question or informational query."
         )
     )
     command: CommandType = Field(
         ..., 
         description=(
-            "Command for the action: OPEN, CLOSE, DELETE, OTHER (like summarizing, querying from file, etc.)"
+            "Determine the specific command to perform within the type above:"
+            "- For FILE_HANDLING: OPEN, CLOSE, DELETE"
+            "- For APP: OPEN or CLOSE"
+            "- For SUMMARIZER: usually OTHER (like summarize, ask questions from doc)"
+            "- For PROJECT_SETUP: OPEN (existing), DELETE (cleanup), or NEW_PROJECT (initialize new)"
+            "- Use OTHER if not clearly mapped."
         )
     )
-    target: str = Field(..., description="Target app, file, project, etc.")
-    path: str = Field(..., description="Windows absolute path (use single \ like C:\new folder) or (D:\"new folder)) only")
-
-
-# ───────────────────────────────
-# PRE-PROMPT BOOSTER (OPTIONAL)
-# ───────────────────────────────
+    target: str = Field(
+        ..., 
+        description=(
+            "Extract the exact name of the file, app, or project the query refers to:"
+            "- For FILE_HANDLING: file name with extension (e.g., report.pdf, data.txt)"
+            "- For APP: valid application names (e.g., Chrome, VS Code, WhatsApp, Terminal)"
+            "- For PROJECT_SETUP: name of the project or template"
+            "- For SUMMARIZER: document file name (e.g., notes.pdf)"
+        )
+    )
+    path: str = Field(
+        ..., 
+        description=(
+            "Determine the correct Windows path (use single `\\`):"
+            "- If the path is mentioned, use it directly (e.g., C:\\Documents\\project)"
+            "- If the query involves setting up a new folder, extract folder name or default to `C:\\new folder` or `D:\\new folder`"
+            "- If not explicitly mentioned, use a safe default Documents"
+        )
+    )
 
 def boost_prompt(prompt: str) -> str:
     summarizer_keywords = [
@@ -60,25 +73,19 @@ def boost_prompt(prompt: str) -> str:
         return "[TASK:SUMMARIZER] " + prompt
     return prompt
 
-# ───────────────────────────────
-# AGENT SETUP
-# ───────────────────────────────
-
 def get_agent() -> Agent:
     return Agent(
         model=Groq(id="llama-3.3-70b-versatile"),
         description=(
-            "You are a query processor. Translate user queries into structured commands. "
-            "Pay close attention to whether a user is asking to summarize or extract information from a document like a PDF. "
-            "Treat these as type='SUMMARIZER' and command='OTHER'."
+            "You are a query processor AI. Your job is to analyze user natural language queries "
+            "and convert them into structured commands with proper type, command, target, and path. "
+            "Carefully assess whether it's a file action, app control, project setup, or document summarization. "
+            "If unclear, default to GENERAL."
         ),
         markdown=True,
         response_model=QueryProcessor,
     )
 
-# ───────────────────────────────
-# MAIN CLI INTERACTION LOOP
-# ───────────────────────────────
 
 def main_loop():
     agent = get_agent()
@@ -94,10 +101,6 @@ def main_loop():
             print("\nExiting...")
             break
 
-# ───────────────────────────────
-# OPTIONAL: STREAMING OUTPUT
-# ───────────────────────────────
-
 def stream_loop():
     agent = get_agent()
     while True:
@@ -106,10 +109,6 @@ def stream_loop():
         output: Iterator[RunResponse] = agent.run(boosted, stream=True)
         for curr in output:
             print(curr.content)
-
-# ───────────────────────────────
-# ENTRY POINT
-# ───────────────────────────────
-
+            
 if __name__ == "__main__":
     main_loop()
