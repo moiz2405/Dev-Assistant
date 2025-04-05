@@ -6,11 +6,6 @@ from typing import Iterator
 from pydantic import BaseModel, Field
 from rich.pretty import pprint  
 
-class ProjectIdea(BaseModel):
-    requirement: str = Field(...,description = "Explain why the given project idea is required")
-    usecases: str = Field(...,description = "Give 3 one word usecases of the project idea")
-    views: str = Field(..., description = "Provide your views on the idea and any improvements")
-
 class query_processor(BaseModel):
     type : str = Field(..., description = "Type of query FROM GENERAL,FILE_HANDLING, PROJECT_SETUP,SUMMARIZER, APP")
     command : str = Field(..., description = "provide the task command from : OPEN,CLOSE,DELETE,OTHER,")
