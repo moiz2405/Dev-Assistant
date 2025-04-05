@@ -71,9 +71,22 @@ class QueryProcessor(BaseModel):
     path: str = Field(
         ...,
         description=(
-            "Full Windows path to the file/folder (e.g., C:\\Users\\User\\Documents\\project).\n"
-            "- If user specifies folder, use it. If not, use sensible defaults like Documents or C:\\new_project.\n"
-            "- Always use single backslashes (\\) for paths."
+           "Determine the correct full Windows-style path for the file or folder referenced in the query."
+            "Guidelines:"
+            "1) If the user provides a path (e.g., 'C:\\my_file' or 'D:\\Projects\\MyApp'), use it directly."
+            "2) If the user wants to create a new folder or set up a new project:"
+            "   - Extract the folder/project name from the query, if specified."
+            "   - Place it under a suitable drive (prefer 'D:\\' if mentioned, otherwise default to 'C:\\')."
+            "   - Use 'C:\\new_folder' or 'D:\\new_folder' as a fallback if no name is provided."
+            "3) For file-related actions (like SEARCH_FILE, OPEN_FILE, etc.):"
+            "   - If no folder is specified, default to the 'Documents' directory (e.g., 'C:\\Documents\\')."
+            "Formatting Rules:"
+            "- Always use single backslashes (\\) between directories."
+            "- Ensure the full absolute path (starting with drive letter) is returned."
+            "Examples:"
+            "- 'Open report.pdf' → path: 'C:\\Documents\\report.pdf'"
+            "- 'Set up a Next.js project in D drive' → path: 'D:\\new_folder' or 'D:\\NextJsApp' (if name found)"
+            "- 'Save it in my_projects' → path: 'C:\\my_projects' (if no drive specified)"
         )
     )
 
