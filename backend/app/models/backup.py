@@ -5,87 +5,102 @@ from agno.agent import Agent, RunResponse
 from agno.models.groq import Groq
 
 class QueryType(str, Enum):
-    GENERAL = "GENERAL"
-    FILE_HANDLING = "FILE_HANDLING"
-    PROJECT_SETUP = "PROJECT_SETUP"
-    SUMMARIZER = "SUMMARIZER"
-    APP = "APP"
+    GITHUB_ACTIONS = "GITHUB_ACTIONS"         
+    PROJECT_SETUP = "PROJECT_SETUP"             
+    FILE_HANDLING = "FILE_HANDLING"             
+    APP_HANDLING = "APP_HANDLING"               
+    SUMMARIZER = "SUMMARIZER"                  
 
-class CommandType(str, Enum):
-    OPEN = "OPEN"
-    CLOSE = "CLOSE"
-    DELETE = "DELETE"
-    OTHER = "OTHER"
+class SubTaskType(str, Enum):
+    # GitHub Actions
+    LIST_REPOS = "LIST_REPOS"
+    CLONE_REPO = "CLONE_REPO"
+    CREATE_AND_PUSH = "CREATE_AND_PUSH"
+
+    # Project Setup
+    NEW_PROJECT = "NEW_PROJECT"
+    EXISTING_PROJECT = "EXISTING_PROJECT"
+
+    # File Handling
+    SEARCH_FILE = "SEARCH_FILE"
+    OPEN_FILE = "OPEN_FILE"
+    CLOSE_FILE = "CLOSE_FILE"
+
+    # App Handling
+    OPEN_APP = "OPEN_APP"
+    CLOSE_APP = "CLOSE_APP"
+
+    # Summarizer
+    SUMMARIZE = "SUMMARIZE"
+    ANSWER_QUERY = "ANSWER_QUERY"
 
 class QueryProcessor(BaseModel):
-    """
-    Structured output parsed from user query.
-    """
     type: QueryType = Field(
-        ..., 
+        ...,
         description=(
-            "Correctly determine the type of query:"
-            "1) FILE_HANDLING — if the query is about searching, opening, or closing a file."
-            "2) APP — if the query is about opening or closing an app."
-            "3) PROJECT_SETUP — if the query is about creating or setting up a new/existing project."
-            "4) SUMMARIZER — if the query asks to summarize or extract answers from a document (PDF, DOCX, etc)."
-            "5) GENERAL — if no clear task is mentioned, and it's a general question or informational query."
+            "Correctly determine the type of query from:\n"
+            "1) GITHUB_ACTIONS - List repos, clone repo & setup, make/push to repo.\n"
+            "2) PROJECT_SETUP - Setup a new/existing project environment (like Next.js, Flask).\n"
+            "3) FILE_HANDLING - Search, open, or close a file.\n"
+            "4) APP_HANDLING - Open or close an application.\n"
+            "5) SUMMARIZER - Summarize or answer questions using a given PDF/document."
         )
     )
-    command: CommandType = Field(
-        ..., 
+    subtask: SubTaskType = Field(
+        ...,
         description=(
-            "Determine the specific command to perform within the type above:"
-            "- For FILE_HANDLING: OPEN, CLOSE, DELETE"
-            "- For APP: OPEN or CLOSE"
-            "- For SUMMARIZER: usually OTHER (like summarize, ask questions from doc)"
-            "- For PROJECT_SETUP: OPEN (existing), DELETE (cleanup), or NEW_PROJECT (initialize new)"
-            "- Use OTHER if not clearly mapped."
+            "The specific sub-action within the main type:\n"
+            "- GITHUB_ACTIONS: LIST_REPOS, CLONE_REPO, CREATE_AND_PUSH\n"
+            "- PROJECT_SETUP: NEW_PROJECT, EXISTING_PROJECT\n"
+            "- FILE_HANDLING: SEARCH_FILE, OPEN_FILE, CLOSE_FILE\n"
+            "- APP_HANDLING: OPEN_APP, CLOSE_APP\n"
+            "- SUMMARIZER: SUMMARIZE, ANSWER_QUERY"
         )
     )
     target: str = Field(
-        ..., 
+        ...,
         description=(
-            "Extract the exact name of the file, app, or project the query refers to:"
-            "- For FILE_HANDLING: file name with extension (e.g., report.pdf, data.txt)"
-            "- For APP: valid application names (e.g., Chrome, VS Code, WhatsApp, Terminal)"
-            "- For PROJECT_SETUP: name of the project or template"
-            "- For SUMMARIZER: document file name (e.g., notes.pdf)"
+            "Main target of the query:\n"
+            "- FILE_HANDLING: file name with extension (e.g., report.pdf, notes.txt)\n"
+            "- APP_HANDLING: valid app name (e.g., Chrome, VS Code, WhatsApp)\n"
+            "- GITHUB_ACTIONS: repo name (e.g., chat-bot)\n"
+            "- PROJECT_SETUP: project type or name (e.g., Flask, Next.js)\n"
+            "- SUMMARIZER: filename (e.g., summary.pdf)"
         )
     )
     path: str = Field(
-        ..., 
+        ...,
         description=(
-            "Determine the correct Windows path (use single `\\`):"
-            "- If the path is mentioned, use it directly (e.g., C:\\Documents\\project)"
-            "- If the query involves setting up a new folder, extract folder name or default to `C:\\new folder` or `D:\\new folder`"
-            "- If not explicitly mentioned, use a safe default Documents"
+            "Full Windows path to the file/folder (e.g., C:\\Users\\User\\Documents\\project).\n"
+            "- If user specifies folder, use it. If not, use sensible defaults like Documents or C:\\new_project.\n"
+            "- Always use single backslashes (\\) for paths."
         )
     )
 
 def boost_prompt(prompt: str) -> str:
     summarizer_keywords = [
         "summarize", "answer from", "explain from", "read from", "understand from", 
-        "questions from", "query from", "explain this pdf", "tell from"
+        "questions from", "query from", "explain this pdf", "tell from", "pdf context"
     ]
     lowered = prompt.lower()
     if any(kw in lowered for kw in summarizer_keywords):
         return "[TASK:SUMMARIZER] " + prompt
     return prompt
 
+
 def get_agent() -> Agent:
     return Agent(
         model=Groq(id="llama-3.3-70b-versatile"),
         description=(
-            "You are a query processor AI. Your job is to analyze user natural language queries "
-            "and convert them into structured commands with proper type, command, target, and path. "
-            "Carefully assess whether it's a file action, app control, project setup, or document summarization. "
-            "If unclear, default to GENERAL."
+            "You are a smart query processor. Your job is to translate natural language user queries "
+            "into structured data with fields: type, subtask, target, and path.\n"
+            "- Recognize summarization or document-based queries as SUMMARIZER.\n"
+            "- Classify GitHub-related tasks as GITHUB_ACTIONS.\n"
+            "- Be precise with subtask selection."
         ),
         markdown=True,
         response_model=QueryProcessor,
     )
-
 
 def main_loop():
     agent = get_agent()
@@ -109,6 +124,6 @@ def stream_loop():
         output: Iterator[RunResponse] = agent.run(boosted, stream=True)
         for curr in output:
             print(curr.content)
-            
+
 if __name__ == "__main__":
     main_loop()
