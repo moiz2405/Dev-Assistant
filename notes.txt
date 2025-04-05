@@ -12,11 +12,11 @@
 #    5) Summarizer - Make a pdf as context and answers the users questions based on that context
     
 # Subtasks_in_query :
-
-#     1) setup new project, setup existing project
-#     2) Search, Open and Close a file 
-#     3) Open and Close a App
-#     4) Gives summary of the given pdf or answers the users questions using the pdf as context
+#     1) List, Clone, Create_New
+#     2) setup new project, setup existing project
+#     3) Search, Open and Close a file 
+#     4) Open and Close a App
+#     5) Gives summary of the given pdf or answers the users questions using the pdf as context
 
 # memory required? : 
 #     1) No 
