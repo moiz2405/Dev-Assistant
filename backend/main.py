@@ -20,3 +20,7 @@
 # ---------------------------------------------------------------------
 # app handling 
 from app.functions.app_handling import open_app, close_app
+
+while(1):
+    app_name = input()
+    open_app(app_name)
