@@ -26,4 +26,4 @@
 -----------------------------------------------------------------------------------------------------------------
 speech recognition and voice to speech flow 
 
-User_Input -> speech_recognition -> 
+User_Input -> speech_recognition -> speech_processor - 1)query_processor, 2)tts
