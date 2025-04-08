@@ -3,3 +3,8 @@ groq
 sqlalchemy
 duckduckgo-search
 pydantic
+pvporcupine 
+pyaudio 
+sounddevice 
+numpy
+google-generativeai
