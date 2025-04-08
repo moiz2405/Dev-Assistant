@@ -19,15 +19,26 @@
 # #     print(f"File successfully moved to: {new_path}")
 # ---------------------------------------------------------------------
 # app handling 
-from app.functions.app_handling import open_app, close_app
+# from app.functions.app_handling import open_app, close_app
 
 # while(1):
 #     app_name = input()
 #     open_app(app_name)
 
-from app.tts.voice_processor import voice_processor
+# from app.tts.voice_processor import voice_processor
 
-while(1):
-    voice_input = input()
-    print(voice_processor(voice_input))
+# while(1):
+#     voice_input = input()
+#     print(voice_processor(voice_input))
 
+from app.functions.file_handler import list_files_by_type
+
+
+# file_type, file_path=input()
+files = list_files_by_type("ppt","C:\\Users\\Shikhar\\Downloads")
+print(files)
+
+ 
+
+
+ 
