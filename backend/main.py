@@ -21,6 +21,13 @@
 # app handling 
 from app.functions.app_handling import open_app, close_app
 
+# while(1):
+#     app_name = input()
+#     open_app(app_name)
+
+from app.tts.voice_processor import voice_processor
+
 while(1):
-    app_name = input()
-    open_app(app_name)
+    voice_input = input()
+    print(voice_processor(voice_input))
+
