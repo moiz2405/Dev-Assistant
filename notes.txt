@@ -23,3 +23,7 @@
 #     2) NO 
 #     3) No 
 #     4) Yes, temp 
+-----------------------------------------------------------------------------------------------------------------
+speech recognition and voice to speech flow 
+
+User_Input -> speech_recognition -> 
