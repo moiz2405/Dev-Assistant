@@ -60,6 +60,40 @@ def move_file(file_path, new_location):
     except Exception as e:
         print(f"⚠️ Error moving file: {e}")
         return None
+    
+# import os
+
+def list_files_by_type(file_type, path=None):
+    """
+    Lists all files of a given type in the provided directory.
+    Falls back to the user's Documents folder if no path is provided.
+
+    :param file_type: One of ['word', 'ppt', 'pdf', 'image']
+    :param path: Directory to search in. Defaults to ~/Documents.
+    :return: List of file paths.
+    """
+    extensions_map = {
+        'word': ['.doc', '.docx'],
+        'ppt': ['.ppt', '.pptx'],
+        'pdf': ['.pdf'],
+        'image': ['.jpg', '.jpeg', '.png', '.bmp', '.gif']
+    }
+
+    file_type = file_type.lower()
+    if file_type not in extensions_map:
+        raise ValueError(f"❌ Unsupported file type: {file_type}")
+
+    if not path:
+        path = os.path.join(os.path.expanduser("~"), "Documents")
+        print(f"📁 No path provided. Using fallback path: {path}")
+
+    matched_files = []
+    for root, _, files in os.walk(path):
+        for file in files:
+            if any(file.lower().endswith(ext) for ext in extensions_map[file_type]):
+                matched_files.append(os.path.join(root, file))
+
+    return matched_files
 
 # # starting point 
 # from app.functions.file_handler import search_file, open_file, move_file
