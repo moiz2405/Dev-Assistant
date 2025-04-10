@@ -31,14 +31,16 @@
 #     voice_input = input()
 #     print(voice_processor(voice_input))
 
-from app.functions.file_handler import list_files_by_type
+# from app.functions.file_handler import list_files_by_type
 
 
-# file_type, file_path=input()
-files = list_files_by_type("ppt","C:\\Users\\Shikhar\\Downloads")
-print(files)
+# # file_type, file_path=input()
+# files = list_files_by_type("ppt","C:\\Users\\Shikhar\\Downloads")
+# print(files)
 
- 
+from app.tts.voice_recognition import VoiceAssistant
+assistant = VoiceAssistant(hotword="jarvis", record_duration=5)
+assistant.start_hotword_listener()
 
 
  
