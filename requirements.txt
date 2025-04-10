@@ -8,3 +8,4 @@ pyaudio
 sounddevice 
 numpy
 google-generativeai
+SpeechRecognition
