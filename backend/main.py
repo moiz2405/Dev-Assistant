@@ -42,9 +42,9 @@
 # assistant = VoiceAssistant(hotword="jarvis", record_duration=5)
 # assistant.start_hotword_listener()
 
-from app.models.backup import process_query
+from app.models.groq_preprocess import process_query
 
-query = "can u answer some of my questions from mypdf named college its in downloads folder"
+query = "open whatsapp"
 test = 10
 while(test):
     result = process_query(query)
