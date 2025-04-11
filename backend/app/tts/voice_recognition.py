@@ -18,6 +18,15 @@ dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../
 load_dotenv(dotenv_path)
 
 class VoiceAssistant:
+    def list_input_devices():
+        pa = pyaudio.PyAudio()
+        print("\nAvailable audio input devices:\n")
+        for i in range(pa.get_device_count()):
+            info = pa.get_device_info_by_index(i)
+            if info['maxInputChannels'] > 0:
+                print(f"ID {i}: {info['name']}")
+        pa.terminate()
+
     def __init__(self, hotword="jarvis", record_duration=5):
         self.hotword = hotword
         self.record_duration = record_duration
@@ -25,7 +34,7 @@ class VoiceAssistant:
         access_key = os.getenv("PICOVOICE_ACCESS_KEY")
 
     # Debug print to verify key loading
-        print(f"[DEBUG] Loaded Picovoice Access Key: {access_key}")
+        # print(f"[DEBUG] Loaded Picovoice Access Key: {access_key}")
 
         if not access_key:
             raise ValueError("⚠️ Missing Picovoice access key. Set PICOVOICE_ACCESS_KEY in your .env file.")
@@ -56,7 +65,7 @@ class VoiceAssistant:
             input=True,
             frames_per_buffer=self.porcupine.frame_length,
         )
-
+    
     def _record_audio(self):
         print("[🎙️] Recording voice...")
         RATE = 16000
