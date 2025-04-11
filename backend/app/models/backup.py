@@ -3,7 +3,7 @@ from typing import Iterator
 from pydantic import BaseModel, Field
 from agno.agent import Agent, RunResponse
 from agno.models.groq import Groq
-
+from pathlib import Path
 class QueryType(str, Enum):
     GITHUB_ACTIONS = "GITHUB_ACTIONS"         
     PROJECT_SETUP = "PROJECT_SETUP"             
@@ -32,9 +32,9 @@ class SubTaskType(str, Enum):
 
     # Summarizer
     SUMMARIZE = "SUMMARIZE"
+    ANSWER_QUERY = "ANSWER_QUERY"
     #general 
-    NONE = "NONE"
-    
+    GENERAL_QUERY = "GENERAL_QUERY"
 
 class QueryProcessor(BaseModel):
     type: QueryType = Field(
@@ -119,6 +119,12 @@ def get_agent() -> Agent:
             "- Recognize summarization or document-based queries as SUMMARIZER.\n"
             "- Classify GitHub-related tasks as GITHUB_ACTIONS.\n"
             "- Be precise with subtask selection."
+            "- Be precise with subtask selection.\n"
+            "- If the query mentions a file (e.g., 'pdf named college', 'from my file xyz'), extract the filename "
+            "and ensure it ends with '.pdf'.\n"
+            "- Construct the absolute file path in the format: C:\\\\Users\\\\<username>\\\\Downloads\\\\<filename>.pdf\n"
+            "- Set 'target' as the full filename with extension, and 'path' as the complete path to that file.\n"
+            "- Preserve the extension (e.g., .pdf) since it is needed for file access or processing." 
         ),
         markdown=True,
         response_model=QueryProcessor,
@@ -137,7 +143,9 @@ def process_query(prompt: str) -> QueryProcessor:
             path=""
         )
 
-    return agent.run(boosted_prompt, stream=False)
+    # return agent.run(boosted_prompt, stream=False)
+    response = agent.run(boosted_prompt, stream=False)
+    return response.content
 
 # def main_loop():
 #     agent = get_agent()
