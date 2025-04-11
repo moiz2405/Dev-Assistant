@@ -4,6 +4,10 @@ from pydantic import BaseModel, Field
 from agno.agent import Agent, RunResponse
 from agno.models.groq import Groq
 from pathlib import Path
+import platform
+import os
+import getpass
+    
 class QueryType(str, Enum):
     GITHUB_ACTIONS = "GITHUB_ACTIONS"         
     PROJECT_SETUP = "PROJECT_SETUP"             
@@ -109,7 +113,6 @@ def boost_prompt(prompt: str) -> str:
         return "[TASK:SUMMARIZER] " + prompt
     return prompt
 
-
 def get_agent() -> Agent:
     return Agent(
         model=Groq(id="llama-3.3-70b-versatile"),
@@ -129,6 +132,16 @@ def get_agent() -> Agent:
         markdown=True,
         response_model=QueryProcessor,
     )
+
+
+def get_default_download_path(filename: str) -> str:
+    user = getpass.getuser()
+    if platform.system() == "Windows":
+        return f"C:\\Users\\{user}\\Downloads\\{filename}"
+    else:
+        return f"/home/{user}/Downloads/{filename}"
+
+    
 def process_query(prompt: str) -> QueryProcessor:
     agent = get_agent()
     boosted_prompt = boost_prompt(prompt)
@@ -138,14 +151,20 @@ def process_query(prompt: str) -> QueryProcessor:
         general_response = general_agent.run(boosted_prompt.replace("[TASK:GENERAL_QUERY] ", ""), stream=False)
         return QueryProcessor(
             type=QueryType.GENERAL_QUERY,
-            subtask=SubTaskType.NONE,
+            subtask=SubTaskType.GENERAL_QUERY,
             target=general_response.content.strip(),
             path=""
         )
 
-    # return agent.run(boosted_prompt, stream=False)
     response = agent.run(boosted_prompt, stream=False)
-    return response.content
+    query_obj = response.content
+
+    # Post-process if the path is Windows-style and we're on a non-Windows OS
+    if "C:\\Users\\" in query_obj.path and platform.system() != "Windows":
+        query_obj.path = get_default_download_path(query_obj.target)
+
+    return query_obj
+
 
 # def main_loop():
 #     agent = get_agent()
