@@ -101,6 +101,7 @@ class VoiceAssistant:
                 audio_data = self.recognizer.record(source)
                 text = self.recognizer.recognize_google(audio_data)
                 print(f"[🗣️] You said: {text}")
+                #to call query processor here
                 # TODO: Add command execution here
         except sr.UnknownValueError:
             print("[❓] Couldn't understand what you said.")
