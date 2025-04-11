@@ -10,5 +10,22 @@
 # 5) research on a topic 
 # 6)general query or question
 
+from app.functions.app_handling import open_app, close_app
+from app.functions.environment_setup import setup_project #takes repo link and target dir as argu, will refine later
+from app.functions.file_handler import search_file, open_file, move_file, list_files_by_type
+
+
+def determine_type(structured_query):
+    if(structured_query.type = )
+
+def determine_function(structured_query):
+    #for app handling 
+    open_app(app_name)
+    close_app(app_name)
+    #for environment setup 
+    setup_project(repo_link,target_directory)
+    #for 
+    
+
 
 
