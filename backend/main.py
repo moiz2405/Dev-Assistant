@@ -42,5 +42,12 @@
 # assistant = VoiceAssistant(hotword="jarvis", record_duration=5)
 # assistant.start_hotword_listener()
 
+from app.models.backup import process_query
 
- 
+query = "can u answer some of my questions from mypdf named college its in downloads folder"
+test = 10
+while(test):
+    result = process_query(query)
+    print(result)
+    test = test - 1 
+# print(result(indent=2))
