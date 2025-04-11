@@ -38,7 +38,8 @@
 # files = list_files_by_type("ppt","C:\\Users\\Shikhar\\Downloads")
 # print(files)
 
-from app.tts.voice_recognition import VoiceAssistant
+# from app.tts.voice_recognition import VoiceAssistant
+from app.tts.test import VoiceAssistant
 assistant = VoiceAssistant(hotword="jarvis", record_duration=5)
 assistant.start_hotword_listener()
 
