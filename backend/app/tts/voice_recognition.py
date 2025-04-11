@@ -1,11 +1,7 @@
-# takes user voice as input from mic 
-# passes it to voice processor
-# takes user voice as input from mic 
-# passes it to voice processor
-
 import threading
 import datetime
 import os
+import time
 import pvporcupine
 import pyaudio
 import struct
@@ -27,36 +23,18 @@ class VoiceAssistant:
                 print(f"ID {i}: {info['name']}")
         pa.terminate()
 
-    def __init__(self, hotword="jarvis", record_duration=5):
+    def __init__(self, hotword="jarvis", record_duration=5, cooldown_seconds=2):
         self.hotword = hotword
         self.record_duration = record_duration
+        self.cooldown_seconds = cooldown_seconds
         self.recognizer = sr.Recognizer()
+        self.listening_lock = threading.Lock()
+
         access_key = os.getenv("PICOVOICE_ACCESS_KEY")
-
-    # Debug print to verify key loading
-        # print(f"[DEBUG] Loaded Picovoice Access Key: {access_key}")
-
         if not access_key:
             raise ValueError("⚠️ Missing Picovoice access key. Set PICOVOICE_ACCESS_KEY in your .env file.")
 
-        self.porcupine = pvporcupine.create(
-            access_key=access_key,
-            keywords=[self.hotword]
-        )
-
-        self.hotword = hotword
-        self.record_duration = record_duration
-        self.recognizer = sr.Recognizer()
-        access_key = os.getenv("PICOVOICE_ACCESS_KEY")
-
-        if not access_key:
-            raise ValueError("⚠️ Missing Picovoice access key. Set PICOVOICE_ACCESS_KEY in your .env file.")
-
-        self.porcupine = pvporcupine.create(
-            access_key=access_key,
-            keywords=[self.hotword]
-        )
-
+        self.porcupine = pvporcupine.create(access_key=access_key, keywords=[self.hotword])
         self.pa = pyaudio.PyAudio()
         self.stream = self.pa.open(
             rate=self.porcupine.sample_rate,
@@ -65,22 +43,24 @@ class VoiceAssistant:
             input=True,
             frames_per_buffer=self.porcupine.frame_length,
         )
-    
+
     def _record_audio(self):
         print("[🎙️] Recording voice...")
         RATE = 16000
         CHUNK = 1024
         FORMAT = pyaudio.paInt16
         CHANNELS = 1
+
         audio = pyaudio.PyAudio()
-        stream = audio.open(format=FORMAT, channels=CHANNELS,
-                            rate=RATE, input=True,
-                            frames_per_buffer=CHUNK)
+        stream = audio.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK)
         frames = []
 
         for _ in range(int(RATE / CHUNK * self.record_duration)):
-            data = stream.read(CHUNK)
-            frames.append(data)
+            try:
+                data = stream.read(CHUNK, exception_on_overflow=False)
+                frames.append(data)
+            except Exception as e:
+                print(f"[⚠️] Error while recording: {e}")
 
         stream.stop_stream()
         stream.close()
@@ -104,29 +84,47 @@ class VoiceAssistant:
                 audio_data = self.recognizer.record(source)
                 text = self.recognizer.recognize_google(audio_data)
                 print(f"[🗣️] You said: {text}")
-                # 🔁 Add execution logic here
-                # self.execute_command(text)
+                # TODO: Add command execution here
         except sr.UnknownValueError:
             print("[❓] Couldn't understand what you said.")
         except Exception as e:
             print(f"[⚠️] Error in recognition: {e}")
 
+    def _beep(self):
+        print('\a', end='', flush=True)
+
     def _handle_hotword_trigger(self):
-        filename = self._record_audio()
-        self._recognize_and_execute(filename)
+        def inner():
+            with self.listening_lock:
+                self._beep()
+                filename = self._record_audio()
+                try:
+                    self._recognize_and_execute(filename)
+                finally:
+                    print("[✅] Ready for next command...")
+    
+        threading.Thread(target=inner, daemon=True).start()
+
 
     def start_hotword_listener(self):
         print("🎧 Hotword listener started... Say your hotword to begin.")
+        last_trigger_time = 0
         try:
             while True:
-                pcm = self.stream.read(self.porcupine.frame_length)
-                pcm = struct.unpack_from("h" * self.porcupine.frame_length, pcm)
-                result = self.porcupine.process(pcm)
+                try:
+                    pcm = self.stream.read(self.porcupine.frame_length, exception_on_overflow=False)
+                    pcm = struct.unpack_from("h" * self.porcupine.frame_length, pcm)
+                    result = self.porcupine.process(pcm)
+                except Exception as e:
+                    print(f"[⚠️] Error reading audio stream: {e}")
+                    continue
 
                 if result >= 0:
-                    print("[🔊] Hotword detected!")
-                    t = threading.Thread(target=self._handle_hotword_trigger)
-                    t.start()
+                    current_time = time.time()
+                    if current_time - last_trigger_time >= self.cooldown_seconds and not self.listening_lock.locked():
+                        print("[🔊] Hotword detected!")
+                        last_trigger_time = current_time
+                        threading.Thread(target=self._handle_hotword_trigger, daemon=True).start()
 
         except KeyboardInterrupt:
             print("\n[🛑] Hotword listener stopped.")
