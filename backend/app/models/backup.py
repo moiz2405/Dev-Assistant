@@ -10,7 +10,7 @@ class QueryType(str, Enum):
     FILE_HANDLING = "FILE_HANDLING"             
     APP_HANDLING = "APP_HANDLING"               
     SUMMARIZER = "SUMMARIZER"                  
-
+    GENERAL_QUERY = "GENERAL_QUERY"
 class SubTaskType(str, Enum):
     # GitHub Actions
     LIST_REPOS = "LIST_REPOS"
@@ -32,7 +32,9 @@ class SubTaskType(str, Enum):
 
     # Summarizer
     SUMMARIZE = "SUMMARIZE"
-    ANSWER_QUERY = "ANSWER_QUERY"
+    #general 
+    NONE = "NONE"
+    
 
 class QueryProcessor(BaseModel):
     type: QueryType = Field(
@@ -95,7 +97,14 @@ def boost_prompt(prompt: str) -> str:
         "summarize", "answer from", "explain from", "read from", "understand from", 
         "questions from", "query from", "explain this pdf", "tell from", "pdf context"
     ]
+    general_keywords = [
+        "weather", "who is", "capital of", "how many", "when was", "current", "tell me about",
+        "time in", "president", "prime minister", "fun fact", "general knowledge"
+    ]
     lowered = prompt.lower()
+
+    if any(kw in lowered for kw in general_keywords):
+        return "[TASK:GENERAL_QUERY] " + prompt
     if any(kw in lowered for kw in summarizer_keywords):
         return "[TASK:SUMMARIZER] " + prompt
     return prompt
@@ -114,29 +123,44 @@ def get_agent() -> Agent:
         markdown=True,
         response_model=QueryProcessor,
     )
-
-def main_loop():
+def process_query(prompt: str) -> QueryProcessor:
     agent = get_agent()
-    while True:
-        try:
-            prompt = input(">>> ")
-            if prompt.lower() in {"exit", "quit"}:
-                print("Goodbye!")
-                break
-            boosted = boost_prompt(prompt)
-            agent.print_response(boosted, stream=True)
-        except KeyboardInterrupt:
-            print("\nExiting...")
-            break
+    boosted_prompt = boost_prompt(prompt)
 
-def stream_loop():
-    agent = get_agent()
-    while True:
-        prompt = input(">>> ")
-        boosted = boost_prompt(prompt)
-        output: Iterator[RunResponse] = agent.run(boosted, stream=True)
-        for curr in output:
-            print(curr.content)
+    if "[TASK:GENERAL_QUERY]" in boosted_prompt:
+        general_agent = Agent(model=Groq(id="llama-3.3-70b-versatile"))
+        general_response = general_agent.run(boosted_prompt.replace("[TASK:GENERAL_QUERY] ", ""), stream=False)
+        return QueryProcessor(
+            type=QueryType.GENERAL_QUERY,
+            subtask=SubTaskType.NONE,
+            target=general_response.content.strip(),
+            path=""
+        )
 
-if __name__ == "__main__":
-    main_loop()
+    return agent.run(boosted_prompt, stream=False)
+
+# def main_loop():
+#     agent = get_agent()
+#     while True:
+#         try:
+#             prompt = input(">>> ")
+#             if prompt.lower() in {"exit", "quit"}:
+#                 print("Goodbye!")
+#                 break
+#             boosted = boost_prompt(prompt)
+#             agent.print_response(boosted, stream=True)
+#         except KeyboardInterrupt:
+#             print("\nExiting...")
+#             break
+
+# def stream_loop():
+#     agent = get_agent()
+#     while True:
+#         prompt = input(">>> ")
+#         boosted = boost_prompt(prompt)
+#         output: Iterator[RunResponse] = agent.run(boosted, stream=True)
+#         for curr in output:
+#             print(curr.content)
+
+# if __name__ == "__main__":
+#     main_loop()
