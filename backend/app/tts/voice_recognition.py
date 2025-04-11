@@ -14,6 +14,7 @@ dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../
 load_dotenv(dotenv_path)
 
 class VoiceAssistant:
+
     def list_input_devices():
         pa = pyaudio.PyAudio()
         print("\nAvailable audio input devices:\n")
@@ -22,6 +23,22 @@ class VoiceAssistant:
             if info['maxInputChannels'] > 0:
                 print(f"ID {i}: {info['name']}")
         pa.terminate()
+
+    def cleanup_old_recordings(self, folder="recordings", max_age_minutes=10):
+        now = time.time()
+        max_age_seconds = max_age_minutes * 60
+        if not os.path.exists(folder):
+            return
+        for filename in os.listdir(folder):
+            filepath = os.path.join(folder, filename)
+            if filename.endswith(".wav"):
+                file_age = now - os.path.getmtime(filepath)
+                if file_age > max_age_seconds:
+                    try:
+                        os.remove(filepath)
+                        print(f"[🧹] Deleted old recording: {filename}")
+                    except Exception as e:
+                        print(f"[⚠️] Could not delete {filename}: {e}")
 
     def __init__(self, hotword="jarvis", record_duration=5, cooldown_seconds=2):
         self.hotword = hotword
@@ -101,6 +118,7 @@ class VoiceAssistant:
                 try:
                     self._recognize_and_execute(filename)
                 finally:
+                    self.cleanup_old_recordings()
                     print("[✅] Ready for next command...")
     
         threading.Thread(target=inner, daemon=True).start()
