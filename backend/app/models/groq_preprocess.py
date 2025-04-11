@@ -161,7 +161,7 @@ def process_query(prompt: str) -> QueryProcessor:
 
     # Always enforce Windows-style path
     query_obj.path = get_default_download_path(query_obj.target)
-
+    
     return query_obj
 
 
