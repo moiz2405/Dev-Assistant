@@ -39,7 +39,7 @@
 # print(files)
 
 # from app.tts.voice_recognition import VoiceAssistant
-from app.tts.test import VoiceAssistant
+from app.tts.voice_recognition import VoiceAssistant
 assistant = VoiceAssistant(hotword="jarvis", record_duration=5)
 assistant.start_hotword_listener()
 
