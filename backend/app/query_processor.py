@@ -18,13 +18,19 @@ from app.functions.file_handler import search_file, open_file, move_file, list_f
 def determine_type(structured_query):
     if(structured_query.type = )
 
+def determine_sub_type(structured_query):
+    
+
 def determine_function(structured_query):
     #for app handling 
     open_app(app_name)
     close_app(app_name)
     #for environment setup 
     setup_project(repo_link,target_directory)
-    #for 
+    #for file handler
+    search_file(file_name, search_path)
+    open_file(file_path)
+    move_file(file_path, new_location)
     
 
 
