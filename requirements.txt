@@ -9,3 +9,4 @@ sounddevice
 numpy
 google-generativeai
 SpeechRecognition
+pathlib
