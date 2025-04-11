@@ -1,7 +1,5 @@
 # receives user input determines user intent
 # if general query or question answers it using a call to chatbot.py else determines the fucntion needed and call it 
-
-
 # determines user intent
 # call required function to take action
 # types of actions or functions to create 
@@ -11,5 +9,6 @@
 # 4) pdf summarizer - summarizes and pdf 
 # 5) research on a topic 
 # 6)general query or question
+
 
 
