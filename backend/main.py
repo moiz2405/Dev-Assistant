@@ -37,20 +37,25 @@
 # # file_type, file_path=input()
 # files = list_files_by_type("ppt","C:\\Users\\Shikhar\\Downloads")
 # print(files)
+import os
+import sys
 
-# from app.tts.voice_recognition import VoiceAssistant
-# assistant = VoiceAssistant(hotword="jarvis", record_duration=5)
-# assistant.start_hotword_listener()
+def suppress_stderr():
+    devnull = os.open(os.devnull, os.O_WRONLY)
+    os.dup2(devnull, sys.stderr.fileno())
 
+suppress_stderr()
+
+from app.tts.voice_recognition import VoiceAssistant
 from app.models.groq_preprocess import process_query
 from app.query_processor import determine_function
 
+#start hotword detection and taking user query in natural language
+assistant = VoiceAssistant(hotword="jarvis", record_duration=5)
+assistant.start_hotword_listener()
+
+
+
 query = "open whatsapp"
-test = 10
 result = process_query(query)
 determine_function(result)
-# while(test):
-#     result = process_query(query)
-#     print(result)
-#     test = test - 1 
-# print(result(indent=2))
