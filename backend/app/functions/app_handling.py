@@ -47,13 +47,12 @@ def open_app(app_name: str):
         print(f"[!] App '{app_name}' not found.")
 
 def close_app(app_name: str):
-    """
-    Force-closes an app by killing its process.
-    You can pass either 'chrome', 'notepad_classic', etc.
-    """
     exe_name = app_name + ".exe"
     try:
-        subprocess.call(["taskkill", "/f", "/im", exe_name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.call([
+            "cmd.exe", "/c", "taskkill", "/f", "/im", exe_name
+        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         print(f"[-] Closed app: {exe_name}")
     except Exception as e:
         print(f"[!] Failed to close {exe_name}: {e}")
+
