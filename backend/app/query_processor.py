@@ -20,7 +20,7 @@ def determine_function(structured_query):
     print(structured_query.subtask.value)
     print(structured_query.target)
     print(structured_query.path)
-    
+
     query_type = structured_query.type
     subtask = structured_query.subtask
     target = structured_query.target
@@ -29,6 +29,8 @@ def determine_function(structured_query):
     if query_type == QueryType.APP_HANDLING:
         if subtask == SubTaskType.OPEN_APP:
             open_app(target)
+        if subtask == SubTaskType.CLOSE_APP:
+            close_app(target)    
 
     # if query_type == QueryType.FILE_HANDLING:
     # if query_type == QueryType.GITHUB_ACTIONS:
