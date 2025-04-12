@@ -126,9 +126,10 @@ def get_agent() -> Agent:
             "- Classify GitHub-related tasks as GITHUB_ACTIONS.\n"
             "- Be precise with subtask selection."
             "- Be precise with subtask selection.\n"
+            "- Return the path all in lower case"
             "- If the query mentions a file (e.g., 'pdf named college', 'from my file xyz'), extract the filename "
-            "and ensure it ends with '.pdf'.\n"
-            "- Construct the absolute file path in the format: C:\\\\Users\\\\<username>\\\\Downloads\\\\<filename>.pdf\n"
+            "and ensure it ends with '.pdf', DONT EVER GIVE SPACES BETWEEN NAMES IN A FILE LIKE FILE FILE IS NAMES collegenotes.pdf let it.\n"
+            "- Construct the absolute file path in the format: C:\\\\Users\\\\km866\\\\Downloads\\\\<filename>.pdf\n"
             "- Set 'target' as the full filename with extension, and 'path' as the complete path to that file.\n"
             "- Preserve the extension (e.g., .pdf) since it is needed for file access or processing." 
         ),
@@ -139,7 +140,7 @@ def get_agent() -> Agent:
 
 def get_default_download_path(filename: str) -> str:
     user = getpass.getuser()
-    return f"C:\\Users\\{user}\\Downloads\\{filename}"
+    return f"C:\\Users\\km866\\Downloads\\{filename}"
 
     
 def process_query(prompt: str) -> QueryProcessor:
@@ -160,7 +161,7 @@ def process_query(prompt: str) -> QueryProcessor:
     query_obj = response.content
 
     # Always enforce Windows-style path
-    query_obj.path = get_default_download_path(query_obj.target)
+    # query_obj.path = get_default_download_path(query_obj.target)
     
     return query_obj
 
