@@ -32,7 +32,9 @@ def determine_function(structured_query):
         if subtask == SubTaskType.CLOSE_APP:
             close_app(target)    
 
-    # if query_type == QueryType.FILE_HANDLING:
+    if query_type == QueryType.FILE_HANDLING:
+        if subtask == SubTaskType.OPEN_FILE:
+            open_file(path)
     # if query_type == QueryType.GITHUB_ACTIONS:
     # if query_type == QueryType.GENERAL_QUERY:
     # if query_type == QueryType.PROJECT_SETUP:
