@@ -43,11 +43,14 @@
 # assistant.start_hotword_listener()
 
 from app.models.groq_preprocess import process_query
+from app.query_processor import determine_function
 
 query = "open whatsapp"
 test = 10
-while(test):
-    result = process_query(query)
-    print(result)
-    test = test - 1 
+result = process_query(query)
+determine_function(result)
+# while(test):
+#     result = process_query(query)
+#     print(result)
+#     test = test - 1 
 # print(result(indent=2))
