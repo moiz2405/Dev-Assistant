@@ -54,8 +54,17 @@ from app.query_processor import determine_function
 assistant = VoiceAssistant(hotword="jarvis", record_duration=5)
 assistant.start_hotword_listener()
 
+#access the last query
+def handle_recognized_command(text):
+    if text:
+        print(f"[MAIN] Recognized: {text}")
+        processed_query = process_query(text)
+        # Call your query processor or route it here
+    else:
+        print("[MAIN] Nothing recognized.")
 
+#pass the nat lang query to query processor
+# query = "open whatsapp"
+# result = process_query(query)
 
-query = "open whatsapp"
-result = process_query(query)
-determine_function(result)
+determine_function(process_query)
