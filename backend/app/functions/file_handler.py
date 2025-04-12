@@ -1,17 +1,34 @@
-# does file handling tasks like , searching creating or opening a file 
 import os
 import shutil
+import platform
+
+def is_wsl():
+    return 'microsoft' in platform.uname().release.lower()
+
+def convert_to_wsl_path(win_path: str) -> str:
+
+    if ":" in win_path:
+        drive, rest = win_path.split(":", 1)
+        drive = drive.lower()
+        rest = rest.replace("\\", "/").lstrip("/")
+        return f"/mnt/{drive}/{rest}"
+    return win_path
+
 
 def search_file(file_name, search_path):
     """
     Search for a file in the given directory and subdirectories.
-    
+
     :param file_name: File name (partial match allowed).
     :param search_path: Directory path to search in.
-    :return: Path of the first matching file, or None.
+    :return: List of matching file paths, or None.
     """
     file_name = file_name.lower()
     matching_files = []
+
+    # Handle path for WSL context
+    if is_wsl():
+        search_path = convert_to_wsl_path(search_path)
 
     for root, _, files in os.walk(search_path):
         for file in files:
@@ -21,37 +38,47 @@ def search_file(file_name, search_path):
 
     return matching_files if matching_files else None
 
+
 def open_file(file_path):
     """
-    Open a file if it exists.
-    
+    Open a file if it exists, even from WSL to Windows.
+
     :param file_path: The file path to open.
     """
-    if os.path.exists(file_path):
+    if is_wsl():
+        wsl_path = convert_to_wsl_path(file_path)
+        if os.path.exists(wsl_path):
+            try:
+                os.system(f'cmd.exe /C start "" "{file_path}"')  # open with Windows
+            except Exception as e:
+                print(f"⚠️ Error opening file: {e}")
+        else:
+            print("❌ File does not exist (WSL check)!")
+    elif os.path.exists(file_path):  # Native Windows
         try:
-            if os.name == 'nt':  # Windows
-                os.startfile(file_path)
-            elif os.name == 'posix':  # MacOS/Linux
-                os.system(f'xdg-open "{file_path}"')
+            os.startfile(file_path)
         except Exception as e:
             print(f"⚠️ Error opening file: {e}")
     else:
         print("❌ File does not exist!")
 
+
 def move_file(file_path, new_location):
     """
     Move a file to a new location.
-    
+
     :param file_path: The file to be moved.
     :param new_location: The new directory where the file should go.
     :return: New path of the moved file or None if failed.
     """
-    if not os.path.exists(file_path):
+    check_path = convert_to_wsl_path(file_path) if is_wsl() else file_path
+
+    if not os.path.exists(check_path):
         print("❌ File does not exist!")
         return None
 
     if not os.path.exists(new_location):
-        os.makedirs(new_location)  # Create destination folder if not exists
+        os.makedirs(new_location)
 
     try:
         new_path = os.path.join(new_location, os.path.basename(file_path))
@@ -60,8 +87,7 @@ def move_file(file_path, new_location):
     except Exception as e:
         print(f"⚠️ Error moving file: {e}")
         return None
-    
-# import os
+
 
 def list_files_by_type(file_type, path=None):
     """
@@ -87,6 +113,9 @@ def list_files_by_type(file_type, path=None):
         path = os.path.join(os.path.expanduser("~"), "Documents")
         print(f"📁 No path provided. Using fallback path: {path}")
 
+    if is_wsl():
+        path = convert_to_wsl_path(path)
+
     matched_files = []
     for root, _, files in os.walk(path):
         for file in files:
@@ -94,19 +123,3 @@ def list_files_by_type(file_type, path=None):
                 matched_files.append(os.path.join(root, file))
 
     return matched_files
-
-# # starting point 
-# from app.functions.file_handler import search_file, open_file, move_file
-
-# # Example: Searching for a file
-# search_results = search_file("receipt.txt", "/home/user/Documents")
-# if search_results:
-#     print("Found files:", search_results)
-#     file_to_open = search_results[0]  # Automatically selects the first match
-#     open_file(file_to_open)
-
-# # Example: Moving a file
-# # new_path = move_file(file_to_open, "/home/user/Desktop")
-# # if new_path:
-# #     print(f"File successfully moved to: {new_path}")
-
