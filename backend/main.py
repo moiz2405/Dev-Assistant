@@ -50,21 +50,24 @@ from app.tts.voice_recognition import VoiceAssistant
 from app.models.groq_preprocess import process_query
 from app.query_processor import determine_function
 
-#start hotword detection and taking user query in natural language
-assistant = VoiceAssistant(hotword="jarvis", record_duration=5)
-assistant.start_hotword_listener()
 
 #access the last query
 def handle_recognized_command(text):
     if text:
         print(f"[MAIN] Recognized: {text}")
         processed_query = process_query(text)
+        determine_function(processed_query)
         # Call your query processor or route it here
     else:
         print("[MAIN] Nothing recognized.")
 
+#start hotword detection and taking user query in natural language
+assistant = VoiceAssistant(hotword="jarvis", record_duration=3,on_recognized=handle_recognized_command)
+assistant.start_hotword_listener()
+
+
 #pass the nat lang query to query processor
+
+
 # query = "open whatsapp"
 # result = process_query(query)
-
-determine_function(process_query)
