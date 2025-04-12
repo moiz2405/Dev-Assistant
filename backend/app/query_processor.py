@@ -13,24 +13,43 @@
 from app.functions.app_handling import open_app, close_app
 from app.functions.environment_setup import setup_project #takes repo link and target dir as argu, will refine later
 from app.functions.file_handler import search_file, open_file, move_file, list_files_by_type
-
-
-def determine_type(structured_query):
-    if(structured_query.type = )
-
-def determine_sub_type(structured_query):
-    
+from app.models.groq_preprocess import QueryType, SubTaskType
 
 def determine_function(structured_query):
-    #for app handling 
-    open_app(app_name)
-    close_app(app_name)
-    #for environment setup 
-    setup_project(repo_link,target_directory)
-    #for file handler
-    search_file(file_name, search_path)
-    open_file(file_path)
-    move_file(file_path, new_location)
+    print(structured_query.type.value)
+    print(structured_query.subtask.value)
+    print(structured_query.target)
+    print(structured_query.path)
+    
+    query_type = structured_query.type
+    subtask = structured_query.subtask
+    target = structured_query.target
+    path = structured_query.path
+
+    if query_type == QueryType.APP_HANDLING:
+        if subtask == SubTaskType.OPEN_APP:
+            open_app(target)
+
+    # if query_type == QueryType.FILE_HANDLING:
+    # if query_type == QueryType.GITHUB_ACTIONS:
+    # if query_type == QueryType.GENERAL_QUERY:
+    # if query_type == QueryType.PROJECT_SETUP:
+    # if query_type == QueryType.SUMMARIZER:
+
+
+# def determine_sub_type(structured_query):
+    
+
+# def determine_function(structured_query):
+#     #for app handling 
+#     open_app(app_name)
+#     close_app(app_name)
+#     #for environment setup 
+#     setup_project(repo_link,target_directory)
+#     #for file handler
+#     search_file(file_name, search_path)
+#     open_file(file_path)
+#     move_file(file_path, new_location)
     
 
 
