@@ -40,13 +40,13 @@ class VoiceAssistant:
                     except Exception as e:
                         print(f"[⚠️] Could not delete {filename}: {e}")
 
-    def __init__(self, hotword="jarvis", record_duration=5, cooldown_seconds=2):
+    def __init__(self, hotword="jarvis", record_duration=5, cooldown_seconds=2, on_recognized=None):
         self.hotword = hotword
         self.record_duration = record_duration
         self.cooldown_seconds = cooldown_seconds
         self.recognizer = sr.Recognizer()
         self.listening_lock = threading.Lock()
-
+        self.on_recognized = on_recognized
         access_key = os.getenv("PICOVOICE_ACCESS_KEY")
         if not access_key:
             raise ValueError("⚠️ Missing Picovoice access key. Set PICOVOICE_ACCESS_KEY in your .env file.")
@@ -62,7 +62,7 @@ class VoiceAssistant:
         )
 
     def _record_audio(self):
-        print("[🎙️] Recording voice...")
+        print("Recording voice...")
         RATE = 16000
         CHUNK = 1024
         FORMAT = pyaudio.paInt16
@@ -77,7 +77,7 @@ class VoiceAssistant:
                 data = stream.read(CHUNK, exception_on_overflow=False)
                 frames.append(data)
             except Exception as e:
-                print(f"[⚠️] Error while recording: {e}")
+                print(f"Error while recording: {e}")
 
         stream.stop_stream()
         stream.close()
@@ -100,13 +100,18 @@ class VoiceAssistant:
             with sr.AudioFile(audio_file) as source:
                 audio_data = self.recognizer.record(source)
                 text = self.recognizer.recognize_google(audio_data)
-                print(f"[🗣️] You said: {text}")
+                print(f"You said: {text}")
+                
                 #to call query processor here
-                # TODO: Add command execution here
+                if self.on_recognized:
+                    self.on_recognized(text)
+               
         except sr.UnknownValueError:
-            print("[❓] Couldn't understand what you said.")
+            print()
+            # print("[❓] Couldn't understand what you said.")
         except Exception as e:
-            print(f"[⚠️] Error in recognition: {e}")
+            # print(f"[⚠️] Error in recognition: {e}")
+            print()
 
     def _beep(self):
         print('\a', end='', flush=True)
@@ -126,7 +131,7 @@ class VoiceAssistant:
 
 
     def start_hotword_listener(self):
-        print("🎧 Hotword listener started... Say your hotword to begin.")
+        print("Hotword listener started...")
         last_trigger_time = 0
         try:
             while True:
@@ -141,12 +146,12 @@ class VoiceAssistant:
                 if result >= 0:
                     current_time = time.time()
                     if current_time - last_trigger_time >= self.cooldown_seconds and not self.listening_lock.locked():
-                        print("[🔊] Hotword detected!")
+                        print("Hotword detected!")
                         last_trigger_time = current_time
                         threading.Thread(target=self._handle_hotword_trigger, daemon=True).start()
 
         except KeyboardInterrupt:
-            print("\n[🛑] Hotword listener stopped.")
+            print()
         finally:
             self.stream.stop_stream()
             self.stream.close()
