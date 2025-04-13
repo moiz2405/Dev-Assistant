@@ -8,7 +8,9 @@ import struct
 import wave
 import speech_recognition as sr
 import logging
+import sys
 from dotenv import load_dotenv
+
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
@@ -24,14 +26,13 @@ class VoiceAssistant:
     @staticmethod
     def list_input_devices():
         pa = pyaudio.PyAudio()
-        logger.info("\nAvailable audio input devices:\n")
         for i in range(pa.get_device_count()):
             info = pa.get_device_info_by_index(i)
             if info['maxInputChannels'] > 0:
                 print(f"ID {i}: {info['name']}")
         pa.terminate()
 
-    def cleanup_old_recordings(self, folder="recordings", max_age_minutes=10):
+    def cleanup_old_recordings(self, folder="recordings", max_age_minutes=1):
         now = time.time()
         max_age_seconds = max_age_minutes * 60
         if not os.path.exists(folder):
@@ -43,9 +44,9 @@ class VoiceAssistant:
                 if file_age > max_age_seconds:
                     try:
                         os.remove(filepath)
-                        logger.info(f"[🧹] Deleted old recording: {filename}")
+                        print(f"Deleted old recording: {filename}")
                     except Exception as e:
-                        logger.warning(f"[⚠️] Could not delete {filename}: {e}")
+                        print(f"Could not delete {filename}: {e}")
 
     def __init__(self, hotword="jarvis", record_duration=6, cooldown_seconds=2, on_recognized=None):
         self.hotword = hotword
@@ -57,8 +58,7 @@ class VoiceAssistant:
 
         access_key = os.getenv("PICOVOICE_ACCESS_KEY")
         if not access_key:
-            raise ValueError("⚠️ Missing Picovoice access key. Set PICOVOICE_ACCESS_KEY in your .env file.")
-
+            raise ValueError("Missing Picovoice access key. Set PICOVOICE_ACCESS_KEY in your .env file.")
         self.porcupine = pvporcupine.create(access_key=access_key, keywords=[self.hotword])
         self.pa = pyaudio.PyAudio()
         self.stream = self.pa.open(
@@ -73,7 +73,7 @@ class VoiceAssistant:
         print('\a', end='', flush=True)
 
     def _record_audio_dynamic(self):
-        logger.info("Listening for command...")
+        print("Listening for command...")
         os.makedirs("recordings", exist_ok=True)
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"recordings/voice_{timestamp}.wav"
@@ -84,7 +84,7 @@ class VoiceAssistant:
             try:
                 audio_data = self.recognizer.listen(source, timeout=3, phrase_time_limit=self.record_duration)
             except sr.WaitTimeoutError:
-                logger.info("[⏳] No speech detected in timeout window.")
+                print("No speech detected in timeout window.")
                 return None
 
         with open(filename, "wb") as f:
@@ -96,19 +96,14 @@ class VoiceAssistant:
             with sr.AudioFile(audio_file) as source:
                 audio_data = self.recognizer.record(source)
                 text = self.recognizer.recognize_google(audio_data)
-                logger.info(f"[🗣️] You said: {text}")
-
-                # Save transcript
-                transcript_file = audio_file.replace(".wav", ".txt")
-                with open(transcript_file, 'w') as f:
-                    f.write(text)
+                print(f"You said: {text}")
 
                 if self.on_recognized:
                     self.on_recognized(text)
         except sr.UnknownValueError:
-            logger.info("[❓] Couldn't understand what you said.")
+            print("Couldn't understand what you said.")
         except Exception as e:
-            logger.error(f"[⚠️] Recognition error: {e}")
+            print(f"Recognition error: {e}")
 
     def _handle_hotword_trigger(self):
         def inner():
@@ -120,12 +115,12 @@ class VoiceAssistant:
                         self._recognize_and_execute(filename)
                     finally:
                         self.cleanup_old_recordings()
-                logger.info("[✅] Ready for next command...")
+                print("Ready for next command...")
 
         threading.Thread(target=inner, daemon=True).start()
 
     def _restart_stream(self):
-        logger.warning("Restarting audio stream...")
+        print("Restarting audio stream...")
         try:
             self.stream.stop_stream()
             self.stream.close()
@@ -137,10 +132,10 @@ class VoiceAssistant:
                 frames_per_buffer=self.porcupine.frame_length,
             )
         except Exception as e:
-            logger.error(f"Failed to restart stream: {e}")
+            print(f"Failed to restart stream: {e}")
 
     def start_hotword_listener(self):
-        logger.info("🔊 Hotword listener started...")
+        print("Hotword listener started...")
         last_trigger_time = 0
 
         try:
@@ -150,19 +145,18 @@ class VoiceAssistant:
                     pcm = struct.unpack_from("h" * self.porcupine.frame_length, pcm)
                     result = self.porcupine.process(pcm)
                 except Exception as e:
-                    logger.warning(f"Stream error: {e}")
                     self._restart_stream()
                     continue
 
                 if result >= 0:
                     current_time = time.time()
                     if current_time - last_trigger_time >= self.cooldown_seconds and not self.listening_lock.locked():
-                        logger.info("🎙️ Hotword detected!")
+                        print("Hotword detected!")
                         last_trigger_time = current_time
                         self._handle_hotword_trigger()
 
         except KeyboardInterrupt:
-            logger.info("Voice assistant stopped.")
+            print("Voice assistant stopped.")
         finally:
             self.stream.stop_stream()
             self.stream.close()
@@ -173,6 +167,6 @@ class VoiceAssistant:
     def default_command_handler(command):
         if "time" in command:
             now = datetime.datetime.now().strftime("%H:%M")
-            logger.info(f"The current time is {now}.")
+            print(f"The current time is {now}.")
         else:
-            logger.info(f"Command received: {command}")
+            print(f"Command received: {command}")
