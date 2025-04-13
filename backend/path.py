@@ -10,7 +10,15 @@ from app.functions.file_handler import open_file
 # determine_function(query)
 
 from app.tts.test import VoiceAssistant
-assistant = VoiceAssistant()
+def handle_recognized_command(text):
+    if text:
+        print(f"[MAIN] Recognized: {text}")
+        # processed_query = process_query(text)
+        # determine_function(processed_query)
+        # Call your query processor or route it here
+    else:
+        print("[MAIN] Nothing recognized.")
+assistant = VoiceAssistant(hotword="jarvis", record_duration=4,on_recognized=handle_recognized_command)
 assistant.start_hotword_listener()
 # while(t):
 #     t = t-1
