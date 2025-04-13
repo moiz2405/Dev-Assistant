@@ -7,7 +7,7 @@ import os
 uwp_apps = {
     "whatsapp": "5319275A.WhatsAppDesktop_cv1g1gvanyjgm!App",
     "terminal": "Microsoft.WindowsTerminal_8wekyb3d8bbwe!App",
-    "microsoft_edge": "Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge",
+    "edge": "Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge",
     "calculator": "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App",
     "calendar": "microsoft.windowscommunicationsapps_8wekyb3d8bbwe!microsoft.windowslive.calendar",
     "camera": "Microsoft.WindowsCamera_8wekyb3d8bbwe!App",
@@ -17,13 +17,13 @@ uwp_apps = {
 # Traditional Desktop (.exe) Apps
 desktop_apps = {
     "chrome": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-    "vs_code": "C:\\Users\\<YourUsername>\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+    "code": "C:\\Users\\<YourUsername>\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
     "steam": "C:\\Program Files (x86)\\Steam\\Steam.exe",
     "translucenttb": "C:\\Program Files\\TranslucentTB\\TranslucentTB.exe",
-    "docker_desktop": "C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe",
+    "docker": "C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe",
     "powerpoint": "C:\\Program Files\\Microsoft Office\\root\\Office16\\POWERPNT.EXE",
-    "file_explorer": "explorer.exe",
-    "notepad_classic": "notepad.exe"
+    "explorer": "explorer.exe",
+    "notepad": "notepad.exe"
 }
 
 def open_app(app_name: str):
