@@ -47,9 +47,7 @@ class VoiceAssistant:
     def _record_audio(self):
         print("[🎙️] Recording voice...")
         RATE = 16000
-        CHUNK = 1024
-        FORMAT = pyaudio.paInt16
-        CHANNELS = 1
+   
 
         audio = pyaudio.PyAudio()
         stream = audio.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK)
