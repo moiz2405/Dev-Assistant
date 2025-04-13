@@ -46,7 +46,8 @@ def suppress_stderr():
 
 suppress_stderr()
 
-from app.tts.voice_recognition import VoiceAssistant
+# from app.tts.voice_recognition import VoiceAssistant
+from app.tts.test import VoiceAssistant
 from app.models.groq_preprocess import process_query
 from app.query_processor import determine_function
 
