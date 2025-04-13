@@ -10,3 +10,10 @@ numpy
 google-generativeai
 SpeechRecognition
 pathlib
+pyttsx3 
+sounddevice
+requests
+install 
+requests 
+pyaudio 
+websocket-client
