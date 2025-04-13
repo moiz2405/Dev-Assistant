@@ -1,84 +1,79 @@
-import requests
-import pyaudio
-import wave
+# Example filename: main.py
+
+import httpx
+import logging
+from deepgram.utils import verboselogs
 import threading
-import time
-import json
-import websocket
-from dotenv import load_dotenv
-import os
 
-# Load environment variables from .env file
-load_dotenv()
+from deepgram import (
+    DeepgramClient,
+    DeepgramClientOptions,
+    LiveTranscriptionEvents,
+    LiveOptions,
+)
 
-# Deepgram API Key from .env file
-DEEPGRAM_API_KEY = os.getenv('DEEPGRAM_API_KEY')
-DEEPGRAM_URL = f"https://api.beta.deepgram.com/v1/speak?model=${MODEL_NAME}&performance=some&encoding=linear16&sample_rate=24000"
+# URL for the realtime streaming audio you would like to transcribe
+URL = "http://stream.live.vc.bbcmedia.co.uk/bbc_world_service"
 
-# Microphone settings
-CHUNK_SIZE = 1024
-FORMAT = pyaudio.paInt16
-CHANNELS = 1
-RATE = 16000
-
-# Create PyAudio instance
-p = pyaudio.PyAudio()
-
-# Function to record from the microphone and send audio to Deepgram API
-def record_and_stream():
-    # Create the audio stream from microphone
-    stream = p.open(format=FORMAT,
-                    channels=CHANNELS,
-                    rate=RATE,
-                    input=True,
-                    frames_per_buffer=CHUNK_SIZE)
-    
-    # Setup WebSocket for Deepgram API connection
-    ws = websocket.WebSocketApp(
-        DEEPGRAM_URL,
-        on_open=on_open,
-        on_message=on_message,
-        on_error=on_error,
-        on_close=on_close
-    )
-
-    # Start the WebSocket connection in a separate thread
-    ws_thread = threading.Thread(target=ws.run_forever)
-    ws_thread.start()
-
-    # Continuously read from microphone and send to Deepgram WebSocket
-    while True:
-        data = stream.read(CHUNK_SIZE)
-        ws.send(data, opcode=websocket.ABNF.OPCODE_BINARY)
-        
-    # Close the microphone stream when done
-    stream.stop_stream()
-    stream.close()
-
-# WebSocket callbacks
-def on_open(ws):
-    print("Connection to Deepgram opened")
-
-def on_message(ws, message):
-    # Handle transcription response from Deepgram
+def main():
     try:
-        response = json.loads(message)
-        if response.get("channel"):
-            transcript = response["channel"]["alternatives"][0]["transcript"]
-            print(f"Transcript: {transcript}")
-            # Here you can use the transcribed text for further processing
-    except json.JSONDecodeError as e:
-        print("Error decoding response:", e)
+        # use default config
+        deepgram: DeepgramClient = DeepgramClient()
 
-def on_error(ws, error):
-    print(f"WebSocket Error: {error}")
+        # Create a websocket connection to Deepgram
+        dg_connection = deepgram.listen.websocket.v("1")
 
-def on_close(ws, close_status_code, close_msg):
-    print("Connection to Deepgram closed")
+        def on_message(self, result, **kwargs):
+            sentence = result.channel.alternatives[0].transcript
+            if len(sentence) == 0:
+                return
+            print(f"speaker: {sentence}")
 
-# Start the transcription process
-def start_transcription():
-    record_and_stream()
+        dg_connection.on(LiveTranscriptionEvents.Transcript, on_message)
+
+        # connect to websocket
+        options = LiveOptions(model="nova-3")
+
+        print("\n\nPress Enter to stop recording...\n\n")
+        if dg_connection.start(options) is False:
+            print("Failed to start connection")
+            return
+
+        lock_exit = threading.Lock()
+        exit = False
+
+        # define a worker thread
+        def myThread():
+            with httpx.stream("GET", URL) as r:
+                for data in r.iter_bytes():
+                    lock_exit.acquire()
+                    if exit:
+                        break
+                    lock_exit.release()
+
+                    dg_connection.send(data)
+
+        # start the worker thread
+        myHttp = threading.Thread(target=myThread)
+        myHttp.start()
+
+        # signal finished
+        input("")
+        lock_exit.acquire()
+        exit = True
+        lock_exit.release()
+
+        # Wait for the HTTP thread to close and join
+        myHttp.join()
+
+        # Indicate that we've finished
+        dg_connection.finish()
+
+        print("Finished")
+
+    except Exception as e:
+        print(f"Could not open socket: {e}")
+        return
 
 if __name__ == "__main__":
-    start_transcription()
+    main()
