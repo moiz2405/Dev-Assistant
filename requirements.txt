@@ -17,3 +17,4 @@ install
 requests 
 pyaudio 
 websocket-client
+deepgram-sdk
