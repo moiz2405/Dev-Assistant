@@ -48,7 +48,7 @@ class VoiceAssistant:
                     except Exception as e:
                         print(f"Could not delete {filename}: {e}")
 
-    def __init__(self, hotword="tars", record_duration=6, cooldown_seconds=2, on_recognized=None):
+    def __init__(self, hotword="jarvis", record_duration=6, cooldown_seconds=2, on_recognized=None):
         self.hotword = hotword
         self.record_duration = record_duration
         self.cooldown_seconds = cooldown_seconds
