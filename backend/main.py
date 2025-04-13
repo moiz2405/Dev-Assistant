@@ -62,7 +62,7 @@ def handle_recognized_command(text):
         print("[MAIN] Nothing recognized.")
 
 #start hotword detection and taking user query in natural language
-assistant = VoiceAssistant(hotword="tars", record_duration=4,on_recognized=handle_recognized_command)
+assistant = VoiceAssistant(hotword="jarvis", record_duration=4,on_recognized=handle_recognized_command)
 assistant.start_hotword_listener()
 
 
