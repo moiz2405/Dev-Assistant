@@ -15,5 +15,5 @@ sounddevice
 requests
 requests 
 pyaudio 
-
+TTS
 
