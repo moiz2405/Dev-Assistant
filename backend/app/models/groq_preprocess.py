@@ -10,7 +10,9 @@ from pathlib import Path
 import platform
 import os
 import getpass
-    
+import diskcache
+cache = diskcache.Cache(".query_cache")
+
 class QueryType(str, Enum):
     GITHUB_ACTIONS = "GITHUB_ACTIONS"         
     PROJECT_SETUP = "PROJECT_SETUP"             
@@ -162,3 +164,13 @@ def process_query(prompt: str) -> QueryProcessor:
     response = AGENT_MAIN.run(boosted_prompt, stream=False)
     return response.content
 
+def cached_process_query(prompt: str) -> QueryProcessor:
+    normalized_prompt = " ".join(prompt.strip().lower().split())
+    if normalized_prompt in cache:
+        print("[CACHE HIT]")
+        return cache[normalized_prompt]
+    else:
+        print("[CACHE MISS]")
+    result = process_query(prompt)
+    cache[normalized_prompt] = result
+    return result
