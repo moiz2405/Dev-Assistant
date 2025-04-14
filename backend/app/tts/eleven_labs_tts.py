@@ -25,7 +25,7 @@ def get_audio_from_text(text: str):
     client = get_eleven_client()
     return client.text_to_speech.convert(
         text=text,
-        voice_id="JBFqnCBsd6RMkjVDRZzb",  # Your selected voice
+        voice_id="21m00Tcm4TlvDq8ikWAM",  # Your selected voice
         model_id="eleven_multilingual_v2",
         output_format="mp3_44100_128",
     )
