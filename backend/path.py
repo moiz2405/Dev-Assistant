@@ -9,7 +9,7 @@ def suppress_stderr():
 suppress_stderr()
 
 from app.stt.voice_recognition import VoiceAssistant
-from app.models.groq_preprocess import process_query
+from app.models.groq_preprocess import cached_process_query
 from app.query_processor import determine_function
 from app.tts.response_generator import generate_response
 from app.tts.eleven_labs_tts import speak
@@ -31,7 +31,7 @@ def handle_recognized_command(text):
 
     # Task 2: Query Processor Pathway
     def run_action_pipeline():
-        processed = process_query(text)
+        processed = cached_process_query(text)
         determine_function(processed)
 
     # Run both in parallel
@@ -39,9 +39,5 @@ def handle_recognized_command(text):
     executor.submit(run_action_pipeline)
 
 # Start assistant
-assistant = VoiceAssistant(
-    hotword="jarvis",
-    record_duration=4,
-    on_recognized=handle_recognized_command
-)
+assistant = VoiceAssistant(hotword="jarvis",record_duration=4,on_recognized=handle_recognized_command)
 assistant.start_hotword_listener()
