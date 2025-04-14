@@ -143,13 +143,15 @@ def get_default_download_path(filename: str) -> str:
     return f"C:\\Users\\km866\\Downloads\\{filename}"
 
     
+# Move this outside for reuse
+AGENT_MAIN = get_agent()
+AGENT_GENERAL = Agent(model=Groq(id="llama-3.3-70b-versatile"))
+
 def process_query(prompt: str) -> QueryProcessor:
-    agent = get_agent()
     boosted_prompt = boost_prompt(prompt)
 
     if "[TASK:GENERAL_QUERY]" in boosted_prompt:
-        general_agent = Agent(model=Groq(id="llama-3.3-70b-versatile"))
-        general_response = general_agent.run(boosted_prompt.replace("[TASK:GENERAL_QUERY] ", ""), stream=False)
+        general_response = AGENT_GENERAL.run(boosted_prompt.replace("[TASK:GENERAL_QUERY] ", ""), stream=False)
         return QueryProcessor(
             type=QueryType.GENERAL_QUERY,
             subtask=SubTaskType.GENERAL_QUERY,
@@ -157,37 +159,6 @@ def process_query(prompt: str) -> QueryProcessor:
             path=""
         )
 
-    response = agent.run(boosted_prompt, stream=False)
-    query_obj = response.content
+    response = AGENT_MAIN.run(boosted_prompt, stream=False)
+    return response.content
 
-    # Always enforce Windows-style path
-    # query_obj.path = get_default_download_path(query_obj.target)
-    
-    return query_obj
-
-
-# def main_loop():
-#     agent = get_agent()
-#     while True:
-#         try:
-#             prompt = input(">>> ")
-#             if prompt.lower() in {"exit", "quit"}:
-#                 print("Goodbye!")
-#                 break
-#             boosted = boost_prompt(prompt)
-#             agent.print_response(boosted, stream=True)
-#         except KeyboardInterrupt:
-#             print("\nExiting...")
-#             break
-
-# def stream_loop():
-#     agent = get_agent()
-#     while True:
-#         prompt = input(">>> ")
-#         boosted = boost_prompt(prompt)
-#         output: Iterator[RunResponse] = agent.run(boosted, stream=True)
-#         for curr in output:
-#             print(curr.content)
-
-# if __name__ == "__main__":
-#     main_loop()
