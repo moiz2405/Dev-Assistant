@@ -26,10 +26,3 @@ def generate_response(text: str) -> str:
     response = model.generate_content(prompt)
     
     return response.text.strip()
-
-
-# Example usage
-# if __name__ == "__main__":
-#     user_input = "open whatsapp"
-#     reply = generate_response(user_input)
-#     print(reply)
