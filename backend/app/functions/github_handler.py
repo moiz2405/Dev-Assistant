@@ -3,15 +3,7 @@ import subprocess
 import requests
 from dotenv import load_dotenv
 
-# Load .env from the root of the project
-
 load_dotenv(dotenv_path = os.path.join(os.path.dirname(__file__), '../../..', '.env.local'))
-# if not load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../.env.local')):
-#     print("❌ Failed to load .env.local")
-
-
-
-
 # Fetch credentials
 GITHUB_API = "https://api.github.com"
 USERNAME = os.getenv("GITHUB_USERNAME")
