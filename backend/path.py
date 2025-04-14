@@ -9,7 +9,7 @@ from app.functions.file_handler import open_file
 # query = process_query(input)
 # determine_function(query)
 
-from app.tts.test import VoiceAssistant
+from app.stt.voice_recognition import VoiceAssistant
 def handle_recognized_command(text):
     if text:
         print(f"[MAIN] Recognized: {text}")
