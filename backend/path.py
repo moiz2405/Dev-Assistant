@@ -13,24 +13,46 @@ from app.models.groq_preprocess import process_query
 from app.query_processor import determine_function
 from app.tts.response_generator import generate_response
 from app.tts.eleven_labs_tts import speak
+import asyncio
 
-# Access the last query
-def handle_recognized_command(text):
+async def handle_tts(text: str):
+    response = generate_response(text)
+    await speak(response)
+
+async def handle_action(text: str):
+    processed = process_query(text)
+    determine_function(processed)
+
+def handle_recognized_command(text: str):
     if text:
         print(f"[MAIN] Recognized: {text}")
-
-        # Use ThreadPoolExecutor to run both `generate_response` and `speak` concurrently
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            future_response = executor.submit(generate_response, text)
-            future_speech = executor.submit(speak, future_response.result())
-
-        # Use another ThreadPoolExecutor to run `process_query` and `determine_function` concurrently
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            future_processed_query = executor.submit(process_query, text)
-            future_determine_function = executor.submit(determine_function, future_processed_query.result())
-
+        asyncio.run(run_parallel_tasks(text))
     else:
         print("[MAIN] Nothing recognized.")
+
+async def run_parallel_tasks(text: str):
+    await asyncio.gather(
+        handle_tts(text),
+        handle_action(text)
+    )
+
+# Access the last query
+# def handle_recognized_command(text):
+#     if text:
+#         print(f"[MAIN] Recognized: {text}")
+
+#         # Use ThreadPoolExecutor to run both `generate_response` and `speak` concurrently
+#         with concurrent.futures.ThreadPoolExecutor() as executor:
+#             future_response = executor.submit(generate_response, text)
+#             future_speech = executor.submit(speak, future_response.result())
+
+#         # Use another ThreadPoolExecutor to run `process_query` and `determine_function` concurrently
+#         with concurrent.futures.ThreadPoolExecutor() as executor:
+#             future_processed_query = executor.submit(process_query, text)
+#             future_determine_function = executor.submit(determine_function, future_processed_query.result())
+
+#     else:
+#         print("[MAIN] Nothing recognized.")
 
 # Start hotword detection and taking user query in natural language
 assistant = VoiceAssistant(hotword="jarvis", record_duration=4, on_recognized=handle_recognized_command)
