@@ -19,3 +19,11 @@ pyaudio
 websocket-client
 deepgram-sdk
 httpx
+kokoro
+soundfile
+huggingface-hub
+loguru 
+misaki 
+numpy 
+torch 
+transformers
