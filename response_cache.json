@@ -11,5 +11,15 @@
   "all pdf from download": "Very good. Shall I retrieve all PDF files from your Downloads folder?",
   "one more dot pdf from download": "Very good, sir. I shall retrieve and process that PDF from the downloads folder for you.",
   "open on pdf from download": "Certainly, sir. I shall open the PDF from your Downloads folder directly.",
-  "open mini project ppt": "Certainly, sir. I shall endeavour to open the mini project presentation forthwith. Please allow a moment for the application to load, should it require it."
+  "open mini project ppt": "Certainly, sir. I shall endeavour to open the mini project presentation forthwith. Please allow a moment for the application to load, should it require it.",
+  "how many project": "My apologies, sir, but I require further clarification to answer your query. Could you please specify the context in which you are interested in knowing the number of projects?",
+  "open mini": "Very good, sir. Opening Mini now.",
+  "open mini project": "Certainly, sir. I shall open the mini project for you immediately.",
+  "open the ppt": "Very good, sir. I am opening the presentation now.",
+  "mini": "Certainly, sir. How may I be of service regarding \"Mini\"?",
+  "mini project ppt": "Certainly, sir. I shall assist you in developing a PowerPoint presentation for your mini-project. Perhaps you could provide me with further details regarding the subject matter, desired structure, and any specific requirements?",
+  "mini project from": "Certainly, sir. I am at your service to assist with your mini-project. How may I be of assistance?",
+  "open mini project ppt from": "At once. The \"mini project PPT\" shall be opened directly.",
+  "how many project ppt from document": "Certainly, sir. To determine the number of project PPTs from the document, I would require access to the document itself. Please provide it when you are ready.",
+  "open mini project from download": "Certainly, sir. I shall locate and open the specified mini project from your downloads promptly."
 }
