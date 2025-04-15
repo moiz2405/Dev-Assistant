@@ -4,11 +4,11 @@ import sys
 import atexit
 
 # Suppress stderr
-def suppress_stderr():
-    devnull = os.open(os.devnull, os.O_WRONLY)
-    os.dup2(devnull, sys.stderr.fileno())
+# def suppress_stderr():
+#     devnull = os.open(os.devnull, os.O_WRONLY)
+#     os.dup2(devnull, sys.stderr.fileno())
 
-suppress_stderr()
+# suppress_stderr()
 
 # Imports
 from app.stt.voice_recognition import VoiceAssistant
@@ -32,7 +32,7 @@ def handle_recognized_command(text):
     print(f"[MAIN] Recognized: {text}")
 
     # Run TTS and processing in parallel
-    executor.submit(lambda: speak(generate_response(text)))
+    # executor.submit(lambda: speak(generate_response(text)))
     executor.submit(lambda: determine_function(cached_process_query(text)))
 
 # Start the assistant
