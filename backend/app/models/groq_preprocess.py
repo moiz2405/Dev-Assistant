@@ -7,43 +7,13 @@ from pydantic import BaseModel, Field
 from agno.agent import Agent, RunResponse
 from agno.models.groq import Groq
 from pathlib import Path
+from types import QueryType,SubTaskType
 import platform
 import os
 import getpass
 import diskcache
+
 cache = diskcache.Cache(".query_cache")
-
-class QueryType(str, Enum):
-    GITHUB_ACTIONS = "GITHUB_ACTIONS"         
-    PROJECT_SETUP = "PROJECT_SETUP"             
-    FILE_HANDLING = "FILE_HANDLING"             
-    APP_HANDLING = "APP_HANDLING"               
-    SUMMARIZER = "SUMMARIZER"                  
-    GENERAL_QUERY = "GENERAL_QUERY"
-class SubTaskType(str, Enum):
-    # GitHub Actions
-    LIST_REPOS = "LIST_REPOS"
-    CLONE_REPO = "CLONE_REPO"
-    CREATE_AND_PUSH = "CREATE_AND_PUSH"
-
-    # Project Setup
-    NEW_PROJECT = "NEW_PROJECT"
-    EXISTING_PROJECT = "EXISTING_PROJECT"
-
-    # File Handling
-    SEARCH_FILE = "SEARCH_FILE"
-    OPEN_FILE = "OPEN_FILE"
-    CLOSE_FILE = "CLOSE_FILE"
-
-    # App Handling
-    OPEN_APP = "OPEN_APP"
-    CLOSE_APP = "CLOSE_APP"
-
-    # Summarizer
-    SUMMARIZE = "SUMMARIZE"
-    ANSWER_QUERY = "ANSWER_QUERY"
-    #general 
-    GENERAL_QUERY = "GENERAL_QUERY"
 
 class QueryProcessor(BaseModel):
     type: QueryType = Field(
@@ -110,13 +80,34 @@ def boost_prompt(prompt: str) -> str:
         "weather", "who is", "capital of", "how many", "when was", "current", "tell me about",
         "time in", "president", "prime minister", "fun fact", "general knowledge"
     ]
+
+    path_boosts = {
+        "downloads": " [HINT_PATH: C:\\Users\\km866\\Downloads\\] ",
+        "documents": " [HINT_PATH: C:\\Users\\km866\\Documents\\] ",
+        "desktop": " [HINT_PATH: C:\\Users\\km866\\Desktop\\] ",
+        "d drive": " [HINT_PATH: D:\\] ",
+        "c drive": " [HINT_PATH: C:\\] ",
+        "my projects": " [HINT_PATH: C:\\my_projects\\] ",
+    }
+
     lowered = prompt.lower()
 
+    # General knowledge route
     if any(kw in lowered for kw in general_keywords):
         return "[TASK:GENERAL_QUERY] " + prompt
+
+    # Summarizer route
     if any(kw in lowered for kw in summarizer_keywords):
         return "[TASK:SUMMARIZER] " + prompt
+
+    # Add path hint if any matched
+    for key, path_hint in path_boosts.items():
+        if key in lowered:
+            prompt = f"{prompt} {path_hint}"
+            break
+
     return prompt
+
 
 def get_agent() -> Agent:
     return Agent(
