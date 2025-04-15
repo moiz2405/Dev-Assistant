@@ -1,5 +1,6 @@
 import os
 import subprocess
+import json
 import requests
 from dotenv import load_dotenv
 
@@ -48,25 +49,72 @@ def push_folder_to_github(repo_name, folder_path):
 
     print(f"Successfully pushed '{repo_name}' to GitHub.")
 
-
-def list_github_repos():
+def list_github_repos(save_to_file=True, filename="github_repos.json"):
     """
-    Lists all repositories under the authenticated GitHub user.
+    Fetches repository names and URLs for the authenticated user.
+    Stores only name and html_url if saving.
     """
     if not USERNAME or not TOKEN:
         raise Exception("GitHub credentials not set in .env file.")
 
-    print("📚 Fetching repository list...")
-    response = requests.get(f"{GITHUB_API}/user/repos", auth=(USERNAME, TOKEN))
+    print("Fetching repository list...")
 
-    if response.status_code == 200:
+    repos_summary = []
+    page = 1
+    per_page = 100
+
+    while True:
+        url = f"{GITHUB_API}/user/repos?per_page={per_page}&page={page}"
+        response = requests.get(url, auth=(USERNAME, TOKEN))
+
+        if response.status_code != 200:
+            print(f"Failed to fetch repositories: {response.status_code}")
+            return
+
         repos = response.json()
-        for repo in repos:
-            print(f"- {repo['name']} → {repo['html_url']}")
-    else:
-        print(f"Failed to fetch repositories: {response.status_code}")
+        if not repos:
+            break
 
-    print("Successfully fetched repository list.")
+        for repo in repos:
+            name = repo["name"]
+            url = repo["html_url"]
+            repos_summary.append({"name": name, "url": url})
+            # print(f"- {name} → {url}")
+
+        page += 1
+
+    if save_to_file:
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(repos_summary, f, indent=2)
+        print(f"Saved {len(repos_summary)} repositories to '{filename}'")
+
+    print("Repository fetching complete.")
+
+
+def load_repo_list(path="backend/github_repos.json"):
+    # print(f"Loading repository list from {path}")  # Debugging statement
+    try:
+        with open(path, "r") as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return {"error": f"File not found at {path}"}
+
+def search_repo_url(query, path="backend/github_repos.json"):
+    print(f"Searching for query: {query}")  # Debugging statement
+    query = query.lower()
+    repo_list = load_repo_list(path)
+
+    # Check if the repo_list returned an error
+    if isinstance(repo_list, dict) and "error" in repo_list:
+        return repo_list["error"]  # Return the error message directly
+
+    matches = [repo for repo in repo_list if query in repo["name"].lower()]
+
+    if not matches:
+        return f"No match found for '{query}'"
+
+    # Return only the first matched URL
+    return matches[0]["url"]
 
 def clone_github_repo(repo_url, target_directory):
     """
@@ -75,11 +123,11 @@ def clone_github_repo(repo_url, target_directory):
     if not USERNAME or not TOKEN:
         raise Exception("GitHub credentials not set in .env file.")
 
-    print(f"📥 Cloning {repo_url} into {target_directory}...")
+    print(f"Cloning {repo_url} into {target_directory}...")
     result = subprocess.run(["git", "clone", repo_url], cwd=target_directory, shell=True)
     if result.returncode == 0:
-        print("✅ Successfully cloned GitHub repository.")
+        print("Successfully cloned GitHub repository.")
     else:
         print("Cloning failed.")
 
-    print("✅ Successfully cloned GitHub repository.")
+    print("Successfully cloned GitHub repository.")
