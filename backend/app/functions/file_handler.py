@@ -1,12 +1,12 @@
 import os
 import shutil
 import platform
+import difflib
 
 def is_wsl():
     return 'microsoft' in platform.uname().release.lower()
 
 def convert_to_wsl_path(win_path: str) -> str:
-
     if ":" in win_path:
         drive, rest = win_path.split(":", 1)
         drive = drive.lower()
@@ -39,17 +39,46 @@ def search_file(file_name, search_path):
     return matching_files if matching_files else None
 
 
-def open_file(file_path):
+def fuzzy_search_file(stt_filename, search_path):
     """
-    Open a file if it exists, even from WSL to Windows.
+    Fuzzy search for a file using STT input to tolerate typos or phonetically similar names.
 
-    :param file_path: The file path to open.
+    :param stt_filename: The filename received via voice (can have typos).
+    :param search_path: The directory to search in.
+    :return: Best match file path or None.
     """
+    all_files = search_file("", search_path)  # Get all files
+
+    if not all_files:
+        return None
+
+    file_names = [os.path.basename(f) for f in all_files]
+    matches = difflib.get_close_matches(stt_filename.lower(), [f.lower() for f in file_names], n=1, cutoff=0.6)
+
+    if matches:
+        match_index = file_names.index(next(f for f in file_names if f.lower() == matches[0]))
+        return all_files[match_index]
+
+    return None
+
+
+def open_file(stt_filename, search_path):
+    """
+    Fuzzy match and open a file if it exists, even from WSL to Windows.
+
+    :param stt_filename: The (possibly typoed) filename to find and open.
+    :param search_path: Where to search.
+    """
+    file_path = fuzzy_search_file(stt_filename, search_path)
+    if not file_path:
+        print("❌ No matching file found!")
+        return
+
     if is_wsl():
         wsl_path = convert_to_wsl_path(file_path)
         if os.path.exists(wsl_path):
             try:
-                os.system(f'cmd.exe /C start "" "{file_path}"')  # open with Windows
+                os.system(f'cmd.exe /C start "" "{file_path}"')  # Open with Windows
             except Exception as e:
                 print(f"⚠️ Error opening file: {e}")
         else:
@@ -63,14 +92,20 @@ def open_file(file_path):
         print("❌ File does not exist!")
 
 
-def move_file(file_path, new_location):
+def move_file(stt_filename, search_path, new_location):
     """
-    Move a file to a new location.
+    Fuzzy match and move a file to a new location.
 
-    :param file_path: The file to be moved.
-    :param new_location: The new directory where the file should go.
+    :param stt_filename: The (possibly typoed) filename to move.
+    :param search_path: Where to search for it.
+    :param new_location: The target directory to move the file into.
     :return: New path of the moved file or None if failed.
     """
+    file_path = fuzzy_search_file(stt_filename, search_path)
+    if not file_path:
+        print("❌ No matching file found to move!")
+        return None
+
     check_path = convert_to_wsl_path(file_path) if is_wsl() else file_path
 
     if not os.path.exists(check_path):
