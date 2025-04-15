@@ -4,11 +4,11 @@ import sys
 import atexit
 
 # Suppress stderr
-# def suppress_stderr():
-#     devnull = os.open(os.devnull, os.O_WRONLY)
-#     os.dup2(devnull, sys.stderr.fileno())
+def suppress_stderr():
+    devnull = os.open(os.devnull, os.O_WRONLY)
+    os.dup2(devnull, sys.stderr.fileno())
 
-# suppress_stderr()
+suppress_stderr()
 
 # Imports
 from app.stt.voice_recognition import VoiceAssistant
