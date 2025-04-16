@@ -29,5 +29,5 @@ def handle_recognized_command(text):
     executor.submit(lambda: speak(generate_response(text)))
     executor.submit(lambda: determine_function(cached_process_query(text)))
 
-assistant = VoiceAssistant(hotword="jarvis",record_duration=4,on_recognized=handle_recognized_command)
+assistant = VoiceAssistant(hotword="jarvis",record_duration=6,on_recognized=handle_recognized_command)
 assistant.start_hotword_listener()
