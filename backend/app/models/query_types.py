@@ -31,3 +31,10 @@ class SubTaskType(str, Enum):
     ANSWER_QUERY = "ANSWER_QUERY"
     #general 
     GENERAL_QUERY = "GENERAL_QUERY"
+class PathType(str, Enum):
+    DOWNLOADS = "DOWNLOADS"
+    DOCUMENTS = "DOCUMENTS"
+    DESKTOP = "DESKTOP"
+    CUSTOM = "CUSTOM"
+    D_DRIVE = "D_DRIVE"
+    C_DRIVE = "C_DRIVE"
