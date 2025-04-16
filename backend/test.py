@@ -38,10 +38,15 @@ import sys
 #     on_recognized=handle_recognized_command
 # )
 # assistant.start_hotword_listener()
-from app.models.path_processor import list_directory_contents
-while(1):
-      user_path = input()
-      contents = list_directory_contents(user_path)
-      print(f"\nContents of '{user_path}':")
-      for item in contents:
-          print(f"[{item['type'].upper()}] {item['name']}")
+# from app.models.path_processor import list_directory_contents
+# while(1):
+#       user_path = input()
+#       contents = list_directory_contents(user_path)
+#       print(f"\nContents of '{user_path}':")
+#       for item in contents:
+#           print(f"[{item['type'].upper()}] {item['name']}")
+
+from app.functions.file_handler import open_file
+file_name = ""
+path = ""
+open_file(file_name,path)
