@@ -84,7 +84,7 @@ def boost_prompt(prompt: str) -> str:
 
     path_boosts = {
         "downloads": " [HINT_PATH: C:\\Users\\km866\\Downloads\\] ",
-        "documents": " [HINT_PATH: C:\\Users\\km866\\Documents\\] ",
+        "documents": " [HINT_PATH: Documents\\] ",
         "desktop": " [HINT_PATH: C:\\Users\\km866\\Desktop\\] ",
         "d drive": " [HINT_PATH: D:\\] ",
         "c drive": " [HINT_PATH: C:\\] ",
