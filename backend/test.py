@@ -47,6 +47,6 @@ import sys
 #           print(f"[{item['type'].upper()}] {item['name']}")
 
 from app.functions.file_handler import open_file
-file_name = "college"
+file_name = "notes"
 path = "C:\\Users\\km866\\OneDrive\\Documents\\Documents"
 open_file(file_name,path)
