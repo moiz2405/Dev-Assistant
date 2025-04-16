@@ -82,8 +82,8 @@ class VoiceAssistant:
             self.recognizer.adjust_for_ambient_noise(source, duration=0.5)
             print("Start speaking now...")
             try:
-                # Wait for speech, then record until pause
-                audio_data = self.recognizer.listen(source, timeout=5)
+                # Wait max 5s to start, then record for exactly `record_duration` seconds
+                audio_data = self.recognizer.listen(source, timeout=5, phrase_time_limit=self.record_duration)
             except sr.WaitTimeoutError:
                 print("No speech detected within timeout.")
                 return None
@@ -91,6 +91,7 @@ class VoiceAssistant:
         with open(filename, "wb") as f:
             f.write(audio_data.get_wav_data())
         return filename
+
 
 
     def _recognize_and_execute(self, audio_file):
