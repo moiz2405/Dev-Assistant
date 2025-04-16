@@ -35,14 +35,3 @@ def list_directory_contents(path: str) -> list:
         raise PermissionError(f"You do not have permission to access this path: {path}")
     except Exception as e:
         raise e
-
-# # Example usage
-# if __name__ == "__main__":
-#     user_path = input("Enter a path (e.g., C:\\Users\\Almoiz\\Documents): ").strip()
-#     try:
-#         contents = list_directory_contents(user_path)
-#         print(f"\nContents of '{user_path}':")
-#         for item in contents:
-#             print(f"[{item['type'].upper()}] {item['name']}")
-#     except Exception as err:
-#         print(f"Error: {err}")
