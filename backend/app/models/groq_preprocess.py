@@ -11,8 +11,9 @@ import platform
 import os
 import getpass
 import diskcache
+import re
 # from query_types import QueryType, SubTaskType
-from app.models.query_types import QueryType,SubTaskType,PathType
+from app.models.query_types import QueryType,SubTaskType
 cache = diskcache.Cache(".query_cache")
 
 
@@ -53,23 +54,27 @@ class QueryProcessor(BaseModel):
     path: str = Field(
         ...,
         description=(
-           "Determine the correct full Windows-style path for the file or folder referenced in the query."
-            "Guidelines:"
-            "For documents and downlaods in path return them directly as Documents\\ and Downloads\\ without any parent c or d drive they standalone "
-            "1) If the user provides a path (e.g., 'C:\\my_file' or 'D:\\Projects\\MyApp'), use it directly."
-            "2) If the user wants to create a new folder or set up a new project:"
-            "   - Extract the folder/project name from the query, if specified."
-            "   - Place it under a suitable drive (prefer 'D:\\' if mentioned, otherwise default to 'C:\\')."
-            "   - Use 'C:\\new_folder' or 'D:\\new_folder' as a fallback if no name is provided."
-            "3) For file-related actions (like SEARCH_FILE, OPEN_FILE, etc.):"
-            "   - If no folder is specified, default to the 'Documents\\' directory (e.g., 'Documents\\')."
-            "Formatting Rules:"
-            "- Always use single backslashes (\\) between directories."
-            "- Ensure the full absolute path (starting with drive letter) is returned."
-            "Examples:"
-            "- 'Open report.pdf' → path: 'C:\\Downloads\\report.pdf'"
-            "- 'Set up a Next.js project in D drive' → path: 'D:\\new_folder' or 'D:\\NextJsApp' (if name found)"
-            "- 'Save it in my_projects' → path: 'C:\\my_projects' (if no drive specified)"
+            "Determine the correct full Windows-style path for the file or folder referenced in the query.\n\n"
+            "Guidelines:\n"
+            "- If the path includes 'Documents' or 'Downloads', return them as 'Documents\\' or 'Downloads\\' directly, "
+            "without any parent drive (e.g., not 'C:\\Documents\\').\n"
+            "- Use 'Documents\\' as the default for FILE_HANDLING queries.\n"
+            "- Use 'D:\\' for GITHUB_ACTIONS and PROJECT_SETUP (fallback to 'C:\\' if 'D:\\' is not mentioned).\n"
+            "- If the query includes terms like 'create' or 'new':\n"
+            "  - Extract the folder/project name from the query if specified.\n"
+            "  - Place it under the preferred drive ('D:\\' if mentioned, otherwise 'C:\\').\n"
+            "  - Use 'D:\\new_folder' or 'C:\\new_folder' as a fallback if no name is found.\n"
+            "- If the user provides a full path (e.g., 'C:\\my_file' or 'D:\\Projects\\MyApp'), use it directly.\n"
+            "- For file-related actions (e.g., SEARCH_FILE, OPEN_FILE):\n"
+            "  - If no folder is specified, default to 'Documents\\'.\n\n"
+            "Formatting Rules:\n"
+            "- Always use single backslashes (\\) between directories.\n"
+            "- Paths should follow Windows format using capital drive letters.\n"
+            "- Return absolute paths where applicable.\n\n"
+            "Examples:\n"
+            "- 'Open report.pdf' → path: 'Documents\\report.pdf'\n"
+            "- 'Set up a Next.js project in D drive' → path: 'D:\\NextJsApp' (if name extracted) or 'D:\\new_folder'\n"
+            "- 'Save it in my_projects' → path: 'C:\\my_projects' (if no drive is specified)"
         )
     )
 
@@ -95,56 +100,71 @@ def boost_prompt(prompt: str) -> str:
 
     return prompt
 
-def extract_path_hint(prompt: str, query_type: QueryType, subtask: SubTaskType) -> str:
+# def extract_path_hint(prompt: str, query_type: QueryType, subtask: SubTaskType) -> str:
+#     prompt_lower = prompt.lower()
+
+#     # Rule 1: If "downloads" or "documents" is mentioned
+#     if "downloads" in prompt_lower:
+#         return "Downloads\\"
+#     if "documents" in prompt_lower:
+#         return "Documents\\"
+
+#     # Rule 2: Based on query type
+#     if query_type == QueryType.FILE_HANDLING:
+#         return "Documents\\"
+
+#     if query_type in [QueryType.GITHUB_ACTIONS, QueryType.PROJECT_SETUP]:
+#         drive = "D:\\" if "d drive" in prompt_lower else "C:\\"
+#         if "new" in prompt_lower or "create" in prompt_lower:
+#             folder_name = "new_folder"
+#             # Try to extract folder name from the prompt
+#             tokens = prompt_lower.split()
+#             for i, word in enumerate(tokens):
+#                 if word in {"folder", "project"} and i + 1 < len(tokens):
+#                     folder_name = tokens[i + 1].capitalize()
+#                     break
+#             return f"{drive}{folder_name}"
+#         return drive
+
+#     return "C:\\"  # fallback
+
+def extract_path_hint(prompt: str) -> str | None:
+    """
+    Extract a name from a prompt that likely refers to a file, folder, or project.
+    Uses regex for accuracy. Handles quoted and unquoted names.
+    """
     prompt_lower = prompt.lower()
 
-    # Rule 1: If "downloads" or "documents" is mentioned
-    if "downloads" in prompt_lower:
-        return "Downloads\\"
-    if "documents" in prompt_lower:
-        return "Documents\\"
+    # Look for quoted strings after folder/project/file etc.
+    match = re.search(r'(?:folder|project|file|directory)\s*(named|called|as)?\s*["\']?([a-zA-Z0-9 _-]+)["\']?', prompt_lower)
+    if match:
+        name = match.group(2).strip()
+        name = re.sub(r'[^\w\s-]', '', name)  # Remove any stray special chars
+        name = re.sub(r'\s+', '_', name)      # Convert spaces to underscores
+        return name.capitalize()
 
-    # Rule 2: Based on query type
-    if query_type == QueryType.FILE_HANDLING:
-        return "Documents\\"
+    # Fallback: catch standalone quoted words
+    match_fallback = re.search(r'["\']([a-zA-Z0-9 _-]+)["\']', prompt_lower)
+    if match_fallback:
+        name = match_fallback.group(1).strip()
+        name = re.sub(r'[^\w\s-]', '', name)
+        name = re.sub(r'\s+', '_', name)
+        return name.capitalize()
 
-    if query_type in [QueryType.GITHUB_ACTIONS, QueryType.PROJECT_SETUP]:
-        drive = "D:\\" if "d drive" in prompt_lower else "C:\\"
-        if "new" in prompt_lower or "create" in prompt_lower:
-            folder_name = "new_folder"
-            # Try to extract folder name from the prompt
-            tokens = prompt_lower.split()
-            for i, word in enumerate(tokens):
-                if word in {"folder", "project"} and i + 1 < len(tokens):
-                    folder_name = tokens[i + 1].capitalize()
-                    break
-            return f"{drive}{folder_name}"
-        return drive
-
-    return "C:\\"  # fallback
+    return None
 
 def get_agent() -> Agent:
     return Agent(
         model=Groq(id="llama-3.3-70b-versatile"),
         description=(
-            "You are a smart query processor. Your job is to translate natural language user queries "
-            "into structured data with fields: type, subtask, target, and path.\n"
-             "You are a smart query processor. Translate natural language queries into structured fields: type, subtask, target, and path.\n"
-            "- Use Documents\\ or Downloads\\ if mentioned, no full path or user folder required.\n"
-            "- Use Documents\\ as default for FILE_HANDLING queries.\n"
-            "- Use D:\\ (or fallback to C:\\) for GITHUB_ACTIONS and PROJECT_SETUP unless user mentions otherwise.\n"
-            "- If 'create' or 'new' is mentioned, return drive + new_folder or drive + project/folder name if found.\n"
-            "- Paths should follow Windows format using single backslashes and capital drive letters.\n"
-            "- Recognize summarization or document-based queries as SUMMARIZER.\n"
-            "- Classify GitHub-related tasks as GITHUB_ACTIONS.\n"
-            "- Be precise with subtask selection."
-            "- Be precise with subtask selection.\n"
-            "- Always return Windows-style paths starting with capital drive letters (e.g., C:\\, D:\\)."
-            "- Capitalize the drive letter in the path (e.g., C:\\Users\\...)."
-            "- If the query mentions a file (e.g., 'pdf named college', 'from my file xyz'), extract the filename "
-            "- Construct the absolute file path in the format: C:\\Users\\km866\\Downloads\\<filename> with extension\n"
-            "- Set 'target' as the full filename with extension, and 'path' as the complete path to that file.\n"
-            "- Preserve the extension (e.g., .pdf) since it is needed for file access or processing." 
+            "You are a smart query processor. Translate natural language queries into structured fields: type, subtask, target, and path.\n"
+            "- Use Documents\\ or Downloads\\ if mentioned.\n"
+            "- Default to Documents\\ for FILE_HANDLING.\n"
+            "- Use D:\\ (fallback C:\\) for GITHUB_ACTIONS/PROJECT_SETUP.\n"
+            "- Use 'new_folder' or extracted name if creating something new.\n"
+            "- Use proper Windows-style absolute paths with capital drive letters.\n"
+            "- Extract and preserve file extensions (.pdf, .txt, etc.).\n"
+            "- Be accurate with subtask classification.\n"
         ),
         markdown=True,
         response_model=QueryProcessor,
