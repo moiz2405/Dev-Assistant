@@ -134,7 +134,7 @@ def get_agent() -> Agent:
         model=Groq(id="llama-3.3-70b-versatile"),
         description=(
             "You are a smart query processor. Translate natural language queries into structured fields: type, subtask, target, and path.\n"
-            "- Default to Documents\\ for FILE_HANDLING.\n"
+            "- Default to C:\\Users\\km866\\OneDrive\\Documents\\Documents\\ for FILE_HANDLING.\n"
             "- Use D:\\ (fallback C:\\) for GITHUB_ACTIONS/PROJECT_SETUP.\n"
             "- Use 'new_folder' or extracted name if creating something new.\n"
             "- Use proper Windows-style absolute paths with capital drive letters.\n"
