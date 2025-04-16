@@ -8,7 +8,13 @@
 
 # repo_url = search_repo_url("acc")
 # print(repo_url)
+import os
+import sys
+def suppress_stderr():
+    devnull = os.open(os.devnull, os.O_WRONLY)
+    os.dup2(devnull, sys.stderr.fileno())
 
+suppress_stderr()
 from app.models.groq_preprocess import cached_process_query
 from app.stt.voice_recognition import VoiceAssistant
 # from app.models.test_preprocess import cached_process_query
