@@ -120,7 +120,8 @@ def get_agent() -> Agent:
             "- Classify GitHub-related tasks as GITHUB_ACTIONS.\n"
             "- Be precise with subtask selection."
             "- Be precise with subtask selection.\n"
-            "- Return the path all in lower case"
+            "- Always return Windows-style paths starting with capital drive letters (e.g., C:\\, D:\\)."
+            "- Capitalize the drive letter in the path (e.g., C:\\Users\\...)."
             "- If the query mentions a file (e.g., 'pdf named college', 'from my file xyz'), extract the filename "
             "and ensure it ends with '.pdf', DONT EVER GIVE SPACES BETWEEN NAMES IN A FILE LIKE FILE FILE IS NAMES collegenotes.pdf let it.\n"
             "- Construct the absolute file path in the format: C:\\\\Users\\\\km866\\\\Downloads\\\\<filename>.pdf\n"
@@ -156,13 +157,35 @@ def process_query(prompt: str) -> QueryProcessor:
     response = AGENT_MAIN.run(boosted_prompt, stream=False)
     return response.content
 
+def sanitize_and_validate_path(path: str, create_if_missing: bool = False) -> str:
+    if not path:
+        return ""
+    path = path.strip().replace("/", "\\")
+    
+    if len(path) > 1 and path[1] == ":":
+        path = path[0].upper() + path[1:]
+
+    path_obj = Path(path)
+
+    # If create_if_missing is enabled, and it's likely a directory (no file extension)
+    if create_if_missing and not path_obj.exists():
+        try:
+            if path_obj.suffix == "":
+                path_obj.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            print(f"[Warning] Could not create directory: {e}")
+
+    return str(path_obj)
+
 def cached_process_query(prompt: str) -> QueryProcessor:
     normalized_prompt = " ".join(prompt.strip().lower().split())
+
     if normalized_prompt in cache:
         print("[CACHE HIT]")
         return cache[normalized_prompt]
     else:
         print("[CACHE MISS]")
     result = process_query(prompt)
+    result.path = sanitize_and_validate_path(result.path, create_if_missing=True)
     cache[normalized_prompt] = result
     return result
