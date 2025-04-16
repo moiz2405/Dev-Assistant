@@ -9,6 +9,7 @@ import wave
 import speech_recognition as sr
 import logging
 import sys
+import audioop
 from dotenv import load_dotenv
 
 
@@ -72,27 +73,63 @@ class VoiceAssistant:
     def _beep(self):
         print('\a', end='', flush=True)
 
+    
+
     def _record_audio_dynamic(self):
         print("Listening for command...")
         os.makedirs("recordings", exist_ok=True)
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"recordings/voice_{timestamp}.wav"
 
-        with sr.Microphone(sample_rate=16000) as source:
-            self.recognizer.adjust_for_ambient_noise(source, duration=0.5)
-            print("Start speaking now...")
-            try:
-                # Wait max 5s to start, then record for exactly `record_duration` seconds
-                audio_data = self.recognizer.listen(source, timeout=5, phrase_time_limit=self.record_duration)
-            except sr.WaitTimeoutError:
-                print("No speech detected within timeout.")
-                return None
+        RATE = 16000
+        CHUNK = 1024
+        SILENCE_THRESHOLD = 100  # Adjust based on testing
+        MAX_SILENCE_CHUNKS = int(1.5 * RATE / CHUNK)  # 1.2 sec of silence
+        MAX_RECORD_SECONDS = 10
 
-        with open(filename, "wb") as f:
-            f.write(audio_data.get_wav_data())
+        stream = self.pa.open(format=pyaudio.paInt16,
+                            channels=1,
+                            rate=RATE,
+                            input=True,
+                            frames_per_buffer=CHUNK)
+
+        print("Start speaking now...")
+        frames = []
+        silent_chunks = 0
+        speaking_started = False
+        start_time = time.time()
+
+        while True:
+            data = stream.read(CHUNK)
+            rms = audioop.rms(data, 2)  # Root mean square to detect volume
+            frames.append(data)
+
+            if rms > SILENCE_THRESHOLD:
+                silent_chunks = 0
+                speaking_started = True
+            else:
+                if speaking_started:
+                    silent_chunks += 1
+
+            if silent_chunks > MAX_SILENCE_CHUNKS:
+                print("Silence detected, stopping recording.")
+                break
+
+            if time.time() - start_time > MAX_RECORD_SECONDS:
+                print("Max recording time reached.")
+                break
+
+        stream.stop_stream()
+        stream.close()
+
+        wf = wave.open(filename, 'wb')
+        wf.setnchannels(1)
+        wf.setsampwidth(self.pa.get_sample_size(pyaudio.paInt16))
+        wf.setframerate(RATE)
+        wf.writeframes(b''.join(frames))
+        wf.close()
+
         return filename
-
-
 
     def _recognize_and_execute(self, audio_file):
         try:
