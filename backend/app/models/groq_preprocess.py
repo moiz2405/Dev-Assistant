@@ -55,9 +55,6 @@ class QueryProcessor(BaseModel):
         description=(
             "Determine the correct full Windows-style path for the file or folder referenced in the query.\n\n"
             "Guidelines:\n"
-            "- If the path includes 'Documents' or 'Downloads', return them as 'Documents\\' or 'Downloads\\' directly, "
-            "without any parent drive (e.g., not 'C:\\Documents\\').\n"
-            "- Use 'Documents\\' as the default for FILE_HANDLING queries.\n"
             "- Use 'D:\\' for GITHUB_ACTIONS and PROJECT_SETUP (fallback to 'C:\\' if 'D:\\' is not mentioned).\n"
             "- If the query includes terms like 'create' or 'new':\n"
             "  - Extract the folder/project name from the query if specified.\n"
@@ -101,22 +98,26 @@ def boost_prompt(prompt: str) -> str:
 
 def extract_path_hint(prompt: str, query_type: QueryType, subtask: SubTaskType) -> str:
     prompt_lower = prompt.lower()
+    username = getpass.getuser()
+    
+    documents_path = f"C:\\Users\\km866\\OneDrive\\Documents\\Documents"
+    downloads_path = f"C:\\Users\\km866\\Downloads"
 
     # Rule 1: If "downloads" or "documents" is mentioned
     if "downloads" in prompt_lower:
-        return "Downloads\\"
+        return downloads_path
     if "documents" in prompt_lower:
-        return "Documents\\"
+        return documents_path
 
     # Rule 2: Based on query type
     if query_type == QueryType.FILE_HANDLING:
-        return "Documents\\"
+        return documents_path
 
     if query_type in [QueryType.GITHUB_ACTIONS, QueryType.PROJECT_SETUP]:
         drive = "D:\\" if "d drive" in prompt_lower else "C:\\"
         if "new" in prompt_lower or "create" in prompt_lower:
             folder_name = "new_folder"
-            # Try to extract folder name from the prompt
+            # Try to extract folder/project name from the prompt
             tokens = prompt_lower.split()
             for i, word in enumerate(tokens):
                 if word in {"folder", "project"} and i + 1 < len(tokens):
@@ -127,12 +128,12 @@ def extract_path_hint(prompt: str, query_type: QueryType, subtask: SubTaskType) 
 
     return "C:\\"  # fallback
 
+
 def get_agent() -> Agent:
     return Agent(
         model=Groq(id="llama-3.3-70b-versatile"),
         description=(
             "You are a smart query processor. Translate natural language queries into structured fields: type, subtask, target, and path.\n"
-            "- Use Documents\\ or Downloads\\ if mentioned.\n"
             "- Default to Documents\\ for FILE_HANDLING.\n"
             "- Use D:\\ (fallback C:\\) for GITHUB_ACTIONS/PROJECT_SETUP.\n"
             "- Use 'new_folder' or extracted name if creating something new.\n"
