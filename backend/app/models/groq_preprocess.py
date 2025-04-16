@@ -83,15 +83,6 @@ def boost_prompt(prompt: str) -> str:
         "time in", "president", "prime minister", "fun fact", "general knowledge"
     ]
 
-    path_boosts = {
-        "downloads": " [HINT_PATH: C:\\Users\\km866\\Downloads\\] ",
-        "documents": " [HINT_PATH: Documents\\] ",
-        "desktop": " [HINT_PATH: C:\\Users\\km866\\Desktop\\] ",
-        "d drive": " [HINT_PATH: D:\\] ",
-        "c drive": " [HINT_PATH: C:\\] ",
-        "my projects": " [HINT_PATH: C:\\my_projects\\] ",
-    }
-
     lowered = prompt.lower()
 
     # General knowledge route
@@ -102,14 +93,35 @@ def boost_prompt(prompt: str) -> str:
     if any(kw in lowered for kw in summarizer_keywords):
         return "[TASK:SUMMARIZER] " + prompt
 
-    # Add path hint if any matched
-    for key, path_hint in path_boosts.items():
-        if key in lowered:
-            prompt = f"{prompt} {path_hint}"
-            break
-
     return prompt
 
+def extract_path_hint(prompt: str, query_type: QueryType, subtask: SubTaskType) -> str:
+    prompt_lower = prompt.lower()
+
+    # Rule 1: If "downloads" or "documents" is mentioned
+    if "downloads" in prompt_lower:
+        return "Downloads\\"
+    if "documents" in prompt_lower:
+        return "Documents\\"
+
+    # Rule 2: Based on query type
+    if query_type == QueryType.FILE_HANDLING:
+        return "Documents\\"
+
+    if query_type in [QueryType.GITHUB_ACTIONS, QueryType.PROJECT_SETUP]:
+        drive = "D:\\" if "d drive" in prompt_lower else "C:\\"
+        if "new" in prompt_lower or "create" in prompt_lower:
+            folder_name = "new_folder"
+            # Try to extract folder name from the prompt
+            tokens = prompt_lower.split()
+            for i, word in enumerate(tokens):
+                if word in {"folder", "project"} and i + 1 < len(tokens):
+                    folder_name = tokens[i + 1].capitalize()
+                    break
+            return f"{drive}{folder_name}"
+        return drive
+
+    return "C:\\"  # fallback
 
 def get_agent() -> Agent:
     return Agent(
@@ -117,7 +129,12 @@ def get_agent() -> Agent:
         description=(
             "You are a smart query processor. Your job is to translate natural language user queries "
             "into structured data with fields: type, subtask, target, and path.\n"
-            "For documents and downlaods in path return them directly as Documents\\ and Downloads\\"
+             "You are a smart query processor. Translate natural language queries into structured fields: type, subtask, target, and path.\n"
+            "- Use Documents\\ or Downloads\\ if mentioned, no full path or user folder required.\n"
+            "- Use Documents\\ as default for FILE_HANDLING queries.\n"
+            "- Use D:\\ (or fallback to C:\\) for GITHUB_ACTIONS and PROJECT_SETUP unless user mentions otherwise.\n"
+            "- If 'create' or 'new' is mentioned, return drive + new_folder or drive + project/folder name if found.\n"
+            "- Paths should follow Windows format using single backslashes and capital drive letters.\n"
             "- Recognize summarization or document-based queries as SUMMARIZER.\n"
             "- Classify GitHub-related tasks as GITHUB_ACTIONS.\n"
             "- Be precise with subtask selection."
@@ -132,11 +149,6 @@ def get_agent() -> Agent:
         markdown=True,
         response_model=QueryProcessor,
     )
-
-
-def get_default_download_path(filename: str) -> str:
-    user = getpass.getuser()
-    return f"C:\\Users\\km866\\Downloads\\{filename}"
 
     
 # Move this outside for reuse
@@ -154,29 +166,13 @@ def process_query(prompt: str) -> QueryProcessor:
             target=general_response.content.strip(),
             path=""
         )
-
-    response = AGENT_MAIN.run(boosted_prompt, stream=False)
-    return response.content
-
-def sanitize_and_validate_path(path: str, create_if_missing: bool = False) -> str:
-    if not path:
-        return ""
-    path = path.strip().replace("/", "\\")
     
-    if len(path) > 1 and path[1] == ":":
-        path = path[0].upper() + path[1:]
-
-    path_obj = Path(path)
-
-    # If create_if_missing is enabled, and it's likely a directory (no file extension)
-    # if create_if_missing and not path_obj.exists():
-    #     try:
-    #         if path_obj.suffix == "":
-    #             path_obj.mkdir(parents=True, exist_ok=True)
-    #     except Exception as e:
-    #         print(f"[Warning] Could not create directory: {e}")
-
-    return str(path_obj)
+    response = AGENT_MAIN.run(boosted_prompt, stream=False)
+    query_obj = response.content
+    path_hint = extract_path_hint(prompt, query_obj.type, query_obj.subtask)
+    query_obj.path = path_hint
+    return query_obj
+    # return response.content
 
 def cached_process_query(prompt: str) -> QueryProcessor:
     normalized_prompt = " ".join(prompt.strip().lower().split())
@@ -189,7 +185,6 @@ def cached_process_query(prompt: str) -> QueryProcessor:
         print("[CACHE MISS]")
 
     result = process_query(prompt)
-    result.path = sanitize_and_validate_path(result.path, create_if_missing=True)
     cache[normalized_prompt] = result
     print(result)
     return result
