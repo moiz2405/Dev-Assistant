@@ -1,42 +1,48 @@
-from agno.agent import Agent, RunResponse
-from agno.models.groq import Groq
-from pydantic import BaseModel, Field
+import os
+import platform
 
-class Process_Path(BaseModel):
-    type: str = Field(
-        ...,
-        description=(
-            "Extract a valid file or folder path from the user's input. "
-            "Return it using single backslashes (\\) for all paths.\n"
-            "Paths may start with:\n"
-            "- C:\\\n"
-            "- D:\\\n"
-            "- Documents\\\n"
-            "- Downloads\\\n"
-            "Append all relevant subdirectories or filenames.\n"
-            "Return only the final path, with correct formatting."
-        )
-    )
+def convert_windows_path_to_wsl(path: str) -> str:
+    """Converts Windows-style path to WSL-compatible path if needed."""
+    if ':' in path:
+        drive, rest = path.split(':', 1)
+        drive = drive.lower()
+        wsl_path = f"/mnt/{drive}/{rest.strip().replace('\\\\', '/').replace('\\', '/')}"
+        return wsl_path
+    return path
 
-path_agent = Agent(
-    model=Groq(id="llama-3.3-70b-versatile"),
-    response_model=Process_Path
-)
+def list_directory_contents(path: str) -> list:
+    """
+    Returns the contents of the specified directory path (auto-converts Windows paths if on WSL).
+    """
+    try:
+        # Convert to WSL path if needed
+        if 'microsoft' in platform.uname().release.lower():
+            path = convert_windows_path_to_wsl(path)
 
-while True:
-    prompt = input("Enter a path-related request:\n")
-    path_agent.print_response(
-        f"""Extract a properly formatted file or folder path from this request:
+        contents = os.listdir(path)
+        result = []
+        for item in contents:
+            full_path = os.path.join(path, item)
+            result.append({
+                "name": item,
+                "type": "directory" if os.path.isdir(full_path) else "file"
+            })
+        return result
 
-"{prompt}"
+    except FileNotFoundError:
+        raise FileNotFoundError(f"The specified path does not exist: {path}")
+    except PermissionError:
+        raise PermissionError(f"You do not have permission to access this path: {path}")
+    except Exception as e:
+        raise e
 
-Instructions:
-- Use only single backslashes (\\) throughout the path.
-- Start the path with one of:
-  - C:\
-  - D:\
-  - Documents\
-  - Downloads\
-- Append the subfolders and files from the request.
-- Return just the final path string (no explanations or quotes)."""
-    )
+# # Example usage
+# if __name__ == "__main__":
+#     user_path = input("Enter a path (e.g., C:\\Users\\Almoiz\\Documents): ").strip()
+#     try:
+#         contents = list_directory_contents(user_path)
+#         print(f"\nContents of '{user_path}':")
+#         for item in contents:
+#             print(f"[{item['type'].upper()}] {item['name']}")
+#     except Exception as err:
+#         print(f"Error: {err}")
