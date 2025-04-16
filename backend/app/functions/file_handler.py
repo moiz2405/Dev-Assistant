@@ -45,6 +45,7 @@ def index_files_in_path(search_path):
 def fuzzy_search_file(stt_filename, search_path):
     """
     Fuzzy search for a file using STT input to tolerate typos or phonetically similar names.
+    Silently returns best match without user prompts.
 
     :param stt_filename: The filename received via voice (can have typos).
     :param search_path: The directory to search in.
@@ -58,7 +59,7 @@ def fuzzy_search_file(stt_filename, search_path):
 
     normalized_path = normalize_filename(search_path)
 
-    # If the path is not yet indexed, do it now
+    # Index files if not cached
     if normalized_path not in indexed_files_cache:
         print(f"Indexing files in: {search_path}")
         indexed_files_cache[normalized_path] = index_files_in_path(search_path)
@@ -67,20 +68,23 @@ def fuzzy_search_file(stt_filename, search_path):
     if not all_files:
         return None
 
-    # Normalize input filename for matching
-    normalized_input_filename = normalize_filename(stt_filename)
+    normalized_input = normalize_filename(stt_filename)
+    file_name_map = {normalize_filename(os.path.basename(f)): f for f in all_files}
+    all_normalized_names = list(file_name_map.keys())
 
-    # Normalize the filenames in the indexed list
-    file_names = [normalize_filename(os.path.basename(f)) for f in all_files]
-    
-    # Find best match using fuzzy matching
-    matches = difflib.get_close_matches(normalized_input_filename, file_names, n=1, cutoff=0.6)
+    # Close matches
+    close_matches = difflib.get_close_matches(normalized_input, all_normalized_names, n=5, cutoff=0.5)
+    # Also include partial contains matches
+    partial_matches = [name for name in all_normalized_names if normalized_input in name]
 
-    if matches:
-        match_index = file_names.index(matches[0])
-        return all_files[match_index]
+    combined_matches = list(dict.fromkeys(close_matches + partial_matches))  # Unique
 
-    return None
+    if not combined_matches:
+        return None
+
+    # Return best match path
+    return file_name_map[combined_matches[0]]
+
 
 import subprocess
 
