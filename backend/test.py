@@ -9,3 +9,9 @@
 # repo_url = search_repo_url("acc")
 # print(repo_url)
 
+from app.models.groq_preprocess import cached_process_query
+# from app.models.test_preprocess import cached_process_query
+from app.query_processor import determine_function
+while(1):
+    prompt = input()
+    determine_function(cached_process_query(prompt))
