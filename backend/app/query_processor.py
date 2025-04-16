@@ -3,7 +3,7 @@
 
 from app.functions.app_handling import open_app, close_app
 from app.functions.environment_setup import setup_project #takes repo link and target dir as argu, will refine later
-from app.functions.file_handler.file_handler import search_file, open_file, move_file, list_files_by_type
+from backend.app.functions.file_handler import search_file, open_file, move_file, list_files_by_type
 # from app.models.types import QueryType, SubTaskType
 from app.models.query_types import QueryType, SubTaskType
 
