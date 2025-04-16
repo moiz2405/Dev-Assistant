@@ -12,8 +12,7 @@ import atexit
 
 # Imports
 from app.stt.voice_recognition import VoiceAssistant
-# from app.models.groq_preprocess import cached_process_query
-from app.models.test_preprocessor import process_query
+from app.models.groq_preprocess import cached_process_query
 from app.query_processor import determine_function
 from app.tts.response_generator import generate_response
 from app.tts.eleven_labs_tts import speak
@@ -34,8 +33,7 @@ def handle_recognized_command(text):
 
     # Run TTS and processing in parallel
     # executor.submit(lambda: speak(generate_response(text)))
-    # executor.submit(lambda: determine_function(cached_process_query(text)))
-    executor.submit(lambda: determine_function(process_query(text)))
+    executor.submit(lambda: determine_function(cached_process_query(text)))
 
 # Start the assistant
 assistant = VoiceAssistant(
