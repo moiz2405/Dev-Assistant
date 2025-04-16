@@ -2,7 +2,7 @@ import os
 import shutil
 import platform
 import difflib
-
+import subprocess
 # Global cache for indexed files
 indexed_files_cache = {}
 
@@ -86,8 +86,6 @@ def fuzzy_search_file(stt_filename, search_path):
     return file_name_map[combined_matches[0]]
 
 
-import subprocess
-
 def open_file(stt_filename, search_path):
     """
     Fuzzy match and open a file if it exists, even from WSL to Windows.
@@ -127,8 +125,6 @@ def open_file(stt_filename, search_path):
                 print(f"Error opening file: {e}")
         else:
             print("File does not exist!")
-
-
 
 def list_files_by_type(file_type, path=None):
     """
