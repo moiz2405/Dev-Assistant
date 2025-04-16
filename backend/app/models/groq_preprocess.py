@@ -11,7 +11,6 @@ import platform
 import os
 import getpass
 import diskcache
-import re
 # from query_types import QueryType, SubTaskType
 from app.models.query_types import QueryType,SubTaskType
 cache = diskcache.Cache(".query_cache")
@@ -100,58 +99,33 @@ def boost_prompt(prompt: str) -> str:
 
     return prompt
 
-# def extract_path_hint(prompt: str, query_type: QueryType, subtask: SubTaskType) -> str:
-#     prompt_lower = prompt.lower()
-
-#     # Rule 1: If "downloads" or "documents" is mentioned
-#     if "downloads" in prompt_lower:
-#         return "Downloads\\"
-#     if "documents" in prompt_lower:
-#         return "Documents\\"
-
-#     # Rule 2: Based on query type
-#     if query_type == QueryType.FILE_HANDLING:
-#         return "Documents\\"
-
-#     if query_type in [QueryType.GITHUB_ACTIONS, QueryType.PROJECT_SETUP]:
-#         drive = "D:\\" if "d drive" in prompt_lower else "C:\\"
-#         if "new" in prompt_lower or "create" in prompt_lower:
-#             folder_name = "new_folder"
-#             # Try to extract folder name from the prompt
-#             tokens = prompt_lower.split()
-#             for i, word in enumerate(tokens):
-#                 if word in {"folder", "project"} and i + 1 < len(tokens):
-#                     folder_name = tokens[i + 1].capitalize()
-#                     break
-#             return f"{drive}{folder_name}"
-#         return drive
-
-#     return "C:\\"  # fallback
-
-def extract_path_hint(prompt: str) -> str | None:
-    """
-    Extract a name from a prompt that likely refers to a file, folder, or project.
-    Uses regex for accuracy. Handles quoted and unquoted names.
-    """
+def extract_path_hint(prompt: str, query_type: QueryType, subtask: SubTaskType) -> str:
     prompt_lower = prompt.lower()
 
-    # Look for quoted strings after folder/project/file etc.
-    match = re.search(r'(?:folder|project|file|directory)\s*(named|called|as)?\s*["\']?([a-zA-Z0-9 _-]+)["\']?', prompt_lower)
-    if match:
-        name = match.group(2).strip()
-        name = re.sub(r'[^\w\s-]', '', name)  # Remove any stray special chars
-        name = re.sub(r'\s+', '_', name)      # Convert spaces to underscores
-        return name.capitalize()
+    # Rule 1: If "downloads" or "documents" is mentioned
+    if "downloads" in prompt_lower:
+        return "Downloads\\"
+    if "documents" in prompt_lower:
+        return "Documents\\"
 
-    # Fallback: catch standalone quoted words
-    match_fallback = re.search(r'["\']([a-zA-Z0-9 _-]+)["\']', prompt_lower)
-    if match_fallback:
-        name = match_fallback.group(1).strip()
-        name = re.sub(r'[^\w\s-]', '', name)
-        name = re.sub(r'\s+', '_', name)
-        return name.capitalize()
+    # Rule 2: Based on query type
+    if query_type == QueryType.FILE_HANDLING:
+        return "Documents\\"
 
-    return None
+    if query_type in [QueryType.GITHUB_ACTIONS, QueryType.PROJECT_SETUP]:
+        drive = "D:\\" if "d drive" in prompt_lower else "C:\\"
+        if "new" in prompt_lower or "create" in prompt_lower:
+            folder_name = "new_folder"
+            # Try to extract folder name from the prompt
+            tokens = prompt_lower.split()
+            for i, word in enumerate(tokens):
+                if word in {"folder", "project"} and i + 1 < len(tokens):
+                    folder_name = tokens[i + 1].capitalize()
+                    break
+            return f"{drive}{folder_name}"
+        return drive
+
+    return "C:\\"  # fallback
 
 def get_agent() -> Agent:
     return Agent(
