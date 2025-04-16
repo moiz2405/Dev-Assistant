@@ -126,7 +126,7 @@ def extract_path_hint(prompt: str, query_type: QueryType, subtask: SubTaskType) 
             return f"{drive}{folder_name}"
         return drive
 
-    return "C:\\"  # fallback
+    return "C:\\"  
 
 
 def get_agent() -> Agent:
