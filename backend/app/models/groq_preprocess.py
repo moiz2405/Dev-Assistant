@@ -123,8 +123,7 @@ def get_agent() -> Agent:
             "- Always return Windows-style paths starting with capital drive letters (e.g., C:\\, D:\\)."
             "- Capitalize the drive letter in the path (e.g., C:\\Users\\...)."
             "- If the query mentions a file (e.g., 'pdf named college', 'from my file xyz'), extract the filename "
-            "and ensure it ends with '.pdf', DONT EVER GIVE SPACES BETWEEN NAMES IN A FILE LIKE FILE FILE IS NAMES collegenotes.pdf let it.\n"
-            "- Construct the absolute file path in the format: C:\\\\Users\\\\km866\\\\Downloads\\\\<filename>.pdf\n"
+            "- Construct the absolute file path in the format: C:\\Users\\km866\\Downloads\\<filename> with extension\n"
             "- Set 'target' as the full filename with extension, and 'path' as the complete path to that file.\n"
             "- Preserve the extension (e.g., .pdf) since it is needed for file access or processing." 
         ),
