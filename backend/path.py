@@ -33,7 +33,7 @@ def handle_recognized_command(text):
 
     # Run TTS and processing in parallel
     # executor.submit(lambda: speak(generate_response(text)))
-    # executor.submit(lambda: determine_function(cached_process_query(text)))
+    executor.submit(lambda: determine_function(cached_process_query(text)))
 
 # Start the assistant
 assistant = VoiceAssistant(
