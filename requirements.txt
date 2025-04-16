@@ -13,7 +13,6 @@ pathlib
 pyttsx3 
 sounddevice
 requests
-requests 
 pyaudio 
 diskcache
 
