@@ -38,7 +38,7 @@ def handle_recognized_command(text):
 # Start the assistant
 assistant = VoiceAssistant(
     hotword="jarvis",
-    record_duration=4,
+    record_duration=5,
     on_recognized=handle_recognized_command
 )
 assistant.start_hotword_listener()
