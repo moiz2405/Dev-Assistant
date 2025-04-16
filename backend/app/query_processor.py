@@ -26,7 +26,7 @@ def determine_function(structured_query):
 
     if query_type == QueryType.FILE_HANDLING:
         if subtask == SubTaskType.OPEN_FILE:
-            open_file(path)
+            open_file(target,path)
             
     # if query_type == QueryType.GITHUB_ACTIONS:
     # if query_type == QueryType.GENERAL_QUERY:
