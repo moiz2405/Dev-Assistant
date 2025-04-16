@@ -193,4 +193,3 @@ def cached_process_query(prompt: str) -> QueryProcessor:
     cache[normalized_prompt] = result
     print(result)
     return result
-8
