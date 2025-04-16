@@ -50,7 +50,7 @@ class QueryProcessor(BaseModel):
             "- SUMMARIZER: filename (e.g., summary.pdf)"
         )
     )
-    path: PathType = Field(
+    path: str = Field(
         ...,
         description=(
            "Determine the correct full Windows-style path for the file or folder referenced in the query."
@@ -167,12 +167,12 @@ def sanitize_and_validate_path(path: str, create_if_missing: bool = False) -> st
     path_obj = Path(path)
 
     # If create_if_missing is enabled, and it's likely a directory (no file extension)
-    if create_if_missing and not path_obj.exists():
-        try:
-            if path_obj.suffix == "":
-                path_obj.mkdir(parents=True, exist_ok=True)
-        except Exception as e:
-            print(f"[Warning] Could not create directory: {e}")
+    # if create_if_missing and not path_obj.exists():
+    #     try:
+    #         if path_obj.suffix == "":
+    #             path_obj.mkdir(parents=True, exist_ok=True)
+    #     except Exception as e:
+    #         print(f"[Warning] Could not create directory: {e}")
 
     return str(path_obj)
 
