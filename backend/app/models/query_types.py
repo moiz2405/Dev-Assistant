@@ -15,7 +15,7 @@ class SubTaskType(str, Enum):
 
     # Project Setup
     NEW_PROJECT = "NEW_PROJECT"
-    EXISTING_PROJECT = "EXISTING_PROJECT"
+    # EXISTING_PROJECT = "EXISTING_PROJECT"
 
     # File Handling
     SEARCH_FILE = "SEARCH_FILE"
@@ -31,6 +31,7 @@ class SubTaskType(str, Enum):
     ANSWER_QUERY = "ANSWER_QUERY"
     #general 
     GENERAL_QUERY = "GENERAL_QUERY"
+
 class PathType(str, Enum):
     DOWNLOADS = "DOWNLOADS"
     DOCUMENTS = "DOCUMENTS"
@@ -38,3 +39,14 @@ class PathType(str, Enum):
     CUSTOM = "CUSTOM"
     D_DRIVE = "D_DRIVE"
     C_DRIVE = "C_DRIVE"
+
+class TargetType(str,Enum):
+    NEXTJS = "NEXT.js"
+    REACTJS = "REACT.js"
+    WHATSAPP = "whatsapp"
+    TERMINAL = "terminal"
+    EDGE = "edge"
+    CALCULATOR = "calculator"
+    CALENDAR = "calendar"
+    CAMERA = "camera"
+    NOTEPAD = "notepad"
