@@ -12,7 +12,7 @@ import os
 import getpass
 import diskcache
 # from query_types import QueryType, SubTaskType
-from app.models.query_types import QueryType,SubTaskType
+from app.models.query_types import QueryType,SubTaskType,PathType
 cache = diskcache.Cache(".query_cache")
 
 
@@ -50,7 +50,7 @@ class QueryProcessor(BaseModel):
             "- SUMMARIZER: filename (e.g., summary.pdf)"
         )
     )
-    path: str = Field(
+    path: PathType = Field(
         ...,
         description=(
            "Determine the correct full Windows-style path for the file or folder referenced in the query."
