@@ -181,10 +181,14 @@ def cached_process_query(prompt: str) -> QueryProcessor:
 
     if normalized_prompt in cache:
         print("[CACHE HIT]")
+        print(cache[normalized_prompt])
         return cache[normalized_prompt]
     else:
         print("[CACHE MISS]")
+
     result = process_query(prompt)
     result.path = sanitize_and_validate_path(result.path, create_if_missing=True)
     cache[normalized_prompt] = result
+    print(result)
     return result
+8
