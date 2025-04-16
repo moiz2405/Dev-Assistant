@@ -52,10 +52,16 @@ def fuzzy_search_file(stt_filename, search_path):
     """
     global indexed_files_cache
 
+    # Convert to WSL path if needed
+    if is_wsl():
+        search_path = convert_to_wsl_path(search_path)
+
     normalized_path = normalize_filename(search_path)
 
+    # If the path is not yet indexed, do it now
     if normalized_path not in indexed_files_cache:
-        index_files_in_path(search_path)
+        print(f"Indexing files in: {search_path}")
+        indexed_files_cache[normalized_path] = index_files_in_path(search_path)
 
     all_files = indexed_files_cache[normalized_path]
     if not all_files:
@@ -71,11 +77,12 @@ def fuzzy_search_file(stt_filename, search_path):
     matches = difflib.get_close_matches(normalized_input_filename, file_names, n=1, cutoff=0.6)
 
     if matches:
-        # Find original full path from normalized match
         match_index = file_names.index(matches[0])
         return all_files[match_index]
 
     return None
+
+import subprocess
 
 def open_file(stt_filename, search_path):
     """
@@ -84,35 +91,39 @@ def open_file(stt_filename, search_path):
     :param stt_filename: The (possibly typoed) filename to find and open.
     :param search_path: Where to search.
     """
-    # Ensure the files are indexed before attempting to open
     file_path = fuzzy_search_file(stt_filename, search_path)
-    
+
     if not file_path:
         print("No matching file found!")
         return
 
+    # If in WSL, convert the WSL path to a Windows path for opening
     if is_wsl():
-        wsl_path = convert_to_wsl_path(file_path)
-        if os.path.exists(wsl_path):
+        # Convert `/mnt/c/Users/...` to `C:\\Users\\...`
+        if file_path.startswith("/mnt/"):
+            drive_letter = file_path[5]
+            rest = file_path[7:]
+            windows_path = f"{drive_letter.upper()}:\\{rest.replace('/', '\\')}"
+        else:
+            windows_path = file_path  # fallback
+
+        if os.path.exists(file_path):
             try:
-                os.system(f'cmd.exe /C start "" "{file_path}"')  # Open with Windows
+                subprocess.run(["cmd.exe", "/C", "start", "", windows_path])
             except Exception as e:
                 print(f"Error opening file: {e}")
         else:
             print("File does not exist (WSL check)!")
-
-    elif os.path.exists(file_path):  # Native Windows
-        try:
-            os.startfile(file_path)
-        except Exception as e:
-            print(f"Error opening file: {e}")
     else:
-        print("File does not exist!")
+        # Native Windows path
+        if os.path.exists(file_path):
+            try:
+                os.startfile(file_path)
+            except Exception as e:
+                print(f"Error opening file: {e}")
+        else:
+            print("File does not exist!")
 
-# Example usage
-search_path = "C:/Users/Almoiz/Documents"
-stt_filename = "almoiz_khan"  # This could be from speech-to-text input
-open_file(stt_filename, search_path)
 
 
 def list_files_by_type(file_type, path=None):
