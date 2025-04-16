@@ -3,6 +3,9 @@ import shutil
 import platform
 import difflib
 
+# Global cache for indexed files
+indexed_files_cache = {}
+
 def is_wsl():
     return 'microsoft' in platform.uname().release.lower()
 
@@ -14,30 +17,30 @@ def convert_to_wsl_path(win_path: str) -> str:
         return f"/mnt/{drive}/{rest}"
     return win_path
 
+def normalize_filename(name):
+    """Normalize filename by lowercasing and replacing underscores, hyphens, and spaces with a common separator."""
+    return name.lower().replace('_', ' ').replace('-', ' ').strip()
 
-def search_file(file_name, search_path):
+def index_files_in_path(search_path):
     """
-    Search for a file in the given directory and subdirectories.
-
-    :param file_name: File name (partial match allowed).
-    :param search_path: Directory path to search in.
-    :return: List of matching file paths, or None.
+    Index all files in a directory (recursively) and cache it.
+    :param search_path: Base path to search.
+    :return: List of full file paths.
     """
-    file_name = file_name.lower()
-    matching_files = []
+    global indexed_files_cache
 
-    # Handle path for WSL context
     if is_wsl():
         search_path = convert_to_wsl_path(search_path)
 
+    indexed_files = []
     for root, _, files in os.walk(search_path):
         for file in files:
-            if file_name in file.lower():
-                file_path = os.path.join(root, file)
-                matching_files.append(file_path)
+            full_path = os.path.join(root, file)
+            indexed_files.append(full_path)
 
-    return matching_files if matching_files else None
-
+    # Store cache by normalized path
+    indexed_files_cache[normalize_filename(search_path)] = indexed_files
+    return indexed_files
 
 def fuzzy_search_file(stt_filename, search_path):
     """
@@ -47,20 +50,32 @@ def fuzzy_search_file(stt_filename, search_path):
     :param search_path: The directory to search in.
     :return: Best match file path or None.
     """
-    all_files = search_file("", search_path)  # Get all files
+    global indexed_files_cache
 
+    normalized_path = normalize_filename(search_path)
+
+    if normalized_path not in indexed_files_cache:
+        index_files_in_path(search_path)
+
+    all_files = indexed_files_cache[normalized_path]
     if not all_files:
         return None
 
-    file_names = [os.path.basename(f) for f in all_files]
-    matches = difflib.get_close_matches(stt_filename.lower(), [f.lower() for f in file_names], n=1, cutoff=0.6)
+    # Normalize input filename for matching
+    normalized_input_filename = normalize_filename(stt_filename)
+
+    # Normalize the filenames in the indexed list
+    file_names = [normalize_filename(os.path.basename(f)) for f in all_files]
+    
+    # Find best match using fuzzy matching
+    matches = difflib.get_close_matches(normalized_input_filename, file_names, n=1, cutoff=0.6)
 
     if matches:
-        match_index = file_names.index(next(f for f in file_names if f.lower() == matches[0]))
+        # Find original full path from normalized match
+        match_index = file_names.index(matches[0])
         return all_files[match_index]
 
     return None
-
 
 def open_file(stt_filename, search_path):
     """
@@ -69,7 +84,9 @@ def open_file(stt_filename, search_path):
     :param stt_filename: The (possibly typoed) filename to find and open.
     :param search_path: Where to search.
     """
+    # Ensure the files are indexed before attempting to open
     file_path = fuzzy_search_file(stt_filename, search_path)
+    
     if not file_path:
         print("No matching file found!")
         return
@@ -83,6 +100,7 @@ def open_file(stt_filename, search_path):
                 print(f"Error opening file: {e}")
         else:
             print("File does not exist (WSL check)!")
+
     elif os.path.exists(file_path):  # Native Windows
         try:
             os.startfile(file_path)
@@ -91,37 +109,10 @@ def open_file(stt_filename, search_path):
     else:
         print("File does not exist!")
 
-
-def move_file(stt_filename, search_path, new_location):
-    """
-    Fuzzy match and move a file to a new location.
-
-    :param stt_filename: The (possibly typoed) filename to move.
-    :param search_path: Where to search for it.
-    :param new_location: The target directory to move the file into.
-    :return: New path of the moved file or None if failed.
-    """
-    file_path = fuzzy_search_file(stt_filename, search_path)
-    if not file_path:
-        print("No matching file found to move!")
-        return None
-
-    check_path = convert_to_wsl_path(file_path) if is_wsl() else file_path
-
-    if not os.path.exists(check_path):
-        print("File does not exist!")
-        return None
-
-    if not os.path.exists(new_location):
-        os.makedirs(new_location)
-
-    try:
-        new_path = os.path.join(new_location, os.path.basename(file_path))
-        shutil.move(file_path, new_path)
-        return new_path
-    except Exception as e:
-        print(f"Error moving file: {e}")
-        return None
+# Example usage
+search_path = "C:/Users/Almoiz/Documents"
+stt_filename = "almoiz_khan"  # This could be from speech-to-text input
+open_file(stt_filename, search_path)
 
 
 def list_files_by_type(file_type, path=None):
