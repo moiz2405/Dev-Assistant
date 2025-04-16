@@ -73,8 +73,6 @@ class VoiceAssistant:
     def _beep(self):
         print('\a', end='', flush=True)
 
-    
-
     def _record_audio_dynamic(self):
         print("Listening for command...")
         os.makedirs("recordings", exist_ok=True)
