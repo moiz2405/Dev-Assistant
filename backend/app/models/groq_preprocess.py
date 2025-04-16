@@ -55,6 +55,7 @@ class QueryProcessor(BaseModel):
         description=(
            "Determine the correct full Windows-style path for the file or folder referenced in the query."
             "Guidelines:"
+            "For documents and downlaods in path return them directly as Documents\\ and Downloads\\ without any parent c or d drive they standalone "
             "1) If the user provides a path (e.g., 'C:\\my_file' or 'D:\\Projects\\MyApp'), use it directly."
             "2) If the user wants to create a new folder or set up a new project:"
             "   - Extract the folder/project name from the query, if specified."
@@ -116,6 +117,7 @@ def get_agent() -> Agent:
         description=(
             "You are a smart query processor. Your job is to translate natural language user queries "
             "into structured data with fields: type, subtask, target, and path.\n"
+            "For documents and downlaods in path return them directly as Documents\\ and Downloads\\"
             "- Recognize summarization or document-based queries as SUMMARIZER.\n"
             "- Classify GitHub-related tasks as GITHUB_ACTIONS.\n"
             "- Be precise with subtask selection."
