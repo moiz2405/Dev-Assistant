@@ -80,14 +80,14 @@ def open_file(stt_filename, search_path):
             try:
                 os.system(f'cmd.exe /C start "" "{file_path}"')  # Open with Windows
             except Exception as e:
-                print(f"⚠️ Error opening file: {e}")
+                print(f"Error opening file: {e}")
         else:
             print("File does not exist (WSL check)!")
     elif os.path.exists(file_path):  # Native Windows
         try:
             os.startfile(file_path)
         except Exception as e:
-            print(f"⚠️ Error opening file: {e}")
+            print(f"Error opening file: {e}")
     else:
         print("File does not exist!")
 
