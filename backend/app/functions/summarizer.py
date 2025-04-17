@@ -48,19 +48,40 @@ def summarizer(pdf_path):
         response: RunResponse = AGENT_MAIN.run(full_prompt)
         pprint_run_response(response, markdown=True)
         
+import os
+import subprocess
+
 def summarize_in_new_window(pdf_path):
     if is_wsl():
-        wsl_script_path = "/mnt/d/projects/MYPROJECTS/Dev-Assistant/backend/app/functions/summarizer.py"
+        wsl_project_dir = "/mnt/d/projects/MYPROJECTS/Dev-Assistant"
+        wsl_script_path = f"{wsl_project_dir}/backend/app/functions/summarizer.py"
         wsl_pdf_path = convert_windows_to_wsl_path(pdf_path)
 
-        # Combine script + PDF path into one command
-        full_command = f"python3 {wsl_script_path} {wsl_pdf_path}"
+        # Read the GROQ_API_KEY from .env file
+        env_path = os.path.join(wsl_project_dir, ".env")
+        groq_api_key = ""
+        with open(env_path) as f:
+            for line in f:
+                if line.strip().startswith("GROQ_API_KEY="):
+                    groq_api_key = line.strip().split("=", 1)[1].strip().strip('"').strip("'")
+                    break
 
-        # Call a new WSL terminal using Windows Terminal (`wt`) with WSL profile
+        if not groq_api_key:
+            print("GROQ_API_KEY not found in .env")
+            return
+
+        full_command = (
+            f"cd {wsl_project_dir} && "
+            f"export GROQ_API_KEY='{groq_api_key}' && "
+            f"source venv/bin/activate && "
+            f"python3 {wsl_script_path} {wsl_pdf_path}"
+        )
+
         subprocess.Popen([
             "powershell.exe", "-Command",
             f"wt wsl -e bash -c \"{full_command}\""
         ])
+
 
 
 # If run directly, start summarizer with CLI path
