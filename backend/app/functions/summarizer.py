@@ -47,9 +47,7 @@ def summarizer(pdf_path):
         full_prompt = f"Here is a document content:\n\n{pdf_text}\n\nNow, {question}"
         response: RunResponse = AGENT_MAIN.run(full_prompt)
         pprint_run_response(response, markdown=True)
-        
-import os
-import subprocess
+
 
 def summarize_in_new_window(pdf_path):
     if is_wsl():
@@ -58,7 +56,7 @@ def summarize_in_new_window(pdf_path):
         wsl_pdf_path = convert_windows_to_wsl_path(pdf_path)
 
         # Read the GROQ_API_KEY from .env file
-        env_path = os.path.join(wsl_project_dir, ".env")
+        env_path = os.path.join(wsl_project_dir, ".env.local")
         groq_api_key = ""
         with open(env_path) as f:
             for line in f:
