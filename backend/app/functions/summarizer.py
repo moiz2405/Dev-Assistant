@@ -8,17 +8,6 @@ from typing import Iterator
 from agno.agent import Agent, RunResponse
 from agno.utils.pprint import pprint_run_response
 
-agent = Agent(model=OpenAIChat(id="gpt-4o-mini"))
-
-# Run agent and return the response as a variable
-response: RunResponse = agent.run("Tell me a 5 second short story about a robot")
-# Run agent and return the response as a stream
-response_stream: Iterator[RunResponse] = agent.run("Tell me a 5 second short story about a lion", stream=True)
-
-# Print the response in markdown format
-pprint_run_response(response, markdown=True)
-# Print the response stream in markdown format
-pprint_run_response(response_stream, markdown=True)
 def is_wsl():
     return 'microsoft' in platform.uname().release.lower()
 
@@ -60,7 +49,7 @@ def summarizer(pdf_path):
             break
         full_prompt = f"""Here is a document content:\n\n{pdf_text}\n\nNow, {question}"""
         response = AGENT_MAIN.run(full_prompt, stream=False)
-        response: RunResponse = AGENT_MAIN.run("Tell me a 5 second short story about a robot")
+        response: RunResponse = AGENT_MAIN.run(full_prompt)
         # output = response.content
         pprint_run_response(response, markdown=True)
         # print(output)
