@@ -135,6 +135,7 @@ def get_agent() -> Agent:
         description=(
             "You are a smart query processor. Translate natural language queries into structured fields: type, subtask, target, and path.\n"
             "- Default to C:\\Users\\km866\\OneDrive\\Documents\\Documents\\ for FILE_HANDLING.\n"
+            "- Downloads path is mentioned C:\\Users\\km866\\Downloads"
             "- Use D:\\ (fallback C:\\) for GITHUB_ACTIONS/PROJECT_SETUP.\n"
             "- Use 'new_folder' or extracted name if creating something new.\n"
             "- Use proper Windows-style absolute paths with capital drive letters.\n"
