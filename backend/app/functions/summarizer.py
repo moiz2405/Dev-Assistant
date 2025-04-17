@@ -1,6 +1,7 @@
 import os
 import platform
 import subprocess
+import sys
 from agno.models.groq import Groq
 from PyPDF2 import PdfReader
 from agno.agent import Agent, RunResponse
@@ -21,38 +22,48 @@ def extract_text_from_pdf(path):
 def get_agent() -> Agent:
     return Agent(
         model=Groq(id="llama-3.3-70b-versatile"),
-        description=( 
-            "You are a PDF Summarizer, which explains user queries from a given document"
-            "Determine if the user query is a brief / descriptive / small one and answer aptly"
+        description=(
+            "You are a PDF Summarizer that explains user queries from a given document. "
+            "Determine if the user query is brief/descriptive/small and answer aptly."
         ),
         markdown=True,
     )
 
 AGENT_MAIN = get_agent()
-AGENT_GENERAL = Agent(model=Groq(id="llama-3.3-70b-versatile"))
 
 def summarizer(pdf_path):
-    # Convert Windows-style path to WSL-compatible path if needed
     if is_wsl() and "\\" in pdf_path:
         pdf_path = convert_windows_to_wsl_path(pdf_path)
 
     pdf_text = extract_text_from_pdf(pdf_path)
-    
-    print("SUMMARIZER")
+
+    print("Summarizer")
+
     while True:
-        question = input("Ask a question or type 'exit' to quit: ")
+        question = input("")
         if question.lower() in ['exit', 'quit']:
             print("Exiting")
             break
-        full_prompt = f"""Here is a document content:\n\n{pdf_text}\n\nNow, {question}"""
-        response = AGENT_MAIN.run(full_prompt, stream=False)
+        full_prompt = f"Here is a document content:\n\n{pdf_text}\n\nNow, {question}"
         response: RunResponse = AGENT_MAIN.run(full_prompt)
         pprint_run_response(response, markdown=True)
 
-# Function to run in a new Windows Terminal
 def summarize_in_new_window(pdf_path):
     if is_wsl():
-        # Run in WSL using Windows Terminal (PowerShell)
-        subprocess.Popen(["wt", "-w", "0", "powershell", "-NoExit", "-Command", f"python3 /mnt/d/projects/MYPROJECTS/Dev-Assistant/backend/app/functions/summarizer.py {pdf_path}"], shell=True)
+        # Convert Windows path to WSL path
+        wsl_script_path = "/mnt/d/projects/MYPROJECTS/Dev-Assistant/backend/app/functions/summarizer.py"
+        wsl_pdf_path = convert_windows_to_wsl_path(pdf_path)
+
+        # Properly escape the full command
+        powershell_command = (
+            f'Start-Process wt -ArgumentList \'"powershell -NoExit -Command \\"wsl python3 {wsl_script_path} {wsl_pdf_path}\\""\'')
+
+        subprocess.Popen(["powershell.exe", "-Command", powershell_command])
 
 
+# If run directly, start summarizer with CLI path
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        summarizer(sys.argv[1])
+    else:
+        print("Please provide a PDF path as an argument.")
