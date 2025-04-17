@@ -49,6 +49,7 @@ import sys
 # file_name = "college_notes"
 # path = "C:\\Users\\km866\\OneDrive\\Documents\\Documents"
 # open_file(file_name,path)
-from app.functions.summarizer import summarizer
+from app.functions.summarizer import summarizer, summarize_in_new_window
 pdf_path = "C:\\Users\\km866\\OneDrive\\Documents\\Documents\\Hallticket.pdf"
-summarizer(pdf_path)
+# summarizer(pdf_path)
+summarize_in_new_window(pdf_path)
