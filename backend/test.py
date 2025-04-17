@@ -15,14 +15,14 @@ import sys
 #     os.dup2(devnull, sys.stderr.fileno())
 
 # suppress_stderr()
-from app.models.groq_preprocess import cached_process_query
-from app.stt.voice_recognition import VoiceAssistant
-# from app.models.test_preprocess import cached_process_query
-from app.query_processor import determine_function
-while(1):
-    prompt = input()
-    cached_process_query(prompt)
-    determine_function(cached_process_query(prompt))
+# from app.models.groq_preprocess import cached_process_query
+# from app.stt.voice_recognition import VoiceAssistant
+# # from app.models.test_preprocess import cached_process_query
+# from app.query_processor import determine_function
+# while(1):
+#     prompt = input()
+#     cached_process_query(prompt)
+#     determine_function(cached_process_query(prompt))
 
 # def handle_recognized_command(text):
 #     if not text:
@@ -49,3 +49,6 @@ while(1):
 # file_name = "college_notes"
 # path = "C:\\Users\\km866\\OneDrive\\Documents\\Documents"
 # open_file(file_name,path)
+from app.functions.summarizer import summarizer
+pdf_path = "C:\\Users\\km866\\OneDrive\\Documents\\Documents\\Hallticket.pdf"
+summarizer(pdf_path)
