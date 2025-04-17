@@ -22,14 +22,8 @@ def get_agent() -> Agent:
     return Agent(
         model=Groq(id="llama-3.3-70b-versatile"),
         description=(
-            "You are a smart query processor. Translate natural language queries into structured fields: type, subtask, target, and path.\n"
-            "- Default to C:\\Users\\km866\\OneDrive\\Documents\\Documents\\ for FILE_HANDLING.\n"
-            "- Downloads path is mentioned C:\\Users\\km866\\Downloads"
-            "- Use D:\\ (fallback C:\\) for GITHUB_ACTIONS/PROJECT_SETUP.\n"
-            "- Use 'new_folder' or extracted name if creating something new.\n"
-            "- Use proper Windows-style absolute paths with capital drive letters.\n"
-            "- Extract and preserve file extensions (.pdf, .txt, etc.).\n"
-            "- Be accurate with subtask classification.\n"
+            "You are a PDF Summarizer, which explains user queries from a given document"
+            "Determine if the user query is a brief / descriptive / small one and answer aptly"
         ),
         markdown=True,
         # response_model=QueryProcessor,
@@ -52,4 +46,7 @@ def summarizer(pdf_path):
             print("Exiting")
             break
         full_prompt = f"""Here is a document content:\n\n{pdf_text}\n\nNow, {question}"""
-        agent.print_response(full_prompt)
+        response = AGENT_MAIN.run(full_prompt, stream=False)
+        output = response.content
+        print(output)
+        
