@@ -47,18 +47,20 @@ def summarizer(pdf_path):
         full_prompt = f"Here is a document content:\n\n{pdf_text}\n\nNow, {question}"
         response: RunResponse = AGENT_MAIN.run(full_prompt)
         pprint_run_response(response, markdown=True)
-
+        
 def summarize_in_new_window(pdf_path):
     if is_wsl():
-        # Convert Windows path to WSL path
         wsl_script_path = "/mnt/d/projects/MYPROJECTS/Dev-Assistant/backend/app/functions/summarizer.py"
         wsl_pdf_path = convert_windows_to_wsl_path(pdf_path)
 
-        # Properly escape the full command
-        powershell_command = (
-            f'Start-Process wt -ArgumentList \'"powershell -NoExit -Command \\"wsl python3 {wsl_script_path} {wsl_pdf_path}\\""\'')
+        # Combine script + PDF path into one command
+        full_command = f"python3 {wsl_script_path} {wsl_pdf_path}"
 
-        subprocess.Popen(["powershell.exe", "-Command", powershell_command])
+        # Call a new WSL terminal using Windows Terminal (`wt`) with WSL profile
+        subprocess.Popen([
+            "powershell.exe", "-Command",
+            f"wt wsl -e bash -c \"{full_command}\""
+        ])
 
 
 # If run directly, start summarizer with CLI path
