@@ -64,9 +64,10 @@
 # summarize_in_new_window(pdf_path, file_name)
 
 
-from app.functions.github_handler import push_folder_to_github, fuzzy_search_dir
+from app.functions.github_handler import push_folder_to_github, fuzzy_search_dir, list_github_repos
 
-repo_name = "codeforce"
-path = "D://va_projects"
-push_folder_to_github(repo_name, path)
+# repo_name = "codeforce"
+# path = "D://va_projects"
+list_github_repos()
+# push_folder_to_github(repo_name, path)
 # print(fuzzy_search_dir(repo_name,"D://va_projects"))
