@@ -20,12 +20,15 @@ def is_wsl():
 
 def to_wsl_path(path):
     if is_wsl():
+        if path.startswith("/mnt/"):
+            return path  # Already a WSL path
         try:
             result = subprocess.run(['wslpath', path], capture_output=True, text=True)
             return result.stdout.strip()
         except Exception:
             pass
     return path
+
 
 def normalize_filename(name):
     """Normalize filename by lowercasing and replacing underscores, hyphens, and spaces with a common separator."""
@@ -91,7 +94,8 @@ def push_folder_to_github(repo_name, folder_path):
         raise Exception("GitHub credentials not set in .env file.")
 
     # Fuzzy search for the correct folder
-    matched_folder = fuzzy_search_dir(folder_path, ".")  # You can replace "." with a specific base dir if needed
+    matched_folder = fuzzy_search_dir(repo_name, folder_path)  # You can replace "." with a specific base dir if needed
+    print(matched_folder)
     if not matched_folder:
         raise FileNotFoundError(f"No matching folder found for: {folder_path}")
 
@@ -121,7 +125,8 @@ def push_folder_to_github(repo_name, folder_path):
     subprocess.run(["git", "add", "."], cwd=folder_path, check=True)
     subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=folder_path, check=True)
     subprocess.run(
-        ["git", "remote", "add", "origin", f"https://github.com/{USERNAME}/{repo_name}.git"],
+        # ["git", "remote", "add", "origin", f"https://github.com/{USERNAME}/{repo_name}.git"],
+        ["git", "remote", "add", "origin", f"https://{USERNAME}:{TOKEN}@github.com/{USERNAME}/{repo_name}.git"],
         cwd=folder_path,
         check=True
     )
