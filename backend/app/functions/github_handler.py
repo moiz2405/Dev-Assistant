@@ -3,8 +3,10 @@ import subprocess
 import json
 import requests
 import platform
+import difflib
 from dotenv import load_dotenv
 
+indexed_dirs_cache = {}
 # Load environment
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../../..', '.env.local'))
 
@@ -25,14 +27,76 @@ def to_wsl_path(path):
             pass
     return path
 
+def normalize_filename(name):
+    """Normalize filename by lowercasing and replacing underscores, hyphens, and spaces with a common separator."""
+    return name.lower().replace('_', ' ').replace('-', ' ').strip()
+
+
+def index_dirs_in_path(root_path):
+    """
+    Walk through a directory and collect all subdirectory paths.
+    """
+    dir_paths = []
+    for root, dirs, _ in os.walk(root_path):
+        for d in dirs:
+            dir_paths.append(os.path.join(root, d))
+    return dir_paths
+
+def fuzzy_search_dir(stt_dirname, search_path):
+    """
+    Fuzzy search for a directory using STT input to tolerate typos or phonetically similar names.
+    Silently returns best match without user prompts.
+
+    :param stt_dirname: The directory name received via voice (can have typos).
+    :param search_path: The root directory to search in.
+    :return: Best match directory path or None.
+    """
+    global indexed_dirs_cache
+
+    # Convert to WSL path if needed
+    if is_wsl():
+        search_path = to_wsl_path(search_path)
+
+    normalized_path = normalize_filename(search_path)
+
+    # Index folders if not cached
+    if normalized_path not in indexed_dirs_cache:
+        print(f"Indexing directories in: {search_path}")
+        indexed_dirs_cache[normalized_path] = index_dirs_in_path(search_path)
+
+    all_dirs = indexed_dirs_cache[normalized_path]
+    if not all_dirs:
+        return None
+
+    normalized_input = normalize_filename(stt_dirname)
+    dir_name_map = {normalize_filename(os.path.basename(d)): d for d in all_dirs}
+    all_normalized_names = list(dir_name_map.keys())
+
+    close_matches = difflib.get_close_matches(normalized_input, all_normalized_names, n=5, cutoff=0.5)
+    partial_matches = [name for name in all_normalized_names if normalized_input in name]
+
+    combined_matches = list(dict.fromkeys(close_matches + partial_matches))  # Unique
+
+    if not combined_matches:
+        return None
+
+    return dir_name_map[combined_matches[0]]
+
+
 def push_folder_to_github(repo_name, folder_path):
     """
-    Creates a GitHub repo and pushes the local folder to it.
+    Creates a GitHub repo and pushes the local folder to it using fuzzy directory match.
     """
     if not USERNAME or not TOKEN:
         raise Exception("GitHub credentials not set in .env file.")
 
-    folder_path = to_wsl_path(folder_path)
+    # Fuzzy search for the correct folder
+    matched_folder = fuzzy_search_dir(folder_path, ".")  # You can replace "." with a specific base dir if needed
+    if not matched_folder:
+        raise FileNotFoundError(f"No matching folder found for: {folder_path}")
+
+    print(f"Using matched folder: {matched_folder}")
+    folder_path = to_wsl_path(matched_folder)
 
     # Check if repo exists on GitHub
     check_url = f"{GITHUB_API}/repos/{USERNAME}/{repo_name}"
@@ -65,6 +129,7 @@ def push_folder_to_github(repo_name, folder_path):
     subprocess.run(["git", "push", "-u", "origin", "main"], cwd=folder_path, check=True)
 
     print(f"Successfully pushed '{repo_name}' to GitHub.")
+
 
 def list_github_repos(save_to_file=True, filename="github_repos.json"):
     """
