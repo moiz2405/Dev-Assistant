@@ -24,7 +24,7 @@ def get_repo_folder(repo_link, target_directory):
         if os.path.isdir(folder_path) and repo_name.lower() in folder.lower():
             return folder_path
     
-    print("❌ ERROR: Repository folder not found after cloning.")
+    print("ERROR: Repository folder not found after cloning.")
     return None
 
 def detect_project_type(project_path):
@@ -51,10 +51,10 @@ def install_dependencies(project_path, project_type):
         "go": "go mod tidy"
     }
     if project_type in commands:
-        print(f"📦 Installing dependencies for {project_type}...")
+        print(f"Installing dependencies for {project_type}...")
         run_command(commands[project_type], cwd=project_path)
     else:
-        print("⚠️ Unknown project type. Manual setup may be needed.")
+        print("Unknown project type. Manual setup may be needed.")
 
 def try_running_project(project_path, project_type):
     """Runs the project."""
@@ -68,9 +68,9 @@ def try_running_project(project_path, project_type):
     command = "python main.py" if project_type == "python" and os.path.exists(os.path.join(project_path, "main.py")) else commands.get(project_type, None)
     
     if not command:
-        return False, "⚠️ No known command to run this project."
+        return False, "No known command to run this project."
     
-    print(f"🚀 Running {project_type} project...")
+    print(f"Running {project_type} project...")
     result = run_command(command, cwd=project_path)
     return True, result
 
@@ -85,10 +85,10 @@ def setup_project(repo_link, target_directory):
         project_folder = get_repo_folder(repo_link, target_directory)
         
         if not project_folder or not os.path.exists(project_folder):
-            print("❌ ERROR: Repository folder not found. Exiting...")
+            print("ERROR: Repository folder not found. Exiting...")
             return
         
-        print(f"📂 Repository folder detected: {project_folder}")
+        print(f"Repository folder detected: {project_folder}")
         
         project_type = detect_project_type(project_folder)
         print(f"🛠 Detected project type: {project_type.upper()}")
@@ -101,12 +101,12 @@ def setup_project(repo_link, target_directory):
             if success:
                 print("✅ Project is running successfully! 🎉")
             else:
-                print(f"❌ Project failed to start. Error:\n{output}")
+                print(f"Project failed to start. Error:\n{output}")
         else:
-            print("⚠️ Could not detect project type. Manual setup required.")
+            print("Could not detect project type. Manual setup required.")
     
     except KeyboardInterrupt:
-        print("\n❌ Setup process interrupted by user. Exiting...")
+        print("\nSetup process interrupted by user. Exiting...")
 
 # # calls enviornment setup
 # import subprocess
