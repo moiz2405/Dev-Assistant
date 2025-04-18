@@ -147,6 +147,7 @@ def list_github_repos(save_to_file=True, filename="github_repos.json"):
     """
     Fetches repository names and URLs for the authenticated user.
     Stores only name and html_url if saving.
+    Also prints an indexed list of repository names.
     """
     if not USERNAME or not TOKEN:
         raise Exception("GitHub credentials not set in .env file.")
@@ -177,12 +178,18 @@ def list_github_repos(save_to_file=True, filename="github_repos.json"):
 
         page += 1
 
+    # Print indexed list of names
+    print("\nRepositories:")
+    for idx, repo in enumerate(repos_summary, start=1):
+        print(f"{idx}. {repo['name']}")
+
     if save_to_file:
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(repos_summary, f, indent=2)
-        print(f"Saved {len(repos_summary)} repositories to '{filename}'")
+        print(f"\nSaved {len(repos_summary)} repositories to '{filename}'")
 
     print("Repository fetching complete.")
+
 
 def load_repo_list(path="backend/github_repos.json"):
     path = to_wsl_path(path)
