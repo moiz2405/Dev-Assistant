@@ -125,7 +125,6 @@ def push_folder_to_github(repo_name, folder_path):
     subprocess.run(["git", "add", "."], cwd=folder_path, check=True)
     subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=folder_path, check=True)
     subprocess.run(
-        # ["git", "remote", "add", "origin", f"https://github.com/{USERNAME}/{repo_name}.git"],
         ["git", "remote", "add", "origin", f"https://{USERNAME}:{TOKEN}@github.com/{USERNAME}/{repo_name}.git"],
         cwd=folder_path,
         check=True
