@@ -10,19 +10,20 @@
 # print(repo_url)
 import os
 import sys
-def suppress_stderr():
-    devnull = os.open(os.devnull, os.O_WRONLY) 
-    os.dup2(devnull, sys.stderr.fileno())
+# def suppress_stderr():
+#     devnull = os.open(os.devnull, os.O_WRONLY) 
+#     os.dup2(devnull, sys.stderr.fileno())
 
-suppress_stderr()
+# suppress_stderr()
 from app.models.groq_preprocess import cached_process_query
-from app.stt.voice_recognition import VoiceAssistant
+# from app.stt.voice_recognition import VoiceAssistant
 from app.query_processor import determine_function
 
 while(1):
     prompt = input()
-    cached_process_query(prompt)
-    # determine_function(cached_process_query(prompt))
+    result = cached_process_query(prompt)
+    # print(result)
+    determine_function(cached_process_query(prompt))
 
 # def handle_recognized_command(text):
 #     if not text:
