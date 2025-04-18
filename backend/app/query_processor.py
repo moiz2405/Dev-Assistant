@@ -36,7 +36,8 @@ def determine_function(structured_query):
     if query_type == QueryType.GITHUB_ACTIONS:
         if subtask == SubTaskType.CLONE_REPO:
             clone_github_repo(target,"D://")
-            
+        if subtask == SubTaskType.PUSH_REPO:
+            push_folder_to_github(target,"D://va_projects")    
     # if query_type == QueryType.GENERAL_QUERY:
     # if query_type == QueryType.PROJECT_SETUP:
 
