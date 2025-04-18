@@ -4,7 +4,8 @@
 from app.functions.app_handling import open_app, close_app
 from app.functions.environment_setup import setup_project #takes repo link and target dir as argu, will refine later
 from app.functions.file_handler import open_file,list_files_by_type
-# from app.models.types import QueryType, SubTaskType
+from app.functions.summarizer import summarize_in_new_window
+
 from app.models.query_types import QueryType, SubTaskType
 
 def determine_function(structured_query):
@@ -28,10 +29,13 @@ def determine_function(structured_query):
         if subtask == SubTaskType.OPEN_FILE:
             open_file(target,path)
             
+    if query_type == QueryType.SUMMARIZER:
+        if subtask == SubTaskType.SUMMARIZE:
+            summarize_in_new_window(path)
+    
     # if query_type == QueryType.GITHUB_ACTIONS:
     # if query_type == QueryType.GENERAL_QUERY:
     # if query_type == QueryType.PROJECT_SETUP:
-    # if query_type == QueryType.SUMMARIZER:
 
 
 # def determine_sub_type(structured_query):
