@@ -165,7 +165,7 @@ def summarize_in_new_window(folder_path, spoken_filename):
             f"source venv/bin/activate && "
             f"python3 {wsl_script_path} \"{wsl_pdf_path}\""
         )
-        print("Executing command:", full_command)
+        # print("Executing command:", full_command)
 
         subprocess.Popen([
             "powershell.exe", "-Command",
