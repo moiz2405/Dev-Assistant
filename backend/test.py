@@ -6,9 +6,9 @@ from app.functions.github_handler import push_folder_to_github, list_github_repo
 # push_folder_to_github("test_repo", "/mnt/c/Users/km866/Downloads/test_folder")
 # list_github_repos()
 
-repo_url = search_repo_url("monitoring")
-clone_github_repo(repo_url,"D://")
-print(repo_url)
+repo_name = "heritage"
+clone_github_repo(repo_name,"D://")
+# print(repo_url)
 
 # import os
 # import sys
@@ -18,7 +18,7 @@ print(repo_url)
 
 # # suppress_stderr()
 # from app.models.groq_preprocess import cached_process_query
-# # from app.stt.voice_recognition import VoiceAssistant
+# from app.stt.voice_recognition import VoiceAssistant
 # from app.query_processor import determine_function
 
 # while(1):
