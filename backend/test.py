@@ -6,7 +6,7 @@ from app.functions.github_handler import push_folder_to_github, list_github_repo
 # push_folder_to_github("test_repo", "/mnt/c/Users/km866/Downloads/test_folder")
 # list_github_repos()
 
-repo_url = search_repo_url("inno")
+repo_url = search_repo_url("flue")
 clone_github_repo(repo_url,"D://")
 print(repo_url)
 
