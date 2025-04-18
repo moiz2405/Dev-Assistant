@@ -66,7 +66,7 @@
 
 from app.functions.github_handler import push_folder_to_github, fuzzy_search_dir
 
-repo_name = "PROJECt1"
-# path = "D://"
-# push_folder_to_github(repo_name, path)
-print(fuzzy_search_dir(repo_name,"D://va_projects"))
+repo_name = "codeforce"
+path = "D://va_projects"
+push_folder_to_github(repo_name, path)
+# print(fuzzy_search_dir(repo_name,"D://va_projects"))
