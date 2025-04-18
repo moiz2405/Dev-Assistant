@@ -79,7 +79,7 @@ def setup_project(repo_link, target_directory):
     try:
         os.makedirs(target_directory, exist_ok=True)
         
-        print(f"📥 Cloning {repo_link} into {target_directory}...")
+        print(f"Cloning {repo_link} into {target_directory}...")
         run_command(f"git clone {repo_link}", cwd=target_directory)
         
         project_folder = get_repo_folder(repo_link, target_directory)
