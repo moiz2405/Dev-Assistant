@@ -94,10 +94,9 @@ def push_folder_to_github(repo_name, folder_path):
         raise Exception("GitHub credentials not set in .env file.")
 
     # Fuzzy search for the correct folder
-    matched_folder = fuzzy_search_dir(repo_name, folder_path)  # You can replace "." with a specific base dir if needed
-    print(matched_folder)
+    matched_folder = fuzzy_search_dir(repo_name, folder_path)
     if not matched_folder:
-        raise FileNotFoundError(f"No matching folder found for: {folder_path}")
+        raise FileNotFoundError(f"No matching folder found for: {repo_name} in {folder_path}")
 
     print(f"Using matched folder: {matched_folder}")
     folder_path = to_wsl_path(matched_folder)
@@ -107,32 +106,33 @@ def push_folder_to_github(repo_name, folder_path):
     check = requests.get(check_url, auth=(USERNAME, TOKEN))
     if check.status_code == 200:
         print(f"Repo '{repo_name}' already exists on GitHub.")
-        return
-
-    # Create repo
-    print("Creating GitHub repository...")
-    payload = {"name": repo_name, "private": False}
-    r = requests.post(f"{GITHUB_API}/user/repos", json=payload, auth=(USERNAME, TOKEN))
-    if r.status_code != 201:
-        raise Exception(f"Failed to create repo: {r.status_code}, {r.json()}")
+    else:
+        # Create repo only if it doesn't already exist
+        print("Creating GitHub repository...")
+        payload = {"name": repo_name, "private": False}
+        r = requests.post(f"{GITHUB_API}/user/repos", json=payload, auth=(USERNAME, TOKEN))
+        if r.status_code != 201:
+            raise Exception(f"Failed to create repo: {r.status_code}, {r.json()}")
 
     # Initialize Git and push
     print("Initializing local repo and pushing to GitHub...")
 
     if not os.path.exists(os.path.join(folder_path, ".git")):
         subprocess.run(["git", "init"], cwd=folder_path, check=True)
-
+    repo_url = f"https://{USERNAME}:{TOKEN}@github.com/{USERNAME}/{repo_name}.git"
     subprocess.run(["git", "add", "."], cwd=folder_path, check=True)
     subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=folder_path, check=True)
     subprocess.run(
-        ["git", "remote", "add", "origin", f"https://{USERNAME}:{TOKEN}@github.com/{USERNAME}/{repo_name}.git"],
+        # ["git", "remote", "add", "origin", f"https://{USERNAME}:{TOKEN}@github.com/{USERNAME}/{matched_folder}.git"],
+        ["git", "remote", "add", "origin", repo_url],
         cwd=folder_path,
         check=True
     )
     subprocess.run(["git", "branch", "-M", "main"], cwd=folder_path, check=True)
     subprocess.run(["git", "push", "-u", "origin", "main"], cwd=folder_path, check=True)
 
-    print(f"Successfully pushed '{repo_name}' to GitHub.")
+    print(f"Successfully pushed '{matched_folder}' to GitHub.")
+
 
 
 def list_github_repos(save_to_file=True, filename="github_repos.json"):
