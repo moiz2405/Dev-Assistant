@@ -49,12 +49,12 @@ import sys
 # file_name = "college_notes"
 # path = "C:\\Users\\km866\\OneDrive\\Documents\\Documents"
 # open_file(file_name,path)
-from app.functions.summarizer import summarizer, summarize_in_new_window
-pdf_path = "C:\\Users\\km866\\OneDrive\\Documents\\Documents"
-# summarizer(pdf_path)
-file_name = "hall ticket"
-summarize_in_new_window(pdf_path, file_name)
 
-# from app.functions.file_handler import fuzzy_search_file
 
-# fuzzy_search_file("hall","C:\\Users\\km866\\OneDrive\\Documents\\Documents")
+# from app.functions.summarizer import summarizer, summarize_in_new_window
+# pdf_path = "C:\\Users\\km866\\OneDrive\\Documents\\Documents"
+# # summarizer(pdf_path)
+# file_name = "hall ticket"
+# summarize_in_new_window(pdf_path, file_name)
+
+from 
