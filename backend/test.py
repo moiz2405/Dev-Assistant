@@ -52,7 +52,7 @@ import sys
 from app.functions.summarizer import summarizer, summarize_in_new_window
 pdf_path = "C:\\Users\\km866\\OneDrive\\Documents\\Documents"
 # summarizer(pdf_path)
-file_name = "hall"
+file_name = "hall ticket"
 summarize_in_new_window(pdf_path, file_name)
 
 # from app.functions.file_handler import fuzzy_search_file
