@@ -117,7 +117,7 @@ def load_repo_list(path="backend/github_repos.json"):
 
 def search_repo_url(query, path="backend/github_repos.json"):
     print(f"Searching for query: {query}")
-    query = query.lower()
+    # query = query.lower()
     repo_list = load_repo_list(path)
 
     if isinstance(repo_list, dict) and "error" in repo_list:
@@ -129,10 +129,15 @@ def search_repo_url(query, path="backend/github_repos.json"):
 
     return matches[0]["url"]
 
-def clone_github_repo(repo_url, target_directory):
+def clone_github_repo(repo_name, target_directory):
     """
     Clones a GitHub repository to the specified target directory.
     """
+    print("repo name")
+    print(repo_name)
+    repo_url = search_repo_url(repo_name)
+    print("repo url")
+    print(repo_url)
     if not USERNAME or not TOKEN:
         raise Exception("GitHub credentials not set in .env file.")
 
