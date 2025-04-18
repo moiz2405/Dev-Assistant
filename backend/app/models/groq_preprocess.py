@@ -36,7 +36,7 @@ class QueryProcessor(BaseModel):
             "- PROJECT_SETUP: NEW_PROJECT, EXISTING_PROJECT\n"
             "- FILE_HANDLING: SEARCH_FILE, OPEN_FILE, CLOSE_FILE\n"
             "- APP_HANDLING: OPEN_APP, CLOSE_APP\n"
-            "- SUMMARIZER: SUMMARIZE, ANSWER_QUERY"
+            "- SUMMARIZER: SUMMARIZE"
         )
     )
     target: str = Field(
