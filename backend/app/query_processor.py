@@ -31,7 +31,7 @@ def determine_function(structured_query):
             
     if query_type == QueryType.SUMMARIZER:
         if subtask == SubTaskType.SUMMARIZE:
-            summarize_in_new_window(path)
+            summarize_in_new_window(path,target)
     
     # if query_type == QueryType.GITHUB_ACTIONS:
     # if query_type == QueryType.GENERAL_QUERY:
