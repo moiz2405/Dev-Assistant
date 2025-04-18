@@ -102,14 +102,14 @@ def push_folder_to_github(repo_name, folder_path):
     folder_path = to_wsl_path(matched_folder)
 
     # Check if repo exists on GitHub
-    check_url = f"{GITHUB_API}/repos/{USERNAME}/{repo_name}"
+    check_url = f"{GITHUB_API}/repos/{USERNAME}/{matched_folder}"
     check = requests.get(check_url, auth=(USERNAME, TOKEN))
     if check.status_code == 200:
-        print(f"Repo '{repo_name}' already exists on GitHub.")
+        print(f"Repo '{matched_folder}' already exists on GitHub.")
     else:
         # Create repo only if it doesn't already exist
         print("Creating GitHub repository...")
-        payload = {"name": repo_name, "private": False}
+        payload = {"name": matched_folder, "private": False}
         r = requests.post(f"{GITHUB_API}/user/repos", json=payload, auth=(USERNAME, TOKEN))
         if r.status_code != 201:
             raise Exception(f"Failed to create repo: {r.status_code}, {r.json()}")
@@ -119,15 +119,25 @@ def push_folder_to_github(repo_name, folder_path):
 
     if not os.path.exists(os.path.join(folder_path, ".git")):
         subprocess.run(["git", "init"], cwd=folder_path, check=True)
-    repo_url = f"https://{USERNAME}:{TOKEN}@github.com/{USERNAME}/{repo_name}.git"
+    repo_url = f"https://{USERNAME}:{TOKEN}@github.com/{USERNAME}/{matched_folder}.git"
     subprocess.run(["git", "add", "."], cwd=folder_path, check=True)
-    subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=folder_path, check=True)
-    subprocess.run(
-        # ["git", "remote", "add", "origin", f"https://{USERNAME}:{TOKEN}@github.com/{USERNAME}/{matched_folder}.git"],
-        ["git", "remote", "add", "origin", repo_url],
-        cwd=folder_path,
-        check=True
-    )
+    # subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=folder_path, check=True)
+    try:
+        subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=folder_path, check=True)
+    except subprocess.CalledProcessError:
+        print("No changes to commit.")
+
+    # subprocess.run(
+    #     ["git", "remote", "add", "origin", repo_url],
+    #     cwd=folder_path,
+    #     check=True
+    # )
+    remotes = subprocess.run(["git", "remote"], cwd=folder_path, capture_output=True, text=True).stdout
+    if "origin" not in remotes:
+        subprocess.run(["git", "remote", "add", "origin", repo_url], cwd=folder_path, check=True)
+    else:
+        subprocess.run(["git", "remote", "set-url", "origin", repo_url], cwd=folder_path, check=True)
+
     subprocess.run(["git", "branch", "-M", "main"], cwd=folder_path, check=True)
     subprocess.run(["git", "push", "-u", "origin", "main"], cwd=folder_path, check=True)
 
