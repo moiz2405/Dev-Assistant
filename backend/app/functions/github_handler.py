@@ -2,13 +2,28 @@ import os
 import subprocess
 import json
 import requests
+import platform
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path = os.path.join(os.path.dirname(__file__), '../../..', '.env.local'))
-# Fetch credentials
+# Load environment
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../../..', '.env.local'))
+
+# GitHub credentials
 GITHUB_API = "https://api.github.com"
 USERNAME = os.getenv("GITHUB_USERNAME")
 TOKEN = os.getenv("GITHUB_TOKEN")
+
+def is_wsl():
+    return 'microsoft' in platform.uname().release.lower()
+
+def to_wsl_path(path):
+    if is_wsl():
+        try:
+            result = subprocess.run(['wslpath', path], capture_output=True, text=True)
+            return result.stdout.strip()
+        except Exception:
+            pass
+    return path
 
 def push_folder_to_github(repo_name, folder_path):
     """
@@ -16,6 +31,8 @@ def push_folder_to_github(repo_name, folder_path):
     """
     if not USERNAME or not TOKEN:
         raise Exception("GitHub credentials not set in .env file.")
+
+    folder_path = to_wsl_path(folder_path)
 
     # Check if repo exists on GitHub
     check_url = f"{GITHUB_API}/repos/{USERNAME}/{repo_name}"
@@ -57,6 +74,7 @@ def list_github_repos(save_to_file=True, filename="github_repos.json"):
     if not USERNAME or not TOKEN:
         raise Exception("GitHub credentials not set in .env file.")
 
+    filename = to_wsl_path(filename)
     print("Fetching repository list...")
 
     repos_summary = []
@@ -79,7 +97,6 @@ def list_github_repos(save_to_file=True, filename="github_repos.json"):
             name = repo["name"]
             url = repo["html_url"]
             repos_summary.append({"name": name, "url": url})
-            # print(f"- {name} → {url}")
 
         page += 1
 
@@ -90,9 +107,8 @@ def list_github_repos(save_to_file=True, filename="github_repos.json"):
 
     print("Repository fetching complete.")
 
-
 def load_repo_list(path="backend/github_repos.json"):
-    # print(f"Loading repository list from {path}")  # Debugging statement
+    path = to_wsl_path(path)
     try:
         with open(path, "r") as file:
             return json.load(file)
@@ -100,20 +116,17 @@ def load_repo_list(path="backend/github_repos.json"):
         return {"error": f"File not found at {path}"}
 
 def search_repo_url(query, path="backend/github_repos.json"):
-    print(f"Searching for query: {query}")  # Debugging statement
+    print(f"Searching for query: {query}")
     query = query.lower()
     repo_list = load_repo_list(path)
 
-    # Check if the repo_list returned an error
     if isinstance(repo_list, dict) and "error" in repo_list:
-        return repo_list["error"]  # Return the error message directly
+        return repo_list["error"]
 
     matches = [repo for repo in repo_list if query in repo["name"].lower()]
-
     if not matches:
         return f"No match found for '{query}'"
 
-    # Return only the first matched URL
     return matches[0]["url"]
 
 def clone_github_repo(repo_url, target_directory):
@@ -123,11 +136,11 @@ def clone_github_repo(repo_url, target_directory):
     if not USERNAME or not TOKEN:
         raise Exception("GitHub credentials not set in .env file.")
 
+    target_directory = to_wsl_path(target_directory)
     print(f"Cloning {repo_url} into {target_directory}...")
+
     result = subprocess.run(["git", "clone", repo_url], cwd=target_directory, shell=True)
     if result.returncode == 0:
         print("Successfully cloned GitHub repository.")
     else:
         print("Cloning failed.")
-
-    print("Successfully cloned GitHub repository.")
