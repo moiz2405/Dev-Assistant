@@ -6,7 +6,7 @@ from agno.models.groq import Groq
 from PyPDF2 import PdfReader
 from agno.agent import Agent, RunResponse
 from agno.utils.pprint import pprint_run_response
-
+from app.functions.file_handler import fuzzy_search_file
 def is_wsl():
     return 'microsoft' in platform.uname().release.lower()
 
@@ -49,36 +49,51 @@ def summarizer(pdf_path):
         pprint_run_response(response, markdown=True)
 
 
-def summarize_in_new_window(pdf_path):
+def summarize_in_new_window(folder_path, spoken_filename):
+    # Always run fuzzy search
+    full_file_path = fuzzy_search_file(spoken_filename, folder_path)
+    if not full_file_path:
+        print(f"No match found for '{spoken_filename}' in {folder_path}")
+        return
+
     if is_wsl():
         wsl_project_dir = "/mnt/d/projects/MYPROJECTS/Dev-Assistant"
         wsl_script_path = f"{wsl_project_dir}/backend/app/functions/summarizer.py"
-        wsl_pdf_path = convert_windows_to_wsl_path(pdf_path)
+        wsl_pdf_path = convert_windows_to_wsl_path(full_file_path)
 
-        # Read the GROQ_API_KEY from .env file
+        # Load GROQ_API_KEY from .env.local
         env_path = os.path.join(wsl_project_dir, ".env.local")
         groq_api_key = ""
-        with open(env_path) as f:
-            for line in f:
-                if line.strip().startswith("GROQ_API_KEY="):
-                    groq_api_key = line.strip().split("=", 1)[1].strip().strip('"').strip("'")
-                    break
-
-        if not groq_api_key:
-            print("GROQ_API_KEY not found in .env")
+        try:
+            with open(env_path) as f:
+                for line in f:
+                    if line.strip().startswith("GROQ_API_KEY="):
+                        groq_api_key = line.strip().split("=", 1)[1].strip().strip('"').strip("'")
+                        break
+        except FileNotFoundError:
+            print(f".env.local file not found at {env_path}")
             return
 
+        if not groq_api_key:
+            print("GROQ_API_KEY not found in .env.local")
+            return
+
+        # Final WSL command
         full_command = (
             f"cd {wsl_project_dir} && "
             f"export GROQ_API_KEY='{groq_api_key}' && "
             f"source venv/bin/activate && "
-            f"python3 {wsl_script_path} {wsl_pdf_path}"
+            f"python3 {wsl_script_path} \"{wsl_pdf_path}\""
         )
 
         subprocess.Popen([
             "powershell.exe", "-Command",
             f"wt wsl -e bash -c \"{full_command}\""
         ])
+    else:
+        # Native Windows version (optional, add your logic if needed)
+        print("Native Windows launch is not fully implemented yet.")
+
 
 
 
