@@ -1,13 +1,13 @@
 # import os; print("USERNAME:", os.getenv("GITHUB_USERNAME"))
 
 
-from app.functions.github_handler import push_folder_to_github, list_github_repos, search_repo_url, clone_github_repo
+# from app.functions.github_handler import push_folder_to_github, list_github_repos, search_repo_url, clone_github_repo
 
-# push_folder_to_github("test_repo", "/mnt/c/Users/km866/Downloads/test_folder")
-# list_github_repos()
+# # push_folder_to_github("test_repo", "/mnt/c/Users/km866/Downloads/test_folder")
+# # list_github_repos()
 
-repo_name = "heritage"
-clone_github_repo(repo_name,"D://")
+# repo_name = "heritage"
+# clone_github_repo(repo_name,"D://")
 # print(repo_url)
 
 # import os
@@ -64,3 +64,9 @@ clone_github_repo(repo_name,"D://")
 # summarize_in_new_window(pdf_path, file_name)
 
 
+from app.functions.github_handler import push_folder_to_github, fuzzy_search_dir
+
+repo_name = "PROJECt1"
+# path = "D://"
+# push_folder_to_github(repo_name, path)
+print(fuzzy_search_dir(repo_name,"D://va_projects"))
