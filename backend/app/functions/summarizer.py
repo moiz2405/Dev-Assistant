@@ -1,14 +1,51 @@
 import os
+import sys
 import platform
 import subprocess
-import sys
+import difflib
+
 from agno.models.groq import Groq
 from PyPDF2 import PdfReader
 from agno.agent import Agent, RunResponse
 from agno.utils.pprint import pprint_run_response
-from app.functions.file_handler import fuzzy_search_file
+indexed_files_cache = {}
+
 def is_wsl():
     return 'microsoft' in platform.uname().release.lower()
+
+def convert_to_wsl_path(win_path: str) -> str:
+    if ":" in win_path:
+        drive, rest = win_path.split(":", 1)
+        drive = drive.lower()
+        rest = rest.replace("\\", "/").lstrip("/")
+        return f"/mnt/{drive}/{rest}"
+    return win_path
+
+def normalize_filename(name):
+    """Normalize filename by lowercasing and replacing underscores, hyphens, and spaces with a common separator."""
+    return name.lower().replace('_', ' ').replace('-', ' ').strip()
+
+def index_files_in_path(search_path):
+    """
+    Index all files in a directory (recursively) and cache it.
+    :param search_path: Base path to search.
+    :return: List of full file paths.
+    """
+    global indexed_files_cache
+
+    if is_wsl():
+        search_path = convert_to_wsl_path(search_path)
+
+    indexed_files = []
+    for root, _, files in os.walk(search_path):
+        for file in files:
+            full_path = os.path.join(root, file)
+            indexed_files.append(full_path)
+
+    # Store cache by normalized path
+    indexed_files_cache[normalize_filename(search_path)] = indexed_files
+    return indexed_files
+
 
 def convert_windows_to_wsl_path(win_path):
     if win_path.startswith("C:\\"):
@@ -48,10 +85,53 @@ def summarizer(pdf_path):
         response: RunResponse = AGENT_MAIN.run(full_prompt)
         pprint_run_response(response, markdown=True)
 
+def fuzzy_search_file(stt_filename, search_path):
+    """
+    Fuzzy search for a file using STT input to tolerate typos or phonetically similar names.
+    Silently returns best match without user prompts.
+
+    :param stt_filename: The filename received via voice (can have typos).
+    :param search_path: The directory to search in.
+    :return: Best match file path or None.
+    """
+    global indexed_files_cache
+
+    # Convert to WSL path if needed
+    if is_wsl():
+        search_path = convert_to_wsl_path(search_path)
+
+    normalized_path = normalize_filename(search_path)
+
+    # Index files if not cached
+    if normalized_path not in indexed_files_cache:
+        print(f"Indexing files in: {search_path}")
+        indexed_files_cache[normalized_path] = index_files_in_path(search_path)
+
+    all_files = indexed_files_cache[normalized_path]
+    if not all_files:
+        return None
+
+    normalized_input = normalize_filename(stt_filename)
+    file_name_map = {normalize_filename(os.path.basename(f)): f for f in all_files}
+    all_normalized_names = list(file_name_map.keys())
+
+    # Close matches
+    close_matches = difflib.get_close_matches(normalized_input, all_normalized_names, n=5, cutoff=0.5)
+    # Also include partial contains matches
+    partial_matches = [name for name in all_normalized_names if normalized_input in name]
+
+    combined_matches = list(dict.fromkeys(close_matches + partial_matches))  # Unique
+
+    if not combined_matches:
+        return None
+
+    # Return best match path
+    return file_name_map[combined_matches[0]]
 
 def summarize_in_new_window(folder_path, spoken_filename):
     # Always run fuzzy search
     full_file_path = fuzzy_search_file(spoken_filename, folder_path)
+    print(full_file_path)
     if not full_file_path:
         print(f"No match found for '{spoken_filename}' in {folder_path}")
         return
@@ -94,12 +174,17 @@ def summarize_in_new_window(folder_path, spoken_filename):
         # Native Windows version (optional, add your logic if needed)
         print("Native Windows launch is not fully implemented yet.")
 
-
+def run_summarizer(pdf_path=None):
+    if pdf_path is None and len(sys.argv) <= 1:
+        print("Please provide a PDF path as an argument.")
+        return
+    
+    if pdf_path is None:
+        pdf_path = sys.argv[1]
+    
+    summarizer(pdf_path)
 
 
 # If run directly, start summarizer with CLI path
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        summarizer(sys.argv[1])
-    else:
-        print("Please provide a PDF path as an argument.")
+    run_summarizer()
