@@ -71,5 +71,7 @@
   "push devops folder to github": "At once, sir.",
   "what's the folder my folder to github": "Very good, I'll explain how to upload your folder to GitHub.",
   "push the folder my folder to github": "At once.",
-  "push the project folder to github": "Very good, sir. Pushing the project folder to GitHub."
+  "push the project folder to github": "Very good, sir. Pushing the project folder to GitHub.",
+  "summarise the hall ticket from documents": "Very good. I shall summarise the hall ticket from the documents.",
+  "summarise the linux papers from documents": "At once. The Linux papers discuss the kernel's development, design principles, and impact on operating systems."
 }
