@@ -11,7 +11,7 @@ class SubTaskType(str, Enum):
     # GitHub Actions
     LIST_REPOS = "LIST_REPOS"
     CLONE_REPO = "CLONE_REPO"
-    CREATE_AND_PUSH = "CREATE_AND_PUSH"
+    PUSH_REPO = "PUSH_REPO"
 
     # Project Setup
     NEW_PROJECT = "NEW_PROJECT"
