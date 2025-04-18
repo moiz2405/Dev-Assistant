@@ -21,7 +21,7 @@ class QueryProcessor(BaseModel):
         ...,
         description=(
             "Correctly determine the type of query from:\n"
-            "1) GITHUB_ACTIONS - List repos, clone repo & setup, make/push to repo.\n"
+            "1) GITHUB_ACTIONS - LIST_REPOS, PUSH_REPO, CLONE_REPO.\n"
             "2) PROJECT_SETUP - Setup a new/existing project environment (like Next.js, Flask).\n"
             "3) FILE_HANDLING - Search, open, or close a file.\n"
             "4) APP_HANDLING - Open or close an application.\n"
@@ -32,7 +32,7 @@ class QueryProcessor(BaseModel):
         ...,
         description=(
             "The specific sub-action within the main type:\n"
-            "- GITHUB_ACTIONS: LIST_REPOS, CLONE_REPO, CREATE_AND_PUSH\n"
+            "- GITHUB_ACTIONS: LIST_REPOS, CLONE_REPO, PUSH_REPO\n"
             "- PROJECT_SETUP: NEW_PROJECT, EXISTING_PROJECT\n"
             "- FILE_HANDLING: SEARCH_FILE, OPEN_FILE, CLOSE_FILE\n"
             "- APP_HANDLING: OPEN_APP, CLOSE_APP\n"
