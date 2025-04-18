@@ -55,6 +55,7 @@ def generate_response(text: str) -> str:
         reply = response.text.strip()
         cache[norm_text] = reply
         save_cache()
+        print(reply)
         return reply
     except Exception as e:
         print(f"[ERROR] Failed to generate response: {e}")
