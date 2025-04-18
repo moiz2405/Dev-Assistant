@@ -139,7 +139,7 @@ def clone_github_repo(repo_url, target_directory):
     target_directory = to_wsl_path(target_directory)
     print(f"Cloning {repo_url} into {target_directory}...")
 
-    result = subprocess.run(["git", "clone", repo_url], cwd=target_directory, shell=True)
+    result = subprocess.run(["git", "clone", repo_url], cwd=target_directory)
     if result.returncode == 0:
         print("Successfully cloned GitHub repository.")
     else:
