@@ -6,6 +6,7 @@ from app.functions.environment_setup import setup_project #takes repo link and t
 from app.functions.file_handler import open_file,list_files_by_type
 from app.functions.summarizer import summarize_in_new_window
 from app.functions.github_handler import clone_github_repo, list_github_repos, push_folder_to_github
+
 from app.models.query_types import QueryType, SubTaskType
 
 def determine_function(structured_query):
@@ -35,11 +36,12 @@ def determine_function(structured_query):
     
     if query_type == QueryType.GITHUB_ACTIONS:
         if subtask == SubTaskType.CLONE_REPO:
-            clone_github_repo(target,"D://")
+            clone_github_repo(target,"D://va_projects")
         if subtask == SubTaskType.PUSH_REPO:
             push_folder_to_github(target,"D://va_projects")    
         if subtask == SubTaskType.LIST_REPOS:
             list_github_repos()
+            
     # if query_type == QueryType.GENERAL_QUERY:
     # if query_type == QueryType.PROJECT_SETUP:
 
