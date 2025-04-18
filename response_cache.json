@@ -54,5 +54,10 @@
   "open all movies khan pdf from documents": "At once, sir.",
   "open hall ticket from documents": "Very good.",
   "thank you for your work": "It has been my distinct pleasure, sir.",
-  "summarise hall ticket from documents": "Very good. I shall extract the pertinent information and summarize it for you."
+  "summarise hall ticket from documents": "Very good. I shall extract the pertinent information and summarize it for you.",
+  "summarise hall ticket from now": "Very good, sir.",
+  "summarise the documentary movies khan from documents": "Very good, a summary will be provided.",
+  "summarise all movies khan found": "Very good, sir. I shall collate and summarise the movies Mr. Khan has located.",
+  "summarise linux papers from documents": "Very good, sir. I shall summarize the Linux papers from the provided documents.",
+  "summarise linux paper from rocket": "At once. Linux is a Unix-like operating system kernel."
 }
