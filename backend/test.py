@@ -10,36 +10,36 @@
 # clone_github_repo(repo_name,"D://")
 # print(repo_url)
 
-# import os
-# import sys
-# # def suppress_stderr():
-# #     devnull = os.open(os.devnull, os.O_WRONLY) 
-# #     os.dup2(devnull, sys.stderr.fileno())
+import os
+import sys
+# def suppress_stderr():
+#     devnull = os.open(os.devnull, os.O_WRONLY) 
+#     os.dup2(devnull, sys.stderr.fileno())
 
-# # suppress_stderr()
-# from app.models.groq_preprocess import cached_process_query
-# from app.stt.voice_recognition import VoiceAssistant
-# from app.query_processor import determine_function
+# suppress_stderr()
+from app.models.groq_preprocess import cached_process_query
+from app.stt.voice_recognition import VoiceAssistant
+from app.query_processor import determine_function
 
-# while(1):
-#     prompt = input()
-#     result = cached_process_query(prompt)
-#     # print(result)
-#     determine_function(cached_process_query(prompt))
+while(1):
+    prompt = input()
+    result = cached_process_query(prompt)
+    # print(result)
+    determine_function(cached_process_query(prompt))
 
-# def handle_recognized_command(text):
-#     if not text:
-#         print("[MAIN] Nothing recognized.")
-#         return
+def handle_recognized_command(text):
+    if not text:
+        print("[MAIN] Nothing recognized.")
+        return
 
-#     print(f"[MAIN] Recognized: {text}")
+    print(f"[MAIN] Recognized: {text}")
 
-# assistant = VoiceAssistant(
-#     hotword="jarvis",
-#     record_duration=5,
-#     on_recognized=handle_recognized_command
-# )
-# assistant.start_hotword_listener()
+assistant = VoiceAssistant(
+    hotword="jarvis",
+    record_duration=5,
+    on_recognized=handle_recognized_command
+)
+assistant.start_hotword_listener()
 
 
 
