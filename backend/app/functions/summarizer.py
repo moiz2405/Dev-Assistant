@@ -171,11 +171,7 @@ def summarize_in_new_window(folder_path, spoken_filename):
             "powershell.exe", "-Command",
             f"Start-Process wt -ArgumentList 'wsl bash -c \"cd /mnt/d/projects/MYPROJECTS/Dev-Assistant && export GROQ_API_KEY=\"{groq_api_key}\" && source venv/bin/activate && python3 /mnt/d/projects/MYPROJECTS/Dev-Assistant/backend/app/functions/summarizer.py \"{wsl_pdf_path}\"\"'"
             ])
-        # subprocess.Popen([
-        #     "powershell.exe", "-Command",
-        #     f"wt wsl -e bash -c \"{full_command}\""
-        # ])
-        
+
     else:
         # Native Windows version (optional, add your logic if needed)
         print("Native Windows launch is not fully implemented yet.")
