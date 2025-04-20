@@ -15,4 +15,4 @@ sounddevice
 requests
 pyaudio 
 diskcache
-
+python-pptx
