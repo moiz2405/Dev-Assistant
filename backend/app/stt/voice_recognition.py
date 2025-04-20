@@ -48,7 +48,7 @@ class VoiceAssistant:
                     except Exception as e:
                         print(f"Could not delete {filename}: {e}")
 
-    def __init__(self, hotword="jarvis", record_duration=6, cooldown_seconds=2, on_recognized=None):
+    def __init__(self, hotword="vision", record_duration=6, cooldown_seconds=2, on_recognized=None):
         self.hotword = hotword
         self.record_duration = record_duration
         self.cooldown_seconds = cooldown_seconds
@@ -59,7 +59,19 @@ class VoiceAssistant:
         access_key = os.getenv("PICOVOICE_ACCESS_KEY")
         if not access_key:
             raise ValueError("Missing Picovoice access key. Set PICOVOICE_ACCESS_KEY in your .env file.")
-        self.porcupine = pvporcupine.create(access_key=access_key, keywords=[self.hotword])
+
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        # Dynamically get the absolute path of the keyword file inside 'vision_wake_word' directory
+        keyword_path = os.path.join(os.path.dirname(__file__), "vision_wake_word", "vision_en_linux_v3_0_0.ppn")
+
+        if not os.path.exists(keyword_path):
+            raise FileNotFoundError(f"Keyword file not found at {keyword_path}")
+
+        self.porcupine = pvporcupine.create(
+            access_key=access_key,
+            keyword_paths=[keyword_path]
+        )
+
         self.pa = pyaudio.PyAudio()
         self.stream = self.pa.open(
             rate=self.porcupine.sample_rate,
