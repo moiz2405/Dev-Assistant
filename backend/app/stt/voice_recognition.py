@@ -23,7 +23,6 @@ load_dotenv(dotenv_path)
 
 
 class VoiceAssistant:
-
     @staticmethod
     def list_input_devices():
         pa = pyaudio.PyAudio()
@@ -175,7 +174,7 @@ class VoiceAssistant:
     def start_hotword_listener(self):
         print("Hotword listener started...")
         last_trigger_time = 0
-
+        
         try:
             while True:
                 try:
