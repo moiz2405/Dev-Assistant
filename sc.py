@@ -1,126 +1,209 @@
-#takes user queries and return structered json output , determines 
-# query_type, sub_query, path, target
-
-from enum import Enum
-from typing import Iterator
-from pydantic import BaseModel, Field
-from agno.agent import Agent, RunResponse
-from agno.models.groq import Groq
-from pathlib import Path
-import platform
+import threading
+import datetime
 import os
-import getpass
-import diskcache
-from app.models.query_types import QueryType,SubTaskType
-cache = diskcache.Cache(".query_cache")
+import time
+import pvporcupine
+import pyaudio
+import struct
+import wave
+import speech_recognition as sr
+import logging
+import sys
+import audioop
+from dotenv import load_dotenv
 
-class QueryProcessor(BaseModel):
-    type: QueryType = Field(...,description=("Correctly determine the type of query from:\n"))
-    subtask: SubTaskType = Field(...,description=("The specific sub-action within the main type:\n"))
-    target: str = Field(...,description=("Main target of the query:\n"))
-    path: str = Field(...,description=("Determine the correct full Windows-style path for the file or folder referenced in the query.\n\n"))
 
-def boost_prompt(prompt: str) -> str:
-    summarizer_keywords = [
-        "summarize", "answer from", "explain from", "read from", "understand from", 
-        "questions from", "query from", "explain this pdf", "tell from", "pdf context"
-    ]
-    general_keywords = [
-        "weather", "who is", "capital of", "how many", "when was", "current", "tell me about",
-        "time in", "president", "prime minister", "fun fact", "general knowledge"
-    ]
-    lowered = prompt.lower()
-    # General knowledge route
-    if any(kw in lowered for kw in general_keywords):
-        return "[TASK:GENERAL_QUERY] " + prompt
-    # Summarizer route
-    if any(kw in lowered for kw in summarizer_keywords):
-        return "[TASK:SUMMARIZER] " + prompt
-    return prompt
+# Setup logging
+logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
+logger = logging.getLogger(__name__)
 
-def extract_path_hint(prompt: str, query_type: QueryType, subtask: SubTaskType) -> str:
-    prompt_lower = prompt.lower()
-    username = getpass.getuser()
-    
-    documents_path = f"C:\\Users\\km866\\OneDrive\\Documents\\Documents"
-    downloads_path = f"C:\\Users\\km866\\Downloads"
+# Load environment variables
+dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../.env.local'))
+load_dotenv(dotenv_path)
 
-    # Rule 1: If "downloads" or "documents" is mentioned
-    if "downloads" in prompt_lower:
-        return downloads_path
-    if "documents" in prompt_lower:
-        return documents_path
 
-    # Rule 2: Based on query type
-    if query_type == QueryType.FILE_HANDLING:
-        return documents_path
+class VoiceAssistant:
+    @staticmethod
+    def list_input_devices():
+        pa = pyaudio.PyAudio()
+        for i in range(pa.get_device_count()):
+            info = pa.get_device_info_by_index(i)
+            if info['maxInputChannels'] > 0:
+                print(f"ID {i}: {info['name']}")
+        pa.terminate()
 
-    if query_type in [QueryType.GITHUB_ACTIONS, QueryType.PROJECT_SETUP]:
-        drive = "D:\\" if "d drive" in prompt_lower else "C:\\"
-        if "new" in prompt_lower or "create" in prompt_lower:
-            folder_name = "new_folder"
-            # Try to extract folder/project name from the prompt
-            tokens = prompt_lower.split()
-            for i, word in enumerate(tokens):
-                if word in {"folder", "project"} and i + 1 < len(tokens):
-                    folder_name = tokens[i + 1].capitalize()
-                    break
-            return f"{drive}{folder_name}"
-        return drive
+    def cleanup_old_recordings(self, folder="recordings", max_age_minutes=1):
+        now = time.time()
+        max_age_seconds = max_age_minutes * 60
+        if not os.path.exists(folder):
+            return
+        for filename in os.listdir(folder):
+            filepath = os.path.join(folder, filename)
+            if filename.endswith(".wav"):
+                file_age = now - os.path.getmtime(filepath)
+                if file_age > max_age_seconds:
+                    try:
+                        os.remove(filepath)
+                        print(f"Deleted old recording: {filename}")
+                    except Exception as e:
+                        print(f"Could not delete {filename}: {e}")
 
-    return "C:\\"  
+    def __init__(self, hotword="jarvis", record_duration=6, cooldown_seconds=2, on_recognized=None):
+        self.hotword = hotword
+        self.record_duration = record_duration
+        self.cooldown_seconds = cooldown_seconds
+        self.recognizer = sr.Recognizer()
+        self.listening_lock = threading.Lock()
+        self.on_recognized = on_recognized or self.default_command_handler
 
-def get_agent() -> Agent:
-    return Agent(
-        model=Groq(id="llama-3.3-70b-versatile"),
-        description=(
-            "You are a smart query processor. Translate natural language queries into structured fields: type, subtask, target, and path.\n"
-            "- Default to C:\\Users\\km866\\OneDrive\\Documents\\Documents\\ for FILE_HANDLING.\n"
-            "- Downloads path is mentioned C:\\Users\\km866\\Downloads"
-            "- Use D:\\ (fallback C:\\) for GITHUB_ACTIONS/PROJECT_SETUP.\n"
-            "- Use 'new_folder' or extracted name if creating something new.\n"
-            "- Use proper Windows-style absolute paths with capital drive letters.\n"
-            "- Extract and preserve file extensions (.pdf, .txt, etc.).\n"
-            "- Be accurate with subtask classification.\n"
-        ),
-        markdown=True,
-        response_model=QueryProcessor,
-    )
-    
-# Move this outside for reuse
-AGENT_MAIN = get_agent()
-AGENT_GENERAL = Agent(model=Groq(id="llama-3.3-70b-versatile"))
-
-def process_query(prompt: str) -> QueryProcessor:
-    boosted_prompt = boost_prompt(prompt)
-
-    if "[TASK:GENERAL_QUERY]" in boosted_prompt:
-        general_response = AGENT_GENERAL.run(boosted_prompt.replace("[TASK:GENERAL_QUERY] ", ""), stream=False)
-        return QueryProcessor(
-            type=QueryType.GENERAL_QUERY,
-            subtask=SubTaskType.GENERAL_QUERY,
-            target=general_response.content.strip(),
-            path=""
+        access_key = os.getenv("PICOVOICE_ACCESS_KEY")
+        if not access_key:
+            raise ValueError("Missing Picovoice access key. Set PICOVOICE_ACCESS_KEY in your .env file.")
+        self.porcupine = pvporcupine.create(access_key=access_key, keywords=[self.hotword])
+        self.pa = pyaudio.PyAudio()
+        self.stream = self.pa.open(
+            rate=self.porcupine.sample_rate,
+            channels=1,
+            format=pyaudio.paInt16,
+            input=True,
+            frames_per_buffer=self.porcupine.frame_length,
         )
-    
-    response = AGENT_MAIN.run(boosted_prompt, stream=False)
-    query_obj = response.content
-    path_hint = extract_path_hint(prompt, query_obj.type, query_obj.subtask)
-    query_obj.path = path_hint
-    return query_obj
-    # return response.content
 
-def cached_process_query(prompt: str) -> QueryProcessor:
-    normalized_prompt = " ".join(prompt.strip().lower().split())
+    def _beep(self):
+        print('\a', end='', flush=True)
 
-    if normalized_prompt in cache:
-        print("[CACHE HIT]")
-        print(cache[normalized_prompt])
-        return cache[normalized_prompt]
-    else:
-        print("[CACHE MISS]")
+    def _record_audio_dynamic(self):
+        print("Listening for command...")
+        os.makedirs("recordings", exist_ok=True)
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"recordings/voice_{timestamp}.wav"
 
-    result = process_query(prompt)
-    cache[normalized_prompt] = result
-    print(result)
-    return result
+        RATE = 16000
+        CHUNK = 1024
+        SILENCE_THRESHOLD = 100  
+        MAX_SILENCE_CHUNKS = int(1.5 * RATE / CHUNK)  
+        MAX_RECORD_SECONDS = 10
+
+        stream = self.pa.open(format=pyaudio.paInt16,
+                            channels=1,
+                            rate=RATE,
+                            input=True,
+                            frames_per_buffer=CHUNK)
+
+        print("Start speaking now...")
+        frames = []
+        silent_chunks = 0
+        speaking_started = False
+        start_time = time.time()
+
+        while True:
+            data = stream.read(CHUNK)
+            rms = audioop.rms(data, 2)  # Root mean square to detect volume
+            frames.append(data)
+
+            if rms > SILENCE_THRESHOLD:
+                silent_chunks = 0
+                speaking_started = True
+            else:
+                if speaking_started:
+                    silent_chunks += 1
+
+            if silent_chunks > MAX_SILENCE_CHUNKS:
+                print("Silence detected, stopping recording.")
+                break
+
+            if time.time() - start_time > MAX_RECORD_SECONDS:
+                print("Max recording time reached.")
+                break
+
+        stream.stop_stream()
+        stream.close()
+
+        wf = wave.open(filename, 'wb')
+        wf.setnchannels(1)
+        wf.setsampwidth(self.pa.get_sample_size(pyaudio.paInt16))
+        wf.setframerate(RATE)
+        wf.writeframes(b''.join(frames))
+        wf.close()
+
+        return filename
+
+    def _recognize_and_execute(self, audio_file):
+        try:
+            with sr.AudioFile(audio_file) as source:
+                audio_data = self.recognizer.record(source)
+                text = self.recognizer.recognize_google(audio_data)
+                print(f"You said: {text}")
+
+                if self.on_recognized:
+                    self.on_recognized(text)
+        except sr.UnknownValueError:
+            print("Couldn't understand what you said.")
+        except Exception as e:
+            print(f"Recognition error: {e}")
+
+    def _handle_hotword_trigger(self):
+        def inner():
+            with self.listening_lock:
+                self._beep()
+                filename = self._record_audio_dynamic()
+                if filename:
+                    try:
+                        self._recognize_and_execute(filename)
+                    finally:
+                        self.cleanup_old_recordings()
+                print("Ready for next command...")
+
+        threading.Thread(target=inner, daemon=True).start()
+
+    def _restart_stream(self):
+        print("Restarting audio stream...")
+        try:
+            self.stream.stop_stream()
+            self.stream.close()
+            self.stream = self.pa.open(
+                rate=self.porcupine.sample_rate,
+                channels=1,
+                format=pyaudio.paInt16,
+                input=True,
+                frames_per_buffer=self.porcupine.frame_length,
+            )
+        except Exception as e:
+            print(f"Failed to restart stream: {e}")
+
+    def start_hotword_listener(self):
+        print("Hotword listener started...")
+        last_trigger_time = 0
+        
+        try:
+            while True:
+                try:
+                    pcm = self.stream.read(self.porcupine.frame_length, exception_on_overflow=False)
+                    pcm = struct.unpack_from("h" * self.porcupine.frame_length, pcm)
+                    result = self.porcupine.process(pcm)
+                except Exception as e:
+                    self._restart_stream()
+                    continue
+
+                if result >= 0:
+                    current_time = time.time()
+                    if current_time - last_trigger_time >= self.cooldown_seconds and not self.listening_lock.locked():
+                        print("Hotword detected!")
+                        last_trigger_time = current_time
+                        self._handle_hotword_trigger()
+
+        except KeyboardInterrupt:
+            print("Voice assistant stopped.")
+        finally:
+            self.stream.stop_stream()
+            self.stream.close()
+            self.pa.terminate()
+            self.porcupine.delete()
+
+    @staticmethod
+    def default_command_handler(command):
+        if "time" in command:
+            now = datetime.datetime.now().strftime("%H:%M")
+            print(f"The current time is {now}.")
+        else:
+            print(f"Command received: {command}")
