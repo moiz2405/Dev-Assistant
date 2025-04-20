@@ -8,6 +8,7 @@ from agno.models.groq import Groq
 from PyPDF2 import PdfReader
 from agno.agent import Agent, RunResponse
 from agno.utils.pprint import pprint_run_response
+from pptx import Presentation
 indexed_files_cache = {}
 
 def is_wsl():
@@ -55,6 +56,16 @@ def convert_windows_to_wsl_path(win_path):
 def extract_text_from_pdf(path):
     reader = PdfReader(path)
     return "\n".join(page.extract_text() or "" for page in reader.pages)
+
+
+def extract_text_from_pptx(path):
+    prs = Presentation(path)
+    text_runs = []
+    for slide in prs.slides:
+        for shape in slide.shapes:
+            if hasattr(shape, "text"):
+                text_runs.append(shape.text)
+    return "\n".join(text_runs)
 
 def get_agent() -> Agent:
     return Agent(
