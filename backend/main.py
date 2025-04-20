@@ -3,11 +3,11 @@ import os
 import sys
 import atexit
 
-def suppress_stderr():
-    devnull = os.open(os.devnull, os.O_WRONLY)
-    os.dup2(devnull, sys.stderr.fileno())
+# def suppress_stderr():
+#     devnull = os.open(os.devnull, os.O_WRONLY)
+#     os.dup2(devnull, sys.stderr.fileno())
 
-suppress_stderr()
+# suppress_stderr()
 
 from app.stt.voice_recognition import VoiceAssistant
 from app.models.groq_preprocess import cached_process_query
@@ -29,5 +29,5 @@ def handle_recognized_command(text):
     executor.submit(lambda: speak(generate_response(text)))
     executor.submit(lambda: determine_function(cached_process_query(text)))
 
-assistant = VoiceAssistant(hotword="jarvis",record_duration=6,on_recognized=handle_recognized_command)
+assistant = VoiceAssistant(hotword="vision",record_duration=6,on_recognized=handle_recognized_command)
 assistant.start_hotword_listener()
