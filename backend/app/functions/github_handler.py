@@ -190,7 +190,6 @@ def list_github_repos(save_to_file=True, filename="github_repos.json"):
 
     print("Repository fetching complete.")
 
-
 def load_repo_list(path="backend/github_repos.json"):
     path = to_wsl_path(path)
     try:
