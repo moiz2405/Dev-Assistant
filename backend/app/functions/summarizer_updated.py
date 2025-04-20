@@ -83,8 +83,14 @@ def summarizer(pdf_path):
     if is_wsl() and "\\" in pdf_path:
         pdf_path = convert_windows_to_wsl_path(pdf_path)
 
-    pdf_text = extract_text_from_pdf(pdf_path)
-
+    if pdf_path.lower().endswith('.pdf'):
+        doc_text = extract_text_from_pdf(pdf_path)
+    elif pdf_path.lower().endswith('.pptx'):
+        doc_text = extract_text_from_pptx(pdf_path)
+    else:
+        print("Unsupported file type. Only PDF and PPTX are supported.")
+        return
+    
     print("Summarizer")
 
     while True:
@@ -92,7 +98,7 @@ def summarizer(pdf_path):
         if question.lower() in ['exit', 'quit']:
             print("Exiting")
             break
-        full_prompt = f"Here is a document content:\n\n{pdf_text}\n\nNow, {question}"
+        full_prompt = f"Here is a document content:\n\n{doc_text}\n\nNow, {question}"
         response: RunResponse = AGENT_MAIN.run(full_prompt)
         pprint_run_response(response, markdown=True)
 
