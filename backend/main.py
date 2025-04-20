@@ -3,11 +3,11 @@ import os
 import sys
 import atexit
 
-# def suppress_stderr():
-#     devnull = os.open(os.devnull, os.O_WRONLY)
-#     os.dup2(devnull, sys.stderr.fileno())
+def suppress_stderr():
+    devnull = os.open(os.devnull, os.O_WRONLY)
+    os.dup2(devnull, sys.stderr.fileno())
 
-# suppress_stderr()
+suppress_stderr()
 
 from app.stt.voice_recognition import VoiceAssistant
 from app.models.groq_preprocess import cached_process_query
