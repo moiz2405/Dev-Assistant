@@ -71,8 +71,3 @@ from app.functions.github_handler import push_folder_to_github, fuzzy_search_dir
 list_github_repos()
 # push_folder_to_github(repo_name, path)
 # print(fuzzy_search_dir(repo_name,"D://va_projects"))
-
-# "AIzaSyDnOExDHU5FTgltHtwxgsIFB6OwatX5seE"
-# "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"
-# "bAoxYko5I1mpaEwmlUealoE1qtJepjLl0uqbkxakw/EOQQPzsqxemA=="
-# "sk_113502a13cc74c9358d262e3f2644f91db537f2ffa3ddc78"
