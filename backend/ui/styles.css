@@ -16,7 +16,6 @@
   background: black;
   color: green;
   padding: 2;
-  font-family: monospace;
 }
 
 #main_panel {
@@ -24,5 +23,4 @@
   background: #1e1e1e;
   color: white;
   padding: 2;
-  font-family: sans-serif;
 }
