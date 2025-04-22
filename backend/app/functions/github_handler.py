@@ -132,10 +132,12 @@ def push_folder_to_github(repo_name, folder_path):
         print("No changes to commit.")
 
     remotes = subprocess.run(["git", "remote"], cwd=folder_path, capture_output=True, text=True).stdout
+    to_set_url = f"https://github.com/{USERNAME}/{final_repo_name}.git"
+
     if "origin" not in remotes:
-        subprocess.run(["git", "remote", "add", "origin", repo_url], cwd=folder_path, check=True)
+        subprocess.run(["git", "remote", "add", "origin", to_set_url], cwd=folder_path, check=True)
     else:
-        subprocess.run(["git", "remote", "set-url", "origin", repo_url], cwd=folder_path, check=True)
+        subprocess.run(["git", "remote", "set-url", "origin", to_set_url], cwd=folder_path, check=True)
 
     subprocess.run(["git", "branch", "-M", "main"], cwd=folder_path, check=True)
     subprocess.run(["git", "push", "-u", "origin", "main"], cwd=folder_path, check=True)
