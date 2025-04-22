@@ -16,3 +16,4 @@ requests
 pyaudio 
 diskcache
 python-pptx
+textual
