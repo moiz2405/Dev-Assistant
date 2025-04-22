@@ -10,7 +10,7 @@ from app.functions.github_handler import clone_github_repo, list_github_repos, p
 from app.models.query_types import QueryType, SubTaskType
 
 def determine_function(structured_query):
-    # print(structured_query.type.value)
+    # print(structured_query)
     # print(structured_query.subtask.value)
     # print(structured_query.target)
     # print(structured_query.path)
