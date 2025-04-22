@@ -9,13 +9,7 @@ from app.tts.response_generator import generate_response
 from app.tts.edge_tts import speak_text
 from app.functions.logger import logger
 
-# Executor will manage threads for tasks, limit to 4 as per original config
 executor = ThreadPoolExecutor(max_workers=4)
-
-# Custom print function to avoid recursion
-def custom_print(message):
-    """Custom print function to avoid recursion, print to stdout"""
-    sys.stdout.write(message + '\n')  # Write directly to stdout (without recursion)
 
 # Suppress stderr for warnings and errors
 def suppress_stderr():
@@ -32,12 +26,10 @@ def handle_recognized_command(text):
     if not text:
         logger.info("[MAIN] Nothing recognized.")   
         return
-    logger.info(f"[MAIN] Recognized: {text}")   # Log it for records
+    logger.info(f"[MAIN] Recognized: {text}")   
 
-    # Submit speech synthesis task in the executor
+
     executor.submit(run_speak_text, text)
-
-    # Run other processing tasks asynchronously or in parallel
     executor.submit(lambda: determine_function(cached_process_query(text)))
 
 # Run the speech synthesis in a separate thread
