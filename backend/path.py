@@ -3,11 +3,12 @@ import os
 import sys
 import atexit
 import asyncio
-# def suppress_stderr():
-#     devnull = os.open(os.devnull, os.O_WRONLY)
-#     os.dup2(devnull, sys.stderr.fileno())
 
-# suppress_stderr()
+def suppress_stderr():
+    devnull = os.open(os.devnull, os.O_WRONLY)
+    os.dup2(devnull, sys.stderr.fileno())
+
+suppress_stderr()
 
 from app.stt.voice_recognition import VoiceAssistant
 from app.models.groq_preprocess import cached_process_query
@@ -26,7 +27,6 @@ def handle_recognized_command(text):
     print(f"[MAIN] Recognized: {text}")
 
     def run_speak_text():
-        # Run the TTS function inside an asyncio event loop
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         loop.run_until_complete(speak_text(generate_response(text)))
@@ -36,7 +36,7 @@ def handle_recognized_command(text):
 
     # Run TTS and processing in parallel
     # executor.submit(lambda: speak_text(generate_response(text)))
-    # executor.submit(lambda: determine_function(cached_process_query(text)))
-    determine_function(cached_process_query(text))
+    executor.submit(lambda: determine_function(cached_process_query(text)))
+
 assistant = VoiceAssistant(hotword="vision",record_duration=6,on_recognized=handle_recognized_command)
 assistant.start_hotword_listener()
