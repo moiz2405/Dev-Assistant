@@ -57,16 +57,16 @@ async def start_hotword_listener(app: AssistantApp):
 # Run the assistant UI and hotword listener
 async def run_ui_and_hotword_listener():
     """Run both the UI and the hotword listener concurrently."""
-    # Start the assistant UI
     app = AssistantApp()
+    
+    # Run the UI in the background
     ui_task = asyncio.create_task(app.run_async())
-
-    # Start the hotword listener in the background and pass the app instance
+    
+    # Start the hotword listener in the background
     listener_task = asyncio.create_task(start_hotword_listener(app))
-
+    
     # Wait for both tasks to finish
     await asyncio.gather(ui_task, listener_task)
-
 if __name__ == "__main__":
     try:
         # Start the combined UI and hotword listener
