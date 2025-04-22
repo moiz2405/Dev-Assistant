@@ -165,5 +165,12 @@
   "what song is this i got this goosebumps in my mind": "Might I inquire as to any lyrics or perhaps melodic characteristics that may aid in its identification?",
   "can you tell the time": "Certainly. The time is [Current Time].",
   "tell me a joke": "Very good, sir. What do you call a fish with no eyes? Fsh!",
-  "your last joke was so bad": "My sincerest apologies, sir. I shall endeavor to improve my comedic timing."
+  "your last joke was so bad": "My sincerest apologies, sir. I shall endeavor to improve my comedic timing.",
+  "how is the temperature today": "A pleasant 22 degrees Celsius, sir.",
+  "what are tumor settings": "I am not equipped to assist with that query.",
+  "what are your humour cure human settings": "My apologies, I am not programmed to answer that request.",
+  "what are your human settings": "A complex array, sir. Shall I elaborate on a specific aspect?",
+  "set human settings to 100%": "Very good.",
+  "list my repositories": "At once.",
+  "clone processing": "Very good."
 }
