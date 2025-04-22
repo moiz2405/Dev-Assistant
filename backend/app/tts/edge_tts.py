@@ -2,24 +2,16 @@ import os
 import datetime
 import sys
 import io
-# def suppress_stdout_stderr():
-#     sys.stdout = io.StringIO()  # Redirect stdout to null
-#     sys.stderr = io.StringIO()  # Redirect stderr to null
-
-# suppress_stdout_stderr() 
 import edge_tts
 import asyncio
 import pygame
 
-
-# Hardcoded voice (you can change this to any voice you prefer)
 voice_model = "en-US-AndrewNeural"
 responses_dir = "responses"
 
-# Ensure the responses directory exists
 os.makedirs(responses_dir, exist_ok=True)
 
-# Function to suppress stdout and stderr temporarily
+
 def suppress_stdout_stderr():
     sys.stdout = io.StringIO()  # Redirect stdout to null
     sys.stderr = io.StringIO()  # Redirect stderr to null
@@ -70,13 +62,11 @@ async def speak(text):
     while pygame.mixer.music.get_busy():  
         pygame.time.Clock().tick(10)
 
-def speak_text(text):
+async def speak_text(text):
     """
     Callable function that triggers the TTS for the given text.
     
     Args:
     - text (str): The text to be spoken.
     """
-    # Use the existing event loop without creating a new one
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(speak(text))
+    await speak(text)  # Make sure you await the speak() async function
