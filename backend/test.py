@@ -11,12 +11,18 @@ from app.tts.edge_tts import speak_text
 # Executor will manage threads for tasks, limit to 4 as per original config
 executor = ThreadPoolExecutor(max_workers=4)
 
-# Suppress stderr to prevent unnecessary pygame outputs
 def suppress_stderr():
+    # Save the original stderr file descriptor
+    original_stderr = sys.stderr
+
+    # Redirect stderr to devnull
     devnull = os.open(os.devnull, os.O_WRONLY)
     os.dup2(devnull, sys.stderr.fileno())
 
-suppress_stderr()
+    return original_stderr
+
+# Call this to suppress stderr
+original_stderr = suppress_stderr()
 
 def handle_recognized_command(text):
     if not text:
