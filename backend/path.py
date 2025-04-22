@@ -2,6 +2,7 @@ import sys
 import os
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+import threading
 from app.stt.voice_recognition import VoiceAssistant
 from app.models.groq_preprocess import cached_process_query
 from app.query_processor import determine_function
@@ -20,8 +21,7 @@ def suppress_stderr():
     os.dup2(devnull, sys.stderr.fileno())
     return original_stderr
 
-
-original_stderr = suppress_stderr()
+# original_stderr = suppress_stderr()
 
 def handle_recognized_command(text):
     if not text:
@@ -41,11 +41,24 @@ def run_speak_text(text):
     except Exception as e:
         logger.error(f"[MAIN] Error in speaking text: {e}")  # Log any error that occurs
 
+# Function to start the UI
+def start_ui():
+    asyncio.run(AssistantApp().run_async())
+
 # Start voice assistant with hotword "vision"
 assistant = VoiceAssistant(hotword="vision", record_duration=6, on_recognized=handle_recognized_command)
 assistant.start_hotword_listener()
 
 if __name__ == "__main__":
-    # Run the UI in the same event loop
-    asyncio.run(AssistantApp().run_async())
+    # Start UI in a separate thread
+    ui_thread = threading.Thread(target=start_ui)
+    ui_thread.daemon = True  # Set to daemon so it doesn't block program exit
+    ui_thread.start()
+
+    # Continue running voice assistant in the main thread
+    try:
+        while True:
+            pass  # Keep the main thread alive
+    except KeyboardInterrupt:
+        logger.info("Voice assistant stopped.")
 
