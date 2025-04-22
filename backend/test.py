@@ -33,7 +33,11 @@ def handle_recognized_command(text):
 
 def run_speak_text(text):
     try:
-        # Use asyncio.run to run the speak_text function in a new event loop
+        # Create and set a new event loop in the thread
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+        # Now, run the async function within this event loop
         asyncio.run(speak_text(generate_response(text)))
     except Exception as e:
         print(f"[MAIN] Error in speaking text: {e}")
