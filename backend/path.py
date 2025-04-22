@@ -2,7 +2,6 @@ import sys
 import os
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-import threading
 from app.stt.voice_recognition import VoiceAssistant
 from app.models.groq_preprocess import cached_process_query
 from app.query_processor import determine_function
@@ -41,24 +40,34 @@ def run_speak_text(text):
     except Exception as e:
         logger.error(f"[MAIN] Error in speaking text: {e}")  # Log any error that occurs
 
-# Function to start the UI
-def start_ui():
-    asyncio.run(AssistantApp().run_async())
-
 # Start voice assistant with hotword "vision"
 assistant = VoiceAssistant(hotword="vision", record_duration=6, on_recognized=handle_recognized_command)
-assistant.start_hotword_listener()
 
-if __name__ == "__main__":
-    # Start UI in a separate thread
-    ui_thread = threading.Thread(target=start_ui)
-    ui_thread.daemon = True  # Set to daemon so it doesn't block program exit
-    ui_thread.start()
-
-    # Continue running voice assistant in the main thread
+def start_assistant():
+    """Start the hotword listener and the voice assistant."""
     try:
-        while True:
-            pass  # Keep the main thread alive
+        # Start the voice assistant with hotword listener
+        assistant.start_hotword_listener()
+        logger.info("Voice assistant is listening for hotword...")
     except KeyboardInterrupt:
         logger.info("Voice assistant stopped.")
+        cleanup()
 
+def cleanup():
+    """Cleanup resources and shutdown the application."""
+    logger.info("Shutting down the application.")
+    # Additional cleanup steps can be placed here if needed
+    sys.exit(0)
+
+if __name__ == "__main__":
+    try:
+        # Start the voice assistant
+        start_assistant()
+
+        # After hotword listener is started, start the UI
+        logger.info("Now starting the UI...")
+        asyncio.run(AssistantApp().run_async())
+
+    except KeyboardInterrupt:
+        logger.info("Ctrl+C detected. Stopping the assistant and UI.")
+        cleanup()
