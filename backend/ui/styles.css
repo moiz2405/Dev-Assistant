@@ -1,0 +1,28 @@
+#layout {
+  layout: horizontal;
+  height: 100%;
+  padding: 1;
+}
+
+#left {
+  width: 30%;
+  border: solid green;
+  padding: 1;
+}
+
+#log_panel {
+  height: 100%;
+  overflow: auto;
+  background: black;
+  color: green;
+  padding: 2;
+  font-family: monospace;
+}
+
+#main_panel {
+  width: 70%;
+  background: #1e1e1e;
+  color: white;
+  padding: 2;
+  font-family: sans-serif;
+}
