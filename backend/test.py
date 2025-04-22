@@ -10,39 +10,40 @@
 # clone_github_repo(repo_name,"D://")
 # print(repo_url)
 
-import os
-import sys
-# def suppress_stderr():
-#     devnull = os.open(os.devnull, os.O_WRONLY) 
-#     os.dup2(devnull, sys.stderr.fileno())
+# import os
+# import sys
+# # def suppress_stderr():
+# #     devnull = os.open(os.devnull, os.O_WRONLY) 
+# #     os.dup2(devnull, sys.stderr.fileno())
 
-# suppress_stderr()
-from app.models.groq_preprocess import cached_process_query
-from app.stt.voice_recognition import VoiceAssistant
-from app.query_processor import determine_function
+# # suppress_stderr()
+# from app.models.groq_preprocess import cached_process_query
+# from app.stt.voice_recognition import VoiceAssistant
+# from app.query_processor import determine_function
 
-while(1):
-    prompt = input()
-    result = cached_process_query(prompt)
-    # print(result)
-    determine_function(cached_process_query(prompt))
+# while(1):
+#     prompt = input()
+#     result = cached_process_query(prompt)
+#     # print(result)
+#     determine_function(cached_process_query(prompt))
 
-def handle_recognized_command(text):
-    if not text:
-        print("[MAIN] Nothing recognized.")
-        return
+# def handle_recognized_command(text):
+#     if not text:
+#         print("[MAIN] Nothing recognized.")
+#         return
 
-    print(f"[MAIN] Recognized: {text}")
+#     print(f"[MAIN] Recognized: {text}")
 
-assistant = VoiceAssistant(
-    hotword="jarvis",
-    record_duration=5,
-    on_recognized=handle_recognized_command
-)
-assistant.start_hotword_listener()
+# assistant = VoiceAssistant(
+#     hotword="jarvis",
+#     record_duration=5,
+#     on_recognized=handle_recognized_command
+# )
+# assistant.start_hotword_listener()
 
-
-
+from app.tts.edge_tts import speak_text
+input = "Very good, cloning decentralized repository."
+speak_text(input)
 # from app.models.path_processor import list_directory_contents
 # while(1):
 #       user_path = input()
@@ -64,10 +65,10 @@ assistant.start_hotword_listener()
 # summarize_in_new_window(pdf_path, file_name)
 
 
-from app.functions.github_handler import push_folder_to_github, fuzzy_search_dir, list_github_repos
+# from app.functions.github_handler import push_folder_to_github, fuzzy_search_dir, list_github_repos
 
-# repo_name = "codeforce"
-# path = "D://va_projects"
-list_github_repos()
+# # repo_name = "codeforce"
+# # path = "D://va_projects"
+# list_github_repos()
 # push_folder_to_github(repo_name, path)
 # print(fuzzy_search_dir(repo_name,"D://va_projects"))
