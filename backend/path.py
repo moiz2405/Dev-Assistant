@@ -21,12 +21,14 @@ def suppress_stderr():
     return original_stderr
 
 # original_stderr = suppress_stderr()
-
-def handle_recognized_command(text):
+def handle_recognized_command(text, app: AssistantApp):
+    """Callback for when hotword is recognized, update the UI log."""
     if not text:
-        logger.info("[MAIN] Nothing recognized.")   
+        logger.info("[MAIN] Nothing recognized.")
+        app.post_message(app.update_log_message("Nothing recognized."))
         return
-    logger.info(f"[MAIN] Recognized: {text}")   
+    logger.info(f"[MAIN] Recognized: {text}")
+    app.post_message(app.update_log_message(f"Recognized: {text}"))
 
     executor.submit(run_speak_text, text)
     executor.submit(lambda: determine_function(cached_process_query(text)))
@@ -42,32 +44,36 @@ def run_speak_text(text):
 
 # Start voice assistant with hotword "vision"
 assistant = VoiceAssistant(hotword="vision", record_duration=6, on_recognized=handle_recognized_command)
+async def start_hotword_listener(app: AssistantApp):
+    """Run hotword listener asynchronously while keeping the UI responsive."""
+    logger.info("Starting hotword listener...")
+    print("Starting hotword listener...")  # Debug print to confirm it's being called
+    await asyncio.to_thread(assistant.start_hotword_listener)
+    logger.info("Hotword listener started.")
+    app.post_message(app.update_log_message("Hotword listener started."))
+    print("Hotword listener started.")  # Debug print to confirm it's running
 
-def start_assistant():
-    """Start the hotword listener and the voice assistant."""
-    try:
-        # Start the voice assistant with hotword listener
-        assistant.start_hotword_listener()
-        logger.info("Voice assistant is listening for hotword...")
-    except KeyboardInterrupt:
-        logger.info("Voice assistant stopped.")
-        cleanup()
 
-def cleanup():
-    """Cleanup resources and shutdown the application."""
-    logger.info("Shutting down the application.")
-    # Additional cleanup steps can be placed here if needed
-    sys.exit(0)
+# Run the assistant UI and hotword listener
+async def run_ui_and_hotword_listener():
+    """Run both the UI and the hotword listener concurrently."""
+    # Start the assistant UI
+    app = AssistantApp()
+    ui_task = asyncio.create_task(app.run_async())
+
+    # Start the hotword listener in the background and pass the app instance
+    listener_task = asyncio.create_task(start_hotword_listener(app))
+
+    # Wait for both tasks to finish
+    await asyncio.gather(ui_task, listener_task)
 
 if __name__ == "__main__":
     try:
-        # Start the voice assistant
-        start_assistant()
-
-        # After hotword listener is started, start the UI
-        logger.info("Now starting the UI...")
-        asyncio.run(AssistantApp().run_async())
+        # Start the combined UI and hotword listener
+        asyncio.run(run_ui_and_hotword_listener())
 
     except KeyboardInterrupt:
         logger.info("Ctrl+C detected. Stopping the assistant and UI.")
-        cleanup()
+        # Cleanup when stopping
+        assistant.stop()  # Assuming you have a stop method in your VoiceAssistant class
+        sys.exit(0)
