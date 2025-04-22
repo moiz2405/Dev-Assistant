@@ -1,8 +1,16 @@
+import os
+import datetime
+import sys
+import io
+# def suppress_stdout_stderr():
+#     sys.stdout = io.StringIO()  # Redirect stdout to null
+#     sys.stderr = io.StringIO()  # Redirect stderr to null
+
+# suppress_stdout_stderr() 
 import edge_tts
 import asyncio
 import pygame
-import os
-import datetime
+
 
 # Hardcoded voice (you can change this to any voice you prefer)
 voice_model = "en-US-AndrewNeural"
@@ -11,6 +19,15 @@ responses_dir = "responses"
 # Ensure the responses directory exists
 os.makedirs(responses_dir, exist_ok=True)
 
+# Function to suppress stdout and stderr temporarily
+def suppress_stdout_stderr():
+    sys.stdout = io.StringIO()  # Redirect stdout to null
+    sys.stderr = io.StringIO()  # Redirect stderr to null
+
+def restore_stdout_stderr():
+    sys.stdout = sys.__stdout__  # Restore original stdout
+    sys.stderr = sys.__stderr__  # Restore original stderr
+
 async def speak(text):
     """
     Function to speak the given text using the hardcoded voice.
@@ -18,6 +35,9 @@ async def speak(text):
     Args:
     - text (str): The text to be spoken.
     """
+    # Suppress the pygame initialization message
+    suppress_stdout_stderr()
+
     # Create a timestamped filename for the new response
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"{responses_dir}/res_voice_{timestamp}.mp3"  # or ".wav" if you prefer
@@ -26,8 +46,10 @@ async def speak(text):
     communicate = edge_tts.Communicate(text, voice=voice_model)
     await communicate.save(filename)
 
+    # Restore stdout and stderr after suppressing
+    restore_stdout_stderr()
+
     # Delete the previous response if it exists
-    # List all files in the response directory, sorted by creation time (oldest first)
     existing_files = sorted(
         [f for f in os.listdir(responses_dir) if f.endswith(".mp3")], 
         key=lambda f: os.path.getctime(os.path.join(responses_dir, f))
@@ -39,7 +61,7 @@ async def speak(text):
 
     # Initialize the pygame mixer
     pygame.mixer.init()
-    
+
     # Load and play the saved audio file
     pygame.mixer.music.load(filename)
     pygame.mixer.music.play()
@@ -55,7 +77,6 @@ def speak_text(text):
     Args:
     - text (str): The text to be spoken.
     """
-    # print(f"Edge_tts called with {text}")
-
+    # Use the existing event loop without creating a new one
     loop = asyncio.get_event_loop()
     loop.run_until_complete(speak(text))
