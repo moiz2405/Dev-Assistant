@@ -158,5 +158,12 @@
   "set timer for what is importance": "At once.",
   "summarise all from documents": "At once.",
   "push local to github": "Very good, sir. Initiating push.",
-  "thank you": "You're most welcome."
+  "thank you": "You're most welcome.",
+  "can you close whatsapp": "Very good.",
+  "how r u": "I am functioning optimally, thank you for inquiring.",
+  "how are you feeling today": "Quite well, thank you for asking.",
+  "what song is this i got this goosebumps in my mind": "Might I inquire as to any lyrics or perhaps melodic characteristics that may aid in its identification?",
+  "can you tell the time": "Certainly. The time is [Current Time].",
+  "tell me a joke": "Very good, sir. What do you call a fish with no eyes? Fsh!",
+  "your last joke was so bad": "My sincerest apologies, sir. I shall endeavor to improve my comedic timing."
 }
