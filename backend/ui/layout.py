@@ -1,7 +1,7 @@
 from textual.app import App, ComposeResult
 from textual.containers import Container, Vertical
 from textual.widgets import Static
-from backend.app.functions.logger import logger
+from app.functions.logger import logger
 
 class LogPanel(Static):
     def on_mount(self) -> None:
