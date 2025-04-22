@@ -8,10 +8,9 @@ from app.query_processor import determine_function
 from app.tts.response_generator import generate_response
 from app.tts.edge_tts import speak_text
 from app.functions.logger import logger
-
+from ui.layout import AssistantApp
 executor = ThreadPoolExecutor(max_workers=4)
 
-# Suppress stderr for warnings and errors
 def suppress_stderr():
     """Suppress stderr output (warnings/errors) by redirecting it to devnull."""
     original_stderr = sys.stderr
@@ -44,3 +43,4 @@ def run_speak_text(text):
 # Start voice assistant with hotword "vision"
 assistant = VoiceAssistant(hotword="vision", record_duration=6, on_recognized=handle_recognized_command)
 assistant.start_hotword_listener()
+
