@@ -1,0 +1,24 @@
+#layout {
+  layout: horizontal;
+  height: 100%;
+}
+
+#left {
+  width: 30%;
+  border: solid green;
+  padding: 1;
+}
+
+#log_panel {
+  height: 100%;
+  overflow: auto;
+  background: black;
+  color: green;
+}
+
+#main_panel {
+  width: 70%;
+  background: #1e1e1e;
+  color: white;
+  padding: 2;
+}
