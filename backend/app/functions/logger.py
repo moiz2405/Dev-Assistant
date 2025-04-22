@@ -31,6 +31,3 @@ def custom_print(*args, **kwargs):
     # Log to the log file without changing the print behavior
     log_to_file(message)
 
-# Example usage: log something
-# print("This is printed in terminal.")  # This will still show in terminal
-# custom_print("This message will be logged into the file.")
