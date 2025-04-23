@@ -2,6 +2,8 @@
 import sys
 import os
 import asyncio
+import websockets
+import json
 from concurrent.futures import ThreadPoolExecutor
 from app.stt.voice_recognition import VoiceAssistant
 from app.models.groq_preprocess import cached_process_query
@@ -12,6 +14,16 @@ from app.functions.logger import logger
 
 executor = ThreadPoolExecutor(max_workers=4)
 
+# WebSocket connection
+UI_WS_URI = "ws://localhost:8765"
+
+async def send_to_ui(message):
+    try:
+        async with websockets.connect(UI_WS_URI) as websocket:
+            await websocket.send(json.dumps({"type": "log", "message": message}))
+    except Exception as e:
+        logger.error(f"[VOICE] WebSocket Error: {e}")
+
 # Run the speech synthesis in a separate thread
 def run_speak_text(text):
     try:
@@ -21,23 +33,15 @@ def run_speak_text(text):
     except Exception as e:
         logger.error(f"[VOICE] Error in speaking text: {e}")
 
-# Initialize UI reference (to be injected later)
-app_instance = None
-
-def inject_ui(app):
-    global app_instance
-    app_instance = app
-
+# Handle recognized text
 def handle_recognized_command(text):
     if not text:
         logger.info("[VOICE] Nothing recognized.")
-        if app_instance:
-            app_instance.post_message(app_instance.update_log_message("Nothing recognized."))
+        asyncio.run(send_to_ui("Nothing recognized."))
         return
 
     logger.info(f"[VOICE] Recognized: {text}")
-    if app_instance:
-        app_instance.post_message(app_instance.update_log_message(f"Recognized: {text}"))
+    asyncio.run(send_to_ui(f"Recognized: {text}"))
 
     executor.submit(run_speak_text, text)
     executor.submit(lambda: determine_function(cached_process_query(text)))
@@ -50,8 +54,7 @@ async def start_voice_assistant():
     print("Starting hotword listener...")
     await asyncio.to_thread(assistant.start_hotword_listener)
     logger.info("Hotword listener started.")
-    if app_instance:
-        app_instance.post_message(app_instance.update_log_message("Hotword listener started."))
+    await send_to_ui("Hotword listener started.")
     print("Hotword listener started.")
 
 if __name__ == "__main__":
