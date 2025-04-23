@@ -41,15 +41,29 @@ class AssistantApp(App):
         if not os.path.exists(LOG_FILE):
             open(LOG_FILE, "w").close()
 
-        with open(LOG_FILE, "r") as f:
-            f.seek(0, os.SEEK_END)  # Move to the end of file
-
-            while True:
-                line = await asyncio.to_thread(f.readline)
-                if line:
-                    self.log_panel.append_log(line.strip())
-                else:
-                    await asyncio.sleep(0.5)
+        # Keep track of the last position we read
+        position = 0
+        
+        while True:
+            # Open the file on each iteration to get fresh data
+            with open(LOG_FILE, "r") as f:
+                # Get file size
+                f.seek(0, os.SEEK_END)
+                file_size = f.tell()
+                
+                # If the file size has increased, read the new content
+                if file_size > position:
+                    f.seek(position)
+                    new_lines = f.read()
+                    position = file_size
+                    
+                    # Process any complete lines
+                    for line in new_lines.splitlines():
+                        if line:
+                            self.log_panel.append_log(line.strip())
+            
+            # Wait a short time before checking again
+            await asyncio.sleep(0.1)
 
 if __name__ == "__main__":
     AssistantApp().run()
