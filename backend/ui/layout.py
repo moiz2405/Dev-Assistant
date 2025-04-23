@@ -32,21 +32,29 @@ class AssistantApp(App):
 
     async def on_startup(self) -> None:
         self.log_panel.append_log("🟢 App started")
-        print("🟢 App started")  # Print to the terminal
+        print("🟢 App started")  # Print to terminal
+        # Start the WebSocket server asynchronously
         await asyncio.create_task(self.start_websocket_server())
 
-
     async def start_websocket_server(self):
-        async def handler(websocket):
+        async def handler(websocket, path):
             async for message in websocket:
                 data = json.loads(message)
                 if data.get("type") == "log":
                     self.log_panel.append_log(data["message"])
 
-        server = await websockets.serve(handler, "localhost", 8765)
-        self.log_panel.append_log("🟢 WebSocket server listening on ws://localhost:8765")
-        print("🟢 WebSocket server listening on ws://localhost:8765")  # Print to terminal
+        try:
+            # Starting the WebSocket server
+            server = await websockets.serve(handler, "localhost", 8765)
+            self.log_panel.append_log("🟢 WebSocket server listening on ws://localhost:8765")
+            print("🟢 WebSocket server listening on ws://localhost:8765")  # Print to terminal
 
+            # Keep the server running until it's stopped
+            await server.wait_closed()
+
+        except Exception as e:
+            print(f"Error starting WebSocket server: {e}")
+            self.log_panel.append_log(f"❌ Error starting WebSocket server: {e}")
 
 if __name__ == "__main__":
     app = AssistantApp()  # Create an instance of AssistantApp
