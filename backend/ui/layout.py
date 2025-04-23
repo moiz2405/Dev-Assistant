@@ -32,7 +32,9 @@ class AssistantApp(App):
 
     async def on_startup(self) -> None:
         self.log_panel.append_log("🟢 App started")
-        asyncio.create_task(self.start_websocket_server())
+        print("🟢 App started")  # Print to the terminal
+        await asyncio.create_task(self.start_websocket_server())
+
 
     async def start_websocket_server(self):
         async def handler(websocket):
@@ -43,6 +45,9 @@ class AssistantApp(App):
 
         server = await websockets.serve(handler, "localhost", 8765)
         self.log_panel.append_log("🟢 WebSocket server listening on ws://localhost:8765")
+        print("🟢 WebSocket server listening on ws://localhost:8765")  # Print to terminal
+
 
 if __name__ == "__main__":
-    AssistantApp.run()
+    app = AssistantApp()  # Create an instance of AssistantApp
+    app.run()  # Run the instance
