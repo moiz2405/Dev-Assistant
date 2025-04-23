@@ -18,11 +18,19 @@ executor = ThreadPoolExecutor(max_workers=4)
 UI_WS_URI = "ws://localhost:8765"
 
 async def send_to_ui(message):
-    try:
-        async with websockets.connect(UI_WS_URI) as websocket:
-            await websocket.send(json.dumps({"type": "log", "message": message}))
-    except Exception as e:
-        logger.error(f"[VOICE] WebSocket Error: {e}")
+    retries = 5  # Set the number of retries
+    for attempt in range(retries):
+        try:
+            async with websockets.connect(UI_WS_URI) as websocket:
+                await websocket.send(json.dumps({"type": "log", "message": message}))
+            return  # Successfully sent, exit function
+        except Exception as e:
+            logger.error(f"[VOICE] WebSocket Error (Attempt {attempt + 1}/{retries}): {e}")
+            if attempt < retries - 1:
+                await asyncio.sleep(2)  # Retry after a short delay
+            else:
+                logger.error("[VOICE] Failed to send message to UI after multiple attempts.")
+                break
 
 # Run the speech synthesis in a separate thread
 def run_speak_text(text):
