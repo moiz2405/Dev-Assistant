@@ -7,8 +7,6 @@ from textual.app import App, ComposeResult
 from textual.containers import Container, Vertical
 from textual.widgets import Static
 
-if sys.stdin.closed:
-    sys.stdin = os.fdopen(sys.stdin.fileno(), 'r')
 class LogPanel(Static):
     def on_mount(self) -> None:
         self.logs = ["Logs will appear here..."]
@@ -45,3 +43,6 @@ class AssistantApp(App):
 
         server = await websockets.serve(handler, "localhost", 8765)
         self.log_panel.append_log("🟢 WebSocket server listening on ws://localhost:8765")
+
+if __name__ == "__main__":
+    AssistantApp.run()
