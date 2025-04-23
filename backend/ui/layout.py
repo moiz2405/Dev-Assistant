@@ -14,17 +14,21 @@ formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
-LOG_FILE = "logs/assistant.log"  # Corrected path to the log file in the logs folder
+LOG_FILE = "logs/assistant.log"  # Ensure the log file exists in the logs folder
 
 class LogPanel(Static):
     def on_mount(self) -> None:
-        # Read the current log file and display its contents in the log panel
+    # Read the current log file and display its contents in the log panel
         self.logs = self.read_log_file()
-        self.update("\n".join(self.logs))
+        # Filter out any invalid markup or escape characters
+        sanitized_logs = "\n".join(self.logs)
+    # Update with the sanitized raw text
+        self.update(sanitized_logs)
+ # Update with raw text
 
     def append_log(self, message: str):
         self.logs.append(message)
-        self.update("\n".join(self.logs))
+        self.update("\n".join(self.logs))  # Update with raw text
 
     def read_log_file(self):
         """Read the logs from the log file and return as a list of log entries."""
@@ -63,16 +67,6 @@ class AssistantApp(App):
         while True:
             self.log_panel.tail_log_file()
 
-    async def on_shutdown(self) -> None:
-        # Perform any cleanup if needed (empty here for now)
-        logger.info("🔴 Shutting down...")
-
 if __name__ == "__main__":
     app = AssistantApp()  # Create an instance of AssistantApp
-
-    # Handle KeyboardInterrupt gracefully
-    try:
-        app.run()  # Run the instance
-    except KeyboardInterrupt:
-        logger.info("\n🛑 Shutting down...")
-        app.shutdown()  # Gracefully shut down the app on Ctrl+C
+    app.run()  # Run the instance
