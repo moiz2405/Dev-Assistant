@@ -70,5 +70,5 @@ if __name__ == "__main__":
         asyncio.run(start_voice_assistant())
     except KeyboardInterrupt:
         logger.info("Stopping voice assistant.")
-        assistant.stop()
+        # assistant.stop()
         sys.exit(0)
