@@ -1,39 +1,35 @@
 import asyncio
 import logging
-import os
 from textual.app import App
 from textual.widgets import Static
+import os
+import time
 
-LOG_FILE = "logs/assistant.log"
-
-# Set up terminal logger
+# Set up logger for terminal output
 logger = logging.getLogger("AssistantApp")
 logger.setLevel(logging.DEBUG)
-stream = logging.StreamHandler()
-stream.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-logger.addHandler(stream)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+
+LOG_FILE = "logs/assistant.log"  # Ensure the log file exists in the logs folder
 
 class LogPanel(Static):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.logs = []
-
-    def on_mount(self):
-        self.update("🟢 Waiting for logs...")
+    def on_mount(self) -> None:
+        self.logs = self.read_log_file()
+        self.update("\n".join(self.logs))  # Update with raw text
 
     def append_log(self, message: str):
         self.logs.append(message)
-        self.update("\n".join(self.logs[-100:]))  # Show last 100 lines
+        self.update("\n".join(self.logs[-100:]))
 
-# Read all new lines after the last known length
-def get_new_log_lines(last_line_count: int) -> tuple[list[str], int]:
-    if os.path.exists(LOG_FILE):
-        with open(LOG_FILE, "r") as f:
-            lines = f.readlines()
-            if len(lines) > last_line_count:
-                new_lines = lines[last_line_count:]
-                return [line.strip() for line in new_lines], len(lines)
-    return [], last_line_count
+    def read_log_file(self):
+        if os.path.exists(LOG_FILE):
+            with open(LOG_FILE, "r") as log_file:
+                return [line.strip() for line in log_file.readlines()]
+        return ["Logs will appear here..."]
 
 class AssistantApp(App):
     def compose(self):
@@ -43,15 +39,24 @@ class AssistantApp(App):
     async def on_startup(self):
         self.log_panel.append_log("🟢 App started")
         logger.info("🟢 App started")
-        asyncio.create_task(self.watch_log_file())
+        asyncio.create_task(self.tail_log_file())
 
-    async def watch_log_file(self):
+    async def tail_log_file(self):
+        """Non-blocking log watcher that tails new lines from file."""
         last_line_count = 0
         while True:
-            new_lines, last_line_count = get_new_log_lines(last_line_count)
-            for line in new_lines:
-                self.log_panel.append_log(line)
-            await asyncio.sleep(1)  # Poll every 1s
+            try:
+                with open(LOG_FILE, "r") as f:
+                    lines = f.readlines()
+                    new_lines = lines[last_line_count:]
+                    for line in new_lines:
+                        self.log_panel.append_log(line.strip())
+                    last_line_count = len(lines)
+            except Exception as e:
+                logger.warning(f"Error reading log file: {e}")
+            await asyncio.sleep(1)  # Let the app breathe
+
 
 if __name__ == "__main__":
-    AssistantApp().run()
+    app = AssistantApp()  # Create an instance of AssistantApp
+    app.run()  # Run the instance
