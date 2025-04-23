@@ -1,21 +1,24 @@
-# wrap.py
-#calls both main.py and layout.py to run together 
+import sys
+import os
+import asyncio
 import multiprocessing
-import subprocess
-import time
-
+from ui.layout import AssistantApp
+from path import start_voice_assistant, send_to_ui
+if sys.stdin.closed:
+    sys.stdin = os.fdopen(sys.stdin.fileno(), 'r')
 def run_ui():
-    subprocess.run(["python", "ui/layout.py"])
+    app = AssistantApp()
+    asyncio.run(app.run_async())  # Ensure you use asyncio to run the app
 
-def run_voice_assistant():
-    subprocess.run(["python", "path.py"])
+def run_assistant():
+    asyncio.run(start_voice_assistant())
 
 if __name__ == "__main__":
+    # Avoid I/O issues by keeping the UI and assistant in the same event loop
     ui_process = multiprocessing.Process(target=run_ui)
-    assistant_process = multiprocessing.Process(target=run_voice_assistant)
+    assistant_process = multiprocessing.Process(target=run_assistant)
 
     ui_process.start()
-    time.sleep(2)  # Wait for WebSocket server to start
     assistant_process.start()
 
     ui_process.join()
