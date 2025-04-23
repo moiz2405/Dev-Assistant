@@ -25,7 +25,7 @@ async def send_to_ui(message):
                 await websocket.send(json.dumps({"type": "log", "message": message}))
             return  # Successfully sent, exit function
         except Exception as e:
-            logger.error(f"[VOICE] WebSocket Error (Attempt {attempt + 1}/{retries}): {e}")
+            # logger.error(f"[VOICE] WebSocket Error (Attempt {attempt + 1}/{retries}): {e}")
             if attempt < retries - 1:
                 await asyncio.sleep(2)  # Retry after a short delay
             else:
