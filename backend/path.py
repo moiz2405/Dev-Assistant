@@ -1,9 +1,8 @@
+
 # path.py
 import sys
 import os
 import asyncio
-import websockets
-import json
 from concurrent.futures import ThreadPoolExecutor
 from app.stt.voice_recognition import VoiceAssistant
 from app.models.groq_preprocess import cached_process_query
@@ -13,24 +12,6 @@ from app.tts.edge_tts import speak_text
 from app.functions.logger import logger
 
 executor = ThreadPoolExecutor(max_workers=4)
-
-# WebSocket connection
-UI_WS_URI = "ws://localhost:8765"
-
-async def send_to_ui(message):
-    retries = 2  # Set the number of retries
-    for attempt in range(retries):
-        try:
-            async with websockets.connect(UI_WS_URI) as websocket:
-                await websocket.send(json.dumps({"type": "log", "message": message}))
-            return  # Successfully sent, exit function
-        except Exception as e:
-            # logger.error(f"[VOICE] WebSocket Error (Attempt {attempt + 1}/{retries}): {e}")
-            if attempt < retries - 1:
-                await asyncio.sleep(2)  # Retry after a short delay
-            else:
-                logger.error("[VOICE] Failed to send message to UI after multiple attempts.")
-                break
 
 # Run the speech synthesis in a separate thread
 def run_speak_text(text):
@@ -45,12 +26,10 @@ def run_speak_text(text):
 def handle_recognized_command(text):
     if not text:
         logger.info("[VOICE] Nothing recognized.")
-        asyncio.run(send_to_ui("Nothing recognized."))
         return
 
     logger.info(f"[VOICE] Recognized: {text}")
-    asyncio.run(send_to_ui(f"Recognized: {text}"))
-
+    
     executor.submit(run_speak_text, text)
     executor.submit(lambda: determine_function(cached_process_query(text)))
 
@@ -62,13 +41,7 @@ async def start_voice_assistant():
     print("Starting hotword listener...")
     await asyncio.to_thread(assistant.start_hotword_listener)
     logger.info("Hotword listener started.")
-    await send_to_ui("Hotword listener started.")
     print("Hotword listener started.")
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(start_voice_assistant())
-    except KeyboardInterrupt:
-        logger.info("Stopping voice assistant.")
-        # assistant.stop()
-        sys.exit(0)
+    asyncio.run(start_voice_assistant())
