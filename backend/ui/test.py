@@ -41,7 +41,6 @@ class LoadingScreen(Screen):
         height: 40%;
         background: $surface-darken-1;
         border: tall $primary;
-        border-radius: 4;
         padding: 2;
         align: center middle;
     }
@@ -101,7 +100,6 @@ class DynamicVisualElement(Static):
         height: 12;
         background: $surface-darken-1;
         border: wide $primary-darken-1;
-        border-radius: 12;
         content-align: center middle;
         padding: 1;
     }
@@ -165,9 +163,8 @@ class StatusIndicator(Static):
         height: 6;
         background: $panel-darken-1;
         border: tall $primary-darken-2;
-        border-radius: 3;
-        padding: 1;
         content-align: center middle;
+        padding: 1;
     }
     
     .status-active {
