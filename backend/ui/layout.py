@@ -1,68 +1,55 @@
 import asyncio
 import logging
-from textual.app import App
-from textual.widgets import Static
 import os
-import time
+from textual.app import App, ComposeResult
+from textual.widgets import Static
+from textual.containers import Container
 
-# Set up logger for terminal output
+LOG_FILE = "logs/assistant.log"
+
 logger = logging.getLogger("AssistantApp")
 logger.setLevel(logging.DEBUG)
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-ch.setFormatter(formatter)
-logger.addHandler(ch)
-
-LOG_FILE = "logs/assistant.log"  # Ensure the log file exists in the logs folder
+stream = logging.StreamHandler()
+stream.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+logger.addHandler(stream)
 
 class LogPanel(Static):
-    def on_mount(self) -> None:
-        # Read the current log file and display its contents in the log panel
-        self.logs = self.read_log_file()
-        self.update("\n".join(self.logs))  # Update with raw text
+    def on_mount(self):
+        self.logs = []
+        self.update("🟢 Waiting for logs...")
 
-    def append_log(self, message: str):
-        self.logs.append(message)
-        self.update("\n".join(self.logs))  # Update with raw text
-
-    def read_log_file(self):
-        """Read the logs from the log file and return as a list of log entries."""
-        if os.path.exists(LOG_FILE):
-            with open(LOG_FILE, "r") as log_file:
-                return log_file.readlines()
-        else:
-            return ["Logs will appear here..."]
-
-    async def tail_log_file(self):
-        """Tail the log file and append new lines to the log panel."""
-        while True:
-            # Check for new lines
-            if os.path.exists(LOG_FILE):
-                with open(LOG_FILE, "r") as log_file:
-                    log_file.seek(0, os.SEEK_END)  # Go to the end of the file
-                    while True:
-                        line = log_file.readline()
-                        if line:
-                            self.append_log(line.strip())
-                        else:
-                            await asyncio.sleep(0.1)  # Sleep briefly before checking for new lines
-            else:
-                await asyncio.sleep(1)  # Wait before retrying
+    def append_log(self, line: str):
+        self.logs.append(line)
+        self.update("\n".join(self.logs[-100:]))
 
 class AssistantApp(App):
-    def compose(self) -> None:
-        self.log_panel = LogPanel(id="log_panel")
-        yield self.log_panel  # Yield just the log panel
+    CSS_PATH = None  # You can add custom CSS for styling
 
-    async def on_startup(self) -> None:
-        # Log to UI and terminal
+    def compose(self) -> ComposeResult:
+        self.log_panel = LogPanel()
+        yield Container(self.log_panel)
+
+    async def on_startup(self):
         self.log_panel.append_log("🟢 App started")
-        logger.info("🟢 App started")  # Log to terminal
+        logger.info("🟢 App started")
 
-        # Start tailing the log file in the background
-        asyncio.create_task(self.log_panel.tail_log_file())  # Run tail_log_file asynchronously
+        # Start background file watcher
+        self.log_task = asyncio.create_task(self.watch_logs())
+
+    async def watch_logs(self):
+        """Tails the log file in a non-blocking async-friendly way."""
+        if not os.path.exists(LOG_FILE):
+            open(LOG_FILE, "w").close()
+
+        with open(LOG_FILE, "r") as f:
+            f.seek(0, os.SEEK_END)  # Move to the end of file
+
+            while True:
+                line = await asyncio.to_thread(f.readline)
+                if line:
+                    self.log_panel.append_log(line.strip())
+                else:
+                    await asyncio.sleep(0.5)
 
 if __name__ == "__main__":
-    app = AssistantApp()  # Create an instance of AssistantApp
-    app.run()  # Run the instance
+    AssistantApp().run()
