@@ -18,7 +18,7 @@ executor = ThreadPoolExecutor(max_workers=4)
 UI_WS_URI = "ws://localhost:8765"
 
 async def send_to_ui(message):
-    retries = 5  # Set the number of retries
+    retries = 2  # Set the number of retries
     for attempt in range(retries):
         try:
             async with websockets.connect(UI_WS_URI) as websocket:
