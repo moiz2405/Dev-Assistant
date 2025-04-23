@@ -17,3 +17,4 @@ pyaudio
 diskcache
 python-pptx
 textual
+watchdog
