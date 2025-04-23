@@ -23,7 +23,7 @@ class LogPanel(Static):
 
     def append_log(self, message: str):
         self.logs.append(message)
-        self.update("\n".join(self.logs[-100:]))
+        self.update("\n".join(self.logs[-100:]))  # Keep last 100 lines for performance
 
     def read_log_file(self):
         if os.path.exists(LOG_FILE):
@@ -46,16 +46,20 @@ class AssistantApp(App):
         last_line_count = 0
         while True:
             try:
-                with open(LOG_FILE, "r") as f:
-                    lines = f.readlines()
-                    new_lines = lines[last_line_count:]
-                    for line in new_lines:
-                        self.log_panel.append_log(line.strip())
-                    last_line_count = len(lines)
+                # Open the file asynchronously (non-blocking)
+                await asyncio.to_thread(self.read_new_logs, last_line_count)
             except Exception as e:
                 logger.warning(f"Error reading log file: {e}")
-            await asyncio.sleep(1)  # Let the app breathe
+            await asyncio.sleep(1)  # Check for updates every 1 second
 
+    def read_new_logs(self, last_line_count):
+        """Reads new lines from the log file."""
+        with open(LOG_FILE, "r") as f:
+            lines = f.readlines()
+            new_lines = lines[last_line_count:]
+            for line in new_lines:
+                self.log_panel.append_log(line.strip())
+            return len(lines)
 
 if __name__ == "__main__":
     app = AssistantApp()  # Create an instance of AssistantApp
