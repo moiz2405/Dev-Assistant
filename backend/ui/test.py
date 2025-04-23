@@ -406,8 +406,8 @@ class VoiceAssistantUI(App):
     CSS_PATH = None  # We're using component-specific DEFAULT_CSS instead
     
     SCREENS = {
-        "loading": LoadingScreen(),
-        "main": MainScreen(),
+        "loading": LoadingScreen,  # Classes, not instances
+        "main": MainScreen,
     }
     
     def on_mount(self) -> None:
