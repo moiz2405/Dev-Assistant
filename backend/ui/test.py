@@ -90,7 +90,6 @@ class LoadingScreen(Screen):
         # Switch to main screen when loading completes
         self.app.push_screen("main")
 
-
 class DynamicVisualElement(Static):
     """A dynamic visual element that updates based on mic status."""
     
