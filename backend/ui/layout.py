@@ -45,7 +45,6 @@ class LogViewer(App):
         height: 100%;
     }
     """
-    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.following = True  # Auto-follow logs by default
