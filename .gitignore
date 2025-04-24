@@ -4,7 +4,7 @@ __pycache__/
 
 #recordings folder
 recordings/
-
+responses/
 # Virtual environments
 venv/
 .env/
