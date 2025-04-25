@@ -1,26 +1,120 @@
-#layout {
-  layout: horizontal;
-  height: 100%;
-  padding: 1;
+LoadingScreen {
+  align: center middle;
+  background: $surface;
 }
 
-#left {
-  width: 30%;
-  border: solid green;
-  padding: 1;
-}
-
-#log_panel {
-  height: 100%;
-  overflow: auto;
-  background: black;
-  color: green;
+.loading-container {
+  width: 60%;
+  height: 40%;
+  background: $surface-darken-1;
+  border: tall $primary;
   padding: 2;
+  align: center middle;
 }
 
-#main_panel {
+.loading-label {
+  text-align: center;
+  margin-bottom: 2;
+  height: 3;
+  color: $text;
+  text-style: bold;
+}
+
+LoadingIndicator {
+  width: 100%;
+  height: 3;
+}
+
+ProgressBar {
+  width: 100%;
+  margin-top: 1;
+}
+
+DynamicVisualElement {
+  width: 100%;
+  height: 12;
+  background: $surface-darken-1;
+  border: wide $primary-darken-1;
+  content-align: center middle;
+  padding: 1;
+}
+
+.animation-active {
+  border: wide $success;
+  background: $success-darken-3;
+}
+
+.animation-inactive {
+  border: wide $primary-darken-1;
+  background: $surface-darken-1;
+}
+
+StatusIndicator {
+  width: 100%;
+  height: 6;
+  /* width: 3; */
+  background: $panel-darken-1;
+  border: tall $primary-darken-2;
+  content-align: center middle;
+  padding: 1;
+}
+
+.status-active {
+  color: $success;
+}
+
+.status-inactive {
+  color: $error;
+}
+MainScreen {
+  layout: vertical;
+  background: $surface;
+}
+
+#main-container {
+  width: 100%;
+  height: 100%;
+}
+
+#main-panel {
   width: 70%;
-  background: #1e1e1e;
-  color: white;
-  padding: 2;
+  border-right: solid $primary;
+  padding: 1;
+}
+
+#logs-panel {
+  width: 30%;
+  border-left: solid $primary;
+}
+
+#logs-label {
+  background: $primary;
+  color: $text;
+  text-align: center;
+  height: 3;
+  padding-top: 1;
+  text-style: bold;
+}
+
+Log {
+  height: 100%;
+  border: none;
+  background: $surface-darken-1;
+  color: $text;
+}
+
+Input {
+  margin-top: 1;
+  width: 100%;
+  border: tall $primary-darken-2;
+}
+
+#voice-controls {
+  margin-top: 1;
+  width: 100%;
+  height: 3;
+}
+
+Button {
+  margin-right: 1;
 }
