@@ -18,3 +18,4 @@ diskcache
 python-pptx
 textual
 watchdog
+prompt-toolkit
