@@ -4,8 +4,11 @@ import sys
 import io
 import edge_tts
 import asyncio
-import pygame
-
+# import contextlib
+# with contextlib.redirect_stdout(None):
+#     import pygame
+import pygame    
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 voice_model = "en-US-AndrewNeural"
 responses_dir = "responses"
 
