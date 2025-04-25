@@ -29,41 +29,7 @@ debug_logger.addHandler(file_handler)
 
 class LoadingScreen(Screen):
     """Loading screen with animation."""
-    
-    DEFAULT_CSS = """
-    LoadingScreen {
-        align: center middle;
-        background: $surface;
-    }
-    
-    .loading-container {
-        width: 60%;
-        height: 40%;
-        background: $surface-darken-1;
-        border: tall $primary;
-        padding: 2;
-        align: center middle;
-    }
-    
-    .loading-label {
-        text-align: center;
-        margin-bottom: 2;
-        height: 3;
-        color: $text;
-        text-style: bold;
-    }
-    
-    LoadingIndicator {
-        width: 100%;
-        height: 3;
-    }
-    
-    ProgressBar {
-        width: 100%;
-        margin-top: 1;
-    }
-    """
-    
+      
     progress = reactive(0.0)
     
     def compose(self) -> ComposeResult:
@@ -92,27 +58,6 @@ class LoadingScreen(Screen):
 
 class DynamicVisualElement(Static):
     """A dynamic visual element that updates based on mic status."""
-    
-    DEFAULT_CSS = """
-    DynamicVisualElement {
-        width: 100%;
-        height: 12;
-        background: $surface-darken-1;
-        border: wide $primary-darken-1;
-        content-align: center middle;
-        padding: 1;
-    }
-    
-    .animation-active {
-        border: wide $success;
-        background: $success-darken-3;
-    }
-    
-    .animation-inactive {
-        border: wide $primary-darken-1;
-        background: $surface-darken-1;
-    }
-    """
     
     is_active = reactive(False)
     
@@ -156,25 +101,6 @@ class DynamicVisualElement(Static):
 class StatusIndicator(Static):
     """Indicator for microphone and other statuses."""
     
-    DEFAULT_CSS = """
-    StatusIndicator {
-        width: 100%;
-        height: 6;
-        background: $panel-darken-1;
-        border: tall $primary-darken-2;
-        content-align: center middle;
-        padding: 1;
-    }
-    
-    .status-active {
-        color: $success;
-    }
-    
-    .status-inactive {
-        color: $error;
-    }
-    """
-    
     def __init__(self, *args, **kwargs):
         super().__init__("◌ Microphone: Inactive", *args, **kwargs)
         self.mic_active = False
@@ -198,61 +124,7 @@ class StatusIndicator(Static):
 
 class MainScreen(Screen):
     """Main application screen with split panels."""
-    
-    DEFAULT_CSS = """
-    MainScreen {
-        layout: vertical;
-        background: $surface;
-    }
-    
-    #main-container {
-        width: 100%;
-        height: 100%;
-    }
-    
-    #main-panel {
-        width: 70%;
-        border-right: solid $primary;
-        padding: 1;
-    }
-    
-    #logs-panel {
-        width: 30%;
-        border-left: solid $primary;
-    }
-    
-    #logs-label {
-        background: $primary;
-        color: $text;
-        text-align: center;
-        height: 3;
-        padding-top: 1;
-        text-style: bold;
-    }
-    
-    Log {
-        height: 100%;
-        border: none;
-        background: $surface-darken-1;
-        color: $text;
-    }
-    
-    Input {
-        margin-top: 1;
-        width: 100%;
-        border: tall $primary-darken-2;
-    }
-    
-    #voice-controls {
-        margin-top: 1;
-        width: 100%;
-        height: 3;
-    }
-    
-    Button {
-        margin-right: 1;
-    }
-    """
+
     
     def compose(self) -> ComposeResult:
         """Create child widgets for the screen."""
@@ -261,8 +133,8 @@ class MainScreen(Screen):
         with Horizontal(id="main-container"):
             # Main panel with visual elements
             with Vertical(id="main-panel"):
-                yield DynamicVisualElement(id="dynamic-element")
                 yield StatusIndicator(id="status-indicator")
+                yield DynamicVisualElement(id="dynamic-element")
                 yield Input(placeholder="Type your message here...", id="text-input")
                 
                 with Horizontal(id="voice-controls"):
@@ -397,9 +269,10 @@ class MainScreen(Screen):
 class VoiceAssistantUI(App):
     """Voice Assistant UI application."""
     
-    TITLE = "Voice Assistant UI"
-    SUB_TITLE = "Textual TUI"
-    CSS_PATH = None  # We're using component-specific DEFAULT_CSS instead
+    TITLE = "V.I.S.I.O.N"
+    SUB_TITLE = "At your service"
+    CSS_PATH = "styles.css"
+  # We're using component-specific DEFAULT_CSS instead
     
     SCREENS = {
         "loading": LoadingScreen,  # Classes, not instances
