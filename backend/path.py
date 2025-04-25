@@ -11,6 +11,12 @@ from app.tts.response_generator import generate_response
 from app.tts.edge_tts import speak_text
 from app.functions.logger import logger
 
+def suppress_stderr():
+    devnull = os.open(os.devnull, os.O_WRONLY)
+    os.dup2(devnull, sys.stderr.fileno())
+
+suppress_stderr()
+
 executor = ThreadPoolExecutor(max_workers=4)
 
 # Run the speech synthesis in a separate thread
