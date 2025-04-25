@@ -1,0 +1,196 @@
+Screen {
+  background: $surface;
+}
+
+#top-bar {
+  height: 3;
+  width: 100%;
+  background: $primary;
+  color: $text;
+  padding: 0 1;
+}
+
+#indicators {
+  dock: right;
+  height: 100%;
+  padding-top: 1;
+}
+
+StatusIndicator {
+  width: 3;
+  height: 1;
+  content-align: center middle;
+  background: transparent;
+  margin-right: 1;
+}
+
+StatusIndicator.active {
+  color: $success;
+}
+
+StatusIndicator.inactive {
+  color: $error;
+}
+
+#main-container {
+  align: center middle;
+  height: 1fr; /* Take remaining space */
+}
+
+#circle-container {
+  width: 80%;
+  height: 80%;
+  align: center middle;
+}
+
+CircleVisual {
+  min-width: 20;
+  min-height: 20;
+  width: 100%;
+  height: 100%;
+  background: $primary-darken-3;
+  border: wide $primary;
+  content-align: center middle;
+  color: $text;
+  text-style: bold;
+  transition: background 500ms in_out_cubic, border 500ms in_out_cubic;
+}
+
+CircleVisual.active {
+  background: $primary-darken-2;
+  border: wide $success;
+}
+
+CircleVisual.pulse {
+  background: $primary-darken-1;
+}
+
+Log {
+  height: 100%;
+  border: solid $primary;
+  background: $surface-darken-1;
+  color: $text;
+}
+
+#input-container {
+  height: 3;
+  margin: 1 2;
+}
+
+Input {
+  width: 100%;
+  border: tall $primary-darken-2;
+}
+
+#logs-panel {
+  width: 30%;
+  height: 100%;
+  border-left: solid $primary;
+}
+
+#main-area {
+  width: 70%;
+  height: 100%;
+}
+
+#bottom-container {
+  height: 1fr; /* Take remaining space */
+}
+Screen {
+  background: $surface;
+}
+
+#top-bar {
+  height: 3;
+  width: 100%;
+  background: $primary;
+  color: $text;
+  padding: 0 1;
+}
+
+#indicators {
+  dock: right;
+  height: 100%;
+  padding-top: 1;
+}
+
+StatusIndicator {
+  width: 3;
+  height: 1;
+  content-align: center middle;
+  background: transparent;
+  margin-right: 1;
+}
+
+StatusIndicator.active {
+  color: $success;
+}
+
+StatusIndicator.inactive {
+  color: $error;
+}
+
+#main-container {
+  align: center middle;
+  height: 1fr; /* Take remaining space */
+}
+
+#circle-container {
+  width: 80%;
+  height: 80%;
+  align: center middle;
+}
+
+CircleVisual {
+  min-width: 20;
+  min-height: 20;
+  width: 100%;
+  height: 100%;
+  background: $primary-darken-3;
+  border: wide $primary;
+  content-align: center middle;
+  color: $text;
+  text-style: bold;
+  transition: background 500ms in_out_cubic, border 500ms in_out_cubic;
+}
+
+CircleVisual.active {
+  background: $primary-darken-2;
+  border: wide $success;
+}
+
+CircleVisual.pulse {
+  background: $primary-darken-1;
+}
+
+Log {
+  height: 100%;
+  border: solid $primary;
+  background: $surface-darken-1;
+  color: $text;
+}
+
+#input-container {
+  height: 3;
+  margin: 1 2;
+}
+
+Input {
+  width: 100%;
+  border: tall $primary-darken-2;
+}
+
+#logs-panel {
+  width: 30%;
+  height: 100%;
+  border-left: solid $primary;
+}
+
+#main-area {
+  width: 70%;
+  height: 100%;
+}
+
+#bottom-container {
+  height: 1fr; /* Take remaining space */
+}
