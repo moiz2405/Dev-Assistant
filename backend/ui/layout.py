@@ -38,40 +38,76 @@ style = Style.from_dict({
 
 async def monitor_log():
     """Continuously monitor the log file and update the UI."""
-    position = 0
-
+    debug_logger.info("Starting log monitor")
+    
     # Create log file if not exists
     if not os.path.exists(LOG_FILE):
         with open(LOG_FILE, "w") as f:
             f.write("Log file created\n")
+        debug_logger.info(f"Created log file: {LOG_FILE}")
 
-    try:
-        position = os.path.getsize(LOG_FILE)
-    except Exception as e:
-        debug_logger.error(f"Error reading log file size: {e}")
+    # Start at the beginning of the file to make sure we catch everything
+    position = 0
+    debug_logger.info(f"Initial position: {position}")
 
     while True:
         try:
+            if not os.path.exists(LOG_FILE):
+                debug_logger.warning("Log file no longer exists")
+                position = 0
+                await asyncio.sleep(1)
+                continue
+                
             current_size = os.path.getsize(LOG_FILE)
+            debug_logger.debug(f"Current file size: {current_size}, position: {position}")
 
             if current_size < position:
-                # Truncated or rotated
+                debug_logger.info("Log file truncated")
                 position = 0
 
             if current_size > position:
-                with open(LOG_FILE, "r") as f:
+                debug_logger.info(f"New content detected: {current_size - position} bytes")
+                with open(LOG_FILE, "r", encoding="utf-8") as f:
                     f.seek(position)
-                    lines = f.readlines()
+                    content = f.read()
                     position = f.tell()
-
-                    for line in lines:
-                        if line.strip():
-                            log_text.buffer.insert_text(line)
+                    
+                    if content:
+                        lines = content.splitlines()
+                        debug_logger.info(f"Read {len(lines)} new lines")
+                        
+                        for line in lines:
+                            if line.strip():
+                                # Extract content part (remove timestamp)
+                                if " - " in line:
+                                    content = line.split(" - ", 1)[1]
+                                    log_text.text += content + "\n"
+                                    debug_logger.debug(f"Added log line: {content}")
+                                else:
+                                    log_text.text += line + "\n"
+                                    debug_logger.debug(f"Added raw line: {line}")
+                
+                # Try different ways to update the UI
+                app.invalidate()
+                
         except Exception as e:
-            debug_logger.error(f"Error monitoring log: {str(e)}")
+            debug_logger.error(f"Error monitoring log: {str(e)}", exc_info=True)
 
         await asyncio.sleep(0.3)
 
+def write_test_logs():
+    """Write some initial test logs to the file."""
+    messages = [
+        "Initial test log entry 1",
+        "Initial test log entry 2",
+        "Initial test log entry 3"
+    ]
+    
+    for msg in messages:
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+        with open(LOG_FILE, "a") as f:
+            f.write(f"{timestamp} - {msg}\n")
+        debug_logger.info(f"Wrote test log: {msg}")
 
 # Keybindings
 kb = KeyBindings()
@@ -99,8 +135,22 @@ app = Application(
 )
 
 async def main():
-    asyncio.create_task(monitor_log())
-    await app.run_async()
+    # Write some test logs before starting monitoring
+    # write_test_logs()
+    
+    # Start monitoring
+    monitor_task = asyncio.create_task(monitor_log())
+    
+    # Run the app
+    try:
+        await app.run_async()
+    finally:
+        # Make sure to clean up the task when application exits
+        monitor_task.cancel()
+        await asyncio.gather(monitor_task, return_exceptions=True)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except Exception as e:
+        debug_logger.critical(f"Application crashed: {str(e)}", exc_info=True)
