@@ -28,7 +28,7 @@ class SubTaskType(str, Enum):
 
     # Summarizer
     SUMMARIZE = "SUMMARIZE"
-    ANSWER_QUERY = "ANSWER_QUERY"
+
     #general 
     GENERAL_QUERY = "GENERAL_QUERY"
 
