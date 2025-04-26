@@ -144,7 +144,7 @@ class MainScreen(Screen):
             
             # Logs panel
             with Vertical(id="logs-panel"):
-                yield Label("Realtime Logs Monitor", id="logs-label")
+                yield Label("Monitor Logs", id="logs-label")
                 yield Log(highlight=True, id="log-widget")
         
         yield Footer()
@@ -219,14 +219,14 @@ class MainScreen(Screen):
             except Exception as e:
                 debug_logger.error(f"Failed to create log file: {str(e)}")
                 return
-        
+                
         # Get current size
         try:
             position = os.path.getsize(LOG_FILE)
         except Exception as e:
             debug_logger.error(f"Error getting file size: {str(e)}")
             position = 0
-        
+            
         # Monitor for changes
         while True:
             try:
@@ -237,7 +237,7 @@ class MainScreen(Screen):
                     continue
                     
                 current_size = os.path.getsize(LOG_FILE)
-                
+                    
                 # If file has grown
                 if current_size > position:
                     with open(LOG_FILE, "r") as f:
@@ -247,24 +247,28 @@ class MainScreen(Screen):
                         
                         for line in new_lines:
                             if line.strip():  # Skip empty lines
-                                # Strip out the timestamp (the first part before ' - ')
-                                message_without_timestamp = line.split(" - ", 1)[-1]
-                                self.log_widget.write_line(message_without_timestamp)
+                                # Only write the content after the timestamp
+                                if " - " in line:
+                                    message_without_timestamp = line.split(" - ", 1)[1]
+                                    # Only write if there's actual content
+                                    if message_without_timestamp.strip():
+                                        self.log_widget.write_line(message_without_timestamp)
                     
-                    position = f.tell()
+                    # Update position to current size after processing
+                    position = current_size
                     
                     # Always scroll to the bottom to follow logs
                     self.log_widget.scroll_end(animate=False)
-                
+                    
                 # Handle file truncation
                 elif current_size < position:
                     # File was truncated or recreated
                     debug_logger.warning(f"File truncated: size={current_size}, was at position={position}")
                     position = current_size
-            
+                    
             except Exception as e:
                 debug_logger.error(f"Error monitoring log: {str(e)}")
-            
+                
             # Sleep before next check
             await asyncio.sleep(0.2)  # 5 checks per second
 
