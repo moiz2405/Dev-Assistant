@@ -113,7 +113,7 @@ def extract_path_hint(prompt: str, query_type: QueryType, subtask: SubTaskType) 
     if query_type == QueryType.FILE_HANDLING:
         return documents_path
 
-    if query_type in [QueryType.GITHUB_ACTIONS, QueryType.PROJECT_SETUP]:
+    if query_type in [QueryType.GITHUB_ACTIONS, QueryType.CREATE_PROJECT]:
         drive = "D:\\" if "d drive" in prompt_lower else "C:\\"
         if "new" in prompt_lower or "create" in prompt_lower:
             folder_name = "new_folder"
@@ -142,12 +142,13 @@ def get_agent() -> Agent:
             "- Extract and preserve file extensions (.pdf, .txt, etc.).\n"
             "- Be accurate with subtask classification.\n"
             "Mapping of query types and subtasks:"
-                "- FILE_HANDLING: (SEARCH_FILE, OPEN_FILE, CLOSE_FILE)"
-                "- GITHUB_ACTIONS: (LIST_REPOS, CLONE_REPO, PUSH_REPO)"
-                "- PROJECT_SETUP: (NEW_PROJECT)"
-                "- APP_HANDLING:(OPEN_APP, CLOSE_APP)"
-                "- SUMMARIZER : (SUMMARIZE)"
-                "- GENERAL_QUERY :(GENERAL_QUERY)"
+                "- FILE_HANDLING: (SEARCH_FILE, OPEN_FILE, CLOSE_FILE).\n"
+                "- GITHUB_ACTIONS: (LIST_REPOS, CLONE_REPO, PUSH_REPO)\n"
+                "- CREATE_PROJECT: (CREATE_PROJECT)\n"
+                "- SETUP_PROJECT: (SETUP_PROJECT)\n"
+                "- APP_HANDLING:(OPEN_APP, CLOSE_APP)\n"
+                "- SUMMARIZER : (SUMMARIZE)\n"
+                "- GENERAL_QUERY :(GENERAL_QUERY)\n"
         ),
         markdown=True,
         response_model=QueryProcessor,
