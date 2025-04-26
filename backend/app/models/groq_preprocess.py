@@ -141,6 +141,13 @@ def get_agent() -> Agent:
             "- Use proper Windows-style absolute paths with capital drive letters.\n"
             "- Extract and preserve file extensions (.pdf, .txt, etc.).\n"
             "- Be accurate with subtask classification.\n"
+            "Mapping of query types and subtasks:"
+                "- FILE_HANDLING: (SEARCH_FILE, OPEN_FILE, CLOSE_FILE)"
+                "- GITHUB_ACTIONS: (LIST_REPOS, CLONE_REPO, PUSH_REPO)"
+                "- PROJECT_SETUP: (NEW_PROJECT)"
+                "- APP_HANDLING:(OPEN_APP, CLOSE_APP)"
+                "- SUMMARIZER : (SUMMARIZE)"
+                "- GENERAL_QUERY :(GENERAL_QUERY)"
         ),
         markdown=True,
         response_model=QueryProcessor,
