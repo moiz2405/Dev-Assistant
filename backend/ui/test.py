@@ -167,6 +167,7 @@ class MainScreen(Screen):
     def write_to_log(self, message: str) -> None:
         """Convenience method to write to both the log file and UI."""
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+        
         with open(LOG_FILE, "a") as f:
             f.write(f"{timestamp} - {message}\n")
         
