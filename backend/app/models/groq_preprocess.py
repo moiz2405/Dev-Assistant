@@ -141,6 +141,8 @@ def get_agent() -> Agent:
             "- Use proper Windows-style absolute paths with capital drive letters.\n"
             "- Extract and preserve file extensions (.pdf, .txt, etc.).\n"
             "- Be accurate with subtask classification.\n"
+            "- If user asks to Setup a project return SETUP_PROJECT as subtask type"
+            "- IF user asks to Create a project return CREATE_PROJECT as substask type"
             "Mapping of query types and subtasks:"
                 "- FILE_HANDLING: (SEARCH_FILE, OPEN_FILE, CLOSE_FILE).\n"
                 "- GITHUB_ACTIONS: (LIST_REPOS, CLONE_REPO, PUSH_REPO)\n"
