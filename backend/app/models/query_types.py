@@ -2,7 +2,8 @@ from enum import Enum
 
 class QueryType(str, Enum):
     GITHUB_ACTIONS = "GITHUB_ACTIONS"         
-    PROJECT_SETUP = "PROJECT_SETUP"             
+    SETUP_PROJECT = "SETUP_PROJECT"
+    CREATE_PROJECT = "CREATE_PROJECT"             
     FILE_HANDLING = "FILE_HANDLING"             
     APP_HANDLING = "APP_HANDLING"               
     SUMMARIZER = "SUMMARIZER"                  
@@ -14,8 +15,9 @@ class SubTaskType(str, Enum):
     PUSH_REPO = "PUSH_REPO"
 
     # Project Setup
-    NEW_PROJECT = "NEW_PROJECT"
+    CREATE_PROJECT = "CREATE_PROJECT"
     # EXISTING_PROJECT = "EXISTING_PROJECT"
+    SETUP_PROJECT = "SETUP_PROJECT"
 
     # File Handling
     SEARCH_FILE = "SEARCH_FILE"
