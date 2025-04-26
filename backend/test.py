@@ -1,7 +1,7 @@
 from app.models.groq_preprocess import cached_process_query
-
-user_prompt = input("Enter your query: ")
-cached_process_query(user_prompt)
+while(1):
+    user_prompt = input("Enter your query: ")
+    cached_process_query(user_prompt)
 
 
 # import sys
