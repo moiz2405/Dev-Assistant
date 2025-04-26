@@ -269,7 +269,6 @@ class MainScreen(Screen):
             await asyncio.sleep(0.2)  # 5 checks per second
 
 
-
 class VoiceAssistantUI(App):
     """Voice Assistant UI application."""
     
