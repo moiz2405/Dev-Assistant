@@ -1,7 +1,8 @@
-from path import *
-from ui.layout import AssistantApp
-if __name__ == "__main__":
-    AssistantApp().run()
+from app.models.groq_preprocess import cached_process_query
+
+user_prompt = input("Enter your query: ")
+cached_process_query(user_prompt)
+
 
 # import sys
 # import os
