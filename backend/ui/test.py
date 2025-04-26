@@ -247,12 +247,9 @@ class MainScreen(Screen):
                         
                         for line in new_lines:
                             if line.strip():  # Skip empty lines
-                                # Only write the content after the timestamp
-                                if " - " in line:
-                                    message_without_timestamp = line.split(" - ", 1)[1]
-                                    # Only write if there's actual content
-                                    if message_without_timestamp.strip():
-                                        self.log_widget.write_line(message_without_timestamp)
+                                # Only display non-timestamped lines (since timestamped ones are already shown by write_to_log)
+                                if not line.startswith(time.strftime("%Y-%m-%d")):
+                                    self.log_widget.write_line(line)
                     
                     # Update position to current size after processing
                     position = current_size
