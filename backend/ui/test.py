@@ -247,12 +247,14 @@ class MainScreen(Screen):
                         
                         for line in new_lines:
                             if line.strip():  # Skip empty lines
-                                self.log_widget.write_line(line)
-                        
-                        position = f.tell()
-                        
-                        # Always scroll to the bottom to follow logs
-                        self.log_widget.scroll_end(animate=False)
+                                # Strip out the timestamp (the first part before ' - ')
+                                message_without_timestamp = line.split(" - ", 1)[-1]
+                                self.log_widget.write_line(message_without_timestamp)
+                    
+                    position = f.tell()
+                    
+                    # Always scroll to the bottom to follow logs
+                    self.log_widget.scroll_end(animate=False)
                 
                 # Handle file truncation
                 elif current_size < position:
@@ -265,6 +267,7 @@ class MainScreen(Screen):
             
             # Sleep before next check
             await asyncio.sleep(0.2)  # 5 checks per second
+
 
 
 class VoiceAssistantUI(App):
