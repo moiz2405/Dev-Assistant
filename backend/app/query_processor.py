@@ -2,7 +2,7 @@
 # if general query or question answers it using a call to chatbot.py else determines the fucntion needed and call it 
 
 from app.functions.app_handling import open_app, close_app
-from app.functions.environment_setup import setup_project
+from app.functions.environment_setup import setup_existing_project
 from app.functions.file_handler import open_file,list_files_by_type
 from app.functions.summarizer import summarize_in_new_window
 from app.functions.github_handler import clone_github_repo, list_github_repos, push_folder_to_github
