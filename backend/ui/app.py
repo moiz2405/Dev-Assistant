@@ -1,4 +1,5 @@
 from textual.app import App
+from logger.logger_setup import logger  # Initialize logger first
 from screens.loading_screen import LoadingScreen
 from screens.main_screen import MainScreen
 
@@ -13,6 +14,7 @@ class VoiceAssistantUI(App):
     }
     
     def on_mount(self) -> None:
+        logger.info("Application started")
         self.push_screen("loading")
 
 
