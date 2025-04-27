@@ -7,7 +7,8 @@ from app.models.groq_preprocess import cached_process_query
 from app.query_processor import determine_function
 from app.tts.response_generator import generate_response
 from app.tts.edge_tts import speak_text
-from app.functions.logger import logger
+# from app.functions.logger.logger_setup import logger\
+from app.logger.logger_setup import logger
 
 def suppress_stderr():
     devnull = os.open(os.devnull, os.O_WRONLY)
