@@ -1,5 +1,3 @@
-
-# path.py
 import sys
 import os
 import asyncio
@@ -26,15 +24,15 @@ def run_speak_text(text):
         asyncio.set_event_loop(loop)
         asyncio.run(speak_text(generate_response(text)))
     except Exception as e:
-        logger.error(f"[VOICE] Error in speaking text: {e}")
+        logger.error(f"Error in speaking text: {e}")
 
 # Handle recognized text
 def handle_recognized_command(text):
     if not text:
-        logger.info("[VOICE] Nothing recognized.")
+        logger.info("Nothing recognized.")
         return
 
-    logger.info(f"[VOICE] Recognized: {text}")
+    logger.info(f"Recognized: {text}")
     
     executor.submit(run_speak_text, text)
     executor.submit(lambda: determine_function(cached_process_query(text)))
@@ -44,10 +42,10 @@ assistant = VoiceAssistant(hotword="vision", record_duration=6, on_recognized=ha
 
 async def start_voice_assistant():
     logger.info("Starting hotword listener...")
-    print("Starting hotword listener...")
+    # Remove print statement and only use logger
     await asyncio.to_thread(assistant.start_hotword_listener)
     logger.info("Hotword listener started.")
-    print("Hotword listener started.")
+    # Remove print statement and only use logger
 
 if __name__ == "__main__":
     asyncio.run(start_voice_assistant())
