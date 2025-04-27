@@ -61,9 +61,7 @@ class VoiceAssistant:
             raise ValueError("Missing Picovoice access key. Set PICOVOICE_ACCESS_KEY in your .env file.")
 
         project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        # Dynamically get the absolute path of the keyword file inside 'vision_wake_word' directory
-        # keyword_path = os.path.join(os.path.dirname(__file__), "vision_wake_word", "vision_en_linux_v3_0_0.ppn")
-        # keyword_path = os.path.join(os.path.dirname(__file__), "../../vision_wake_word/vision_en_linux_v3_0_0.ppn")
+        # get the vision wake word
         keyword_path = "/mnt/d/projects/MYPROJECTS/Dev-Assistant/vision_wake_word/vision_en_linux_v3_0_0.ppn"
         # print(keyword_path)
         if not os.path.exists(keyword_path):
