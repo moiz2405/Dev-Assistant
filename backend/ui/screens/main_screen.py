@@ -1,9 +1,9 @@
 from textual.screen import Screen
-from textual import ComposeResult, on
+from textual.app import ComposeResult, on
 from textual.containers import Horizontal, Vertical
 from textual.widgets import Header, Footer, Input, Button, Label, Log
 
-from widgets.dynamic_visual_element import DynamicVisualElement
+from widgets.dynamic_element import DynamicVisualElement
 from widgets.status_indicator import StatusIndicator
 import asyncio, time, os
 
