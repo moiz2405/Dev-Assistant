@@ -2,7 +2,7 @@ from textual.screen import Screen
 from textual.containers import Container
 from textual.widgets import Label, LoadingIndicator, ProgressBar
 from textual.reactive import reactive
-from textual import ComposeResult
+from textual.app import ComposeResult
 import asyncio
 
 class LoadingScreen(Screen):
