@@ -1,4 +1,4 @@
-# Create a new file: backend/ui/logger_setup.py
+#backend/ui/logger/logger_setup.py
 import sys
 import logging
 import os
