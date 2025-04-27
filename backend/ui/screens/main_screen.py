@@ -10,7 +10,7 @@ import time
 import os
 
 # Import the standardized logger from your module
-from app.functions.logger import logger
+from app.logger.logger_setup import logger
 
 class MainScreen(Screen):
     """Main application screen with split panels."""
