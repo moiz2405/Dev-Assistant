@@ -5,7 +5,7 @@ import os
 # Create a 'logs' directory if it doesn't exist
 os.makedirs("logs", exist_ok=True)
 
-LOG_FILE_PATH = "logs/assistant.log"
+LOG_FILE_PATH = "backend/ui/logs/assistant.log"
 
 # Custom FileHandler that flushes immediately
 class FlushAfterWriteHandler(logging.FileHandler):
