@@ -8,9 +8,10 @@ from widgets.status_indicator import StatusIndicator
 import asyncio
 import time
 import os
+import logging
 
-# Import the standardized logger from your module
-from app.logger.logger_setup import logger
+# Get the already configured logger instead of importing it
+logger = logging.getLogger("assistant")
 
 class MainScreen(Screen):
     """Main application screen with split panels."""
