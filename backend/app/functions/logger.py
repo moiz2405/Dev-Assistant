@@ -22,15 +22,15 @@ if not logger.handlers:
     file_handler = FlushAfterWriteHandler(LOG_FILE_PATH)
     file_handler.setLevel(logging.DEBUG)
 
-    # Formatter for the logs
-    formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
+    # Simplified formatter - only level and message
+    formatter = logging.Formatter('%(levelname)s | %(message)s')
     file_handler.setFormatter(formatter)
 
     logger.addHandler(file_handler)
 
 # Optional: add a console handler (nice for dev debugging)
 console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setFormatter(logging.Formatter('%(asctime)s | %(levelname)s | %(message)s'))
+console_handler.setFormatter(logging.Formatter('%(levelname)s | %(message)s'))
 logger.addHandler(console_handler)
 
 # Custom function to log to file
