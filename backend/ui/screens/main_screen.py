@@ -9,7 +9,8 @@ import asyncio
 import time
 import os
 
-LOG_FILE = "backend/ui/logs/assistant.log"
+# Import the standardized logger from your module
+from app.functions.logger import logger
 
 class MainScreen(Screen):
     """Main application screen with split panels."""
@@ -45,28 +46,16 @@ class MainScreen(Screen):
         self.status_indicator = self.query_one("#status-indicator", StatusIndicator)
         self.text_input = self.query_one("#text-input", Input)
 
-        # Ensure logs folder exists
-        os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
-
         # Start monitoring logs
         asyncio.create_task(self.monitor_log_file())
 
-        # Write startup logs
-        self.write_to_log("Voice Assistant UI started")
-        self.write_to_log("Monitoring logs in real-time")
+        # Log startup messages
+        logger.info("Voice Assistant UI started")
+        logger.info("Monitoring logs in real-time")
 
     def write_to_log(self, message: str) -> None:
-        """Write a log entry to file and UI."""
-        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-        log_entry = f"{timestamp} - {message}"
-
-        try:
-            with open(LOG_FILE, "a") as f:
-                f.write(log_entry + "\n")
-        except Exception as e:
-            self.log_widget.write_line(f"Error writing to log file: {e}")
-
-        self.log_widget.write_line(log_entry)
+        """Use the standardized logger."""
+        logger.info(message)
 
     @on(Button.Pressed, "#toggle-mic")
     def toggle_microphone(self) -> None:
@@ -100,20 +89,20 @@ class MainScreen(Screen):
 
     async def monitor_log_file(self) -> None:
         """Monitor the log file for changes and update log widget."""
+        LOG_FILE = "backend/ui/logs/assistant.log"
+        
         if not os.path.exists(LOG_FILE):
-            try:
-                with open(LOG_FILE, "w") as f:
-                    f.write("Log file created\n")
-            except Exception as e:
-                self.log_widget.write_line(f"Error creating log file: {e}")
-                return
-
+            self.log_widget.write_line("Waiting for log file to be created...")
+            while not os.path.exists(LOG_FILE):
+                await asyncio.sleep(0.5)
+            self.log_widget.write_line("Log file found, monitoring now")
+            
         position = os.path.getsize(LOG_FILE)
 
         while True:
             try:
                 if not os.path.exists(LOG_FILE):
-                    self.write_to_log("Log file missing, recreating...")
+                    self.log_widget.write_line("Log file missing, waiting for recreation...")
                     position = 0
                     await asyncio.sleep(1)
                     continue
@@ -127,7 +116,7 @@ class MainScreen(Screen):
                         new_lines = new_content.splitlines()
 
                         for line in new_lines:
-                            if line.strip() and not line.startswith(time.strftime("%Y-%m-%d")):
+                            if line.strip():  # Only check if line is not empty
                                 self.log_widget.write_line(line)
 
                     position = current_size
@@ -135,7 +124,7 @@ class MainScreen(Screen):
 
                 elif current_size < position:
                     # File was truncated or recreated
-                    self.write_to_log("Log file reset detected")
+                    self.log_widget.write_line("Log file reset detected")
                     position = current_size
 
             except Exception as e:
