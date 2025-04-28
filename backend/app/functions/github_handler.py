@@ -6,6 +6,8 @@ import platform
 import difflib
 from dotenv import load_dotenv
 
+from app.functions.logger import logger
+
 indexed_dirs_cache = {}
 # Load environment
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../../..', '.env.local'))
@@ -192,7 +194,7 @@ def list_github_repos(save_to_file=True, filename="github_repos.json"):
 
     print("Repository fetching complete.")
 
-def load_repo_list(path="backend/github_repos.json"):
+def load_repo_list(path="github_repos.json"):
     path = to_wsl_path(path)
     try:
         with open(path, "r") as file:
@@ -200,7 +202,7 @@ def load_repo_list(path="backend/github_repos.json"):
     except FileNotFoundError:
         return {"error": f"File not found at {path}"}
 
-def search_repo_url(query, path="backend/github_repos.json"):
+def search_repo_url(query, path="github_repos.json"):
     print(f"Searching for query: {query}")
     # query = query.lower()
     repo_list = load_repo_list(path)
@@ -215,6 +217,7 @@ def search_repo_url(query, path="backend/github_repos.json"):
     return matches[0]["url"]
 
 def clone_github_repo(repo_name, target_directory):
+    logger.info(f"Cloning {repo_name} in {target_directory}")
     """
     Clones a GitHub repository to the specified target directory.
     """
