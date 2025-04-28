@@ -1,11 +1,12 @@
 # receives user input determines user intent
 # if general query or question answers it using a call to chatbot.py else determines the fucntion needed and call it 
 
-from app.functions.app_handling import open_app, close_app
-from app.functions.environment_setup import setup_existing_project
+from app.functions.github_handler import clone_github_repo, list_github_repos, push_folder_to_github
 from app.functions.file_handler import open_file,list_files_by_type
 from app.functions.summarizer import summarize_in_new_window
-from app.functions.github_handler import clone_github_repo, list_github_repos, push_folder_to_github
+from app.functions.app_handling import open_app, close_app
+from app.functions.project_handler.setup_project import setup_existing_project
+from app.functions.project_handler.create_project import setup_project
 
 from app.models.query_types import QueryType, SubTaskType
 
@@ -42,8 +43,9 @@ def determine_function(structured_query):
         if subtask == SubTaskType.LIST_REPOS:
             list_github_repos()
             
-    # if query_type == QueryType.GENERAL_QUERY:
     # if query_type == QueryType.PROJECT_SETUP:
+    
+    # if query_type == QueryType.GENERAL_QUERY:
 
 
 # def determine_sub_type(structured_query):
