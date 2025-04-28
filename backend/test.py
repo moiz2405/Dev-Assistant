@@ -5,7 +5,7 @@
 
 from app.functions.project_handler.create_project import setup_project
 while(1):
-    path = ""
+    path = "D://va_projects"
     type = input()
     setup_project(type,path)
 
