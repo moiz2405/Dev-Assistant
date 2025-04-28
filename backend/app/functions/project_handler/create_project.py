@@ -1,6 +1,7 @@
 import os
 import subprocess
 import platform
+import sys
 
 PROJECT_TYPE_ALIASES = {
     "react": ["react", "react.js", "reactjs"],
@@ -10,24 +11,24 @@ PROJECT_TYPE_ALIASES = {
 }
 
 def is_wsl():
+    """Check if running in Windows Subsystem for Linux"""
     return 'microsoft' in platform.uname().release.lower()
 
 def to_wsl_path(path):
-    if is_wsl():
-        if path.startswith("/mnt/"):
-            return path
-        try:
-            result = subprocess.run(['wslpath', path], capture_output=True, text=True)
-            if result.returncode == 0:
-                return result.stdout.strip()
-        except Exception:
-            pass
+    """Convert Windows path to WSL path if running in WSL"""
+    if is_wsl() and ':' in path:  # Windows path containing a drive letter
+        # Convert D:// or D:/ to /mnt/d/
+        drive, rest = path.split(':', 1)
+        path = f"/mnt/{drive.lower()}/{rest.strip('/\\')}"
+        return path.replace('\\', '/')
     return path
 
 def normalize_filename(name):
+    """Normalize filename for comparison"""
     return name.lower().replace('_', ' ').replace('-', ' ').strip()
 
 def normalize_project_type(project_type: str) -> str:
+    """Normalize project type string to a standard format"""
     project_type = normalize_filename(project_type).replace(" ", "")
     for standard, aliases in PROJECT_TYPE_ALIASES.items():
         if project_type in [normalize_filename(alias).replace(" ", "") for alias in aliases]:
@@ -35,6 +36,7 @@ def normalize_project_type(project_type: str) -> str:
     raise ValueError(f"Unsupported project type '{project_type}'. Supported types: {list(PROJECT_TYPE_ALIASES.keys())}")
 
 def get_available_path(base_path: str) -> str:
+    """Find an available path by appending (2), (3), etc. if needed"""
     if not os.path.exists(base_path):
         return base_path
 
@@ -46,37 +48,47 @@ def get_available_path(base_path: str) -> str:
         counter += 1
 
 def setup_project(project_type: str, parent_path: str):
-    """
-    Automatically set up a project inside the given parent folder without asking anything.
-    """
-
+    """Set up a project based on the type provided."""
     try:
         project_type = normalize_project_type(project_type)
     except ValueError as e:
         print(e)
         return
 
-    # Normalize parent path
-    parent_path = os.path.abspath(parent_path)
+    # Convert Windows path to WSL path if needed
     parent_path = to_wsl_path(parent_path)
-
-    # Generate automatic project folder name
+    
+    # Create parent directory if it doesn't exist
+    os.makedirs(parent_path, exist_ok=True)
+    
+    # Project folder under the parent path
     project_folder_name = f"{project_type}-project"
     project_folder_path = os.path.join(parent_path, project_folder_name)
     project_folder_path = get_available_path(project_folder_path)
+    
+    print(f"Setting up {project_type} project at: {project_folder_path}")
 
+    # Create the project directory
+    os.makedirs(project_folder_path, exist_ok=True)
+    
+    # Store current directory to restore later
+    original_dir = os.getcwd()
+    
     try:
         if project_type == "react":
-            subprocess.run(["npx", "create-react-app", project_folder_path], check=True)
+            # For React, we'll use create-react-app which needs to be run from parent directory
+            os.chdir(os.path.dirname(project_folder_path))
+            subprocess.run(["npx", "create-react-app", os.path.basename(project_folder_path)], check=True)
 
         elif project_type == "next":
-            subprocess.run(["npx", "create-next-app@latest", project_folder_path, "--ts"], check=True)
+            # For Next.js, change to parent directory first
+            os.chdir(os.path.dirname(project_folder_path))
+            subprocess.run(["npx", "create-next-app@latest", os.path.basename(project_folder_path), "--ts"], check=True)
 
         elif project_type == "flask":
-            # Create the folder
-            subprocess.run(["mkdir", "-p", os.path.join(project_folder_path, "app")], check=True, shell=True)
+            # For Flask, create files directly
+            os.makedirs(os.path.join(project_folder_path, "app"), exist_ok=True)
 
-            # Create __init__.py
             init_py_content = (
                 "from flask import Flask\n\n"
                 "app = Flask(__name__)\n\n"
@@ -84,29 +96,43 @@ def setup_project(project_type: str, parent_path: str):
                 "def home():\n"
                 "    return \"Hello, Flask!\"\n"
             )
-            subprocess.run(
-                ["bash", "-c", f"echo \"{init_py_content}\" > \"{os.path.join(project_folder_path, 'app', '__init__.py')}\""],
-                check=True
-            )
+            with open(os.path.join(project_folder_path, "app", "__init__.py"), "w") as f:
+                f.write(init_py_content)
 
-            # Create run.py
             run_py_content = (
                 "from app import app\n\n"
                 "if __name__ == '__main__':\n"
                 "    app.run(debug=True)\n"
             )
-            subprocess.run(
-                ["bash", "-c", f"echo \"{run_py_content}\" > \"{os.path.join(project_folder_path, 'run.py')}\""],
-                check=True
-            )
+            with open(os.path.join(project_folder_path, "run.py"), "w") as f:
+                f.write(run_py_content)
 
-            subprocess.run(["pip", "install", "flask"], check=True)
+            # Create requirements.txt
+            with open(os.path.join(project_folder_path, "requirements.txt"), "w") as f:
+                f.write("flask==2.2.3\n")
+            
+            print("Flask project created successfully. Run 'pip install -r requirements.txt' to install dependencies.")
 
         elif project_type == "django":
-            subprocess.run(["pip", "install", "django"], check=True)
-            subprocess.run(["django-admin", "startproject", "config", project_folder_path], check=True)
+            # For Django, we need to change directory first
+            os.chdir(parent_path)
+            subprocess.run(["django-admin", "startproject", os.path.basename(project_folder_path)], check=True)
 
         print(f"{project_type.capitalize()} project set up successfully at {project_folder_path}.")
 
     except subprocess.CalledProcessError as e:
         print(f"An error occurred during setup: {e}")
+    finally:
+        # Restore original directory
+        os.chdir(original_dir)
+
+# Example usage
+if __name__ == "__main__":
+    while True:
+        print("\nAvailable project types:", list(PROJECT_TYPE_ALIASES.keys()))
+        project_type = input("Enter project type (or 'exit' to quit): ")
+        if project_type.lower() == 'exit':
+            break
+            
+        parent_path = input("Enter path for project: ")
+        setup_project(project_type, parent_path)
