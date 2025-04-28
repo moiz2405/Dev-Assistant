@@ -47,8 +47,9 @@ def get_available_path(base_path: str) -> str:
 
 def setup_project(project_type: str, parent_path: str):
     """
-    Set up a project inside the given parent folder.
+    Automatically set up a project inside the given parent folder without asking anything.
     """
+
     try:
         project_type = normalize_project_type(project_type)
     except ValueError as e:
@@ -59,38 +60,53 @@ def setup_project(project_type: str, parent_path: str):
     parent_path = os.path.abspath(parent_path)
     parent_path = to_wsl_path(parent_path)
 
-    # Ask for project folder name
-    project_name = input(f"Enter project name for {project_type} project: ").strip()
-    if not project_name:
-        print("Project name cannot be empty.")
-        return
-
-    project_folder = os.path.join(parent_path, project_name)
-    project_folder = get_available_path(project_folder)
-
-    os.makedirs(project_folder, exist_ok=True)
+    # Generate automatic project folder name
+    project_folder_name = f"{project_type}-project"
+    project_folder_path = os.path.join(parent_path, project_folder_name)
+    project_folder_path = get_available_path(project_folder_path)
 
     try:
         if project_type == "react":
-            subprocess.run(["npx", "create-react-app", project_folder], check=True)
+            subprocess.run(["npx", "create-react-app", project_folder_path], check=True)
 
         elif project_type == "next":
-            subprocess.run(["npx", "create-next-app@latest", project_folder, "--ts"], check=True)
+            subprocess.run(["npx", "create-next-app@latest", project_folder_path, "--ts"], check=True)
 
         elif project_type == "flask":
-            os.makedirs(os.path.join(project_folder, "app"), exist_ok=True)
-            with open(os.path.join(project_folder, "app", "__init__.py"), "w") as f:
-                f.write("""from flask import Flask\n\napp = Flask(__name__)\n\n@app.route('/')\ndef home():\n    return "Hello, Flask!"\n""")
-            with open(os.path.join(project_folder, "run.py"), "w") as f:
-                f.write("from app import app\n\nif __name__ == '__main__':\n    app.run(debug=True)\n")
+            # Create the folder
+            subprocess.run(["mkdir", "-p", os.path.join(project_folder_path, "app")], check=True, shell=True)
+
+            # Create __init__.py
+            init_py_content = (
+                "from flask import Flask\n\n"
+                "app = Flask(__name__)\n\n"
+                "@app.route('/')\n"
+                "def home():\n"
+                "    return \"Hello, Flask!\"\n"
+            )
+            subprocess.run(
+                ["bash", "-c", f"echo \"{init_py_content}\" > \"{os.path.join(project_folder_path, 'app', '__init__.py')}\""],
+                check=True
+            )
+
+            # Create run.py
+            run_py_content = (
+                "from app import app\n\n"
+                "if __name__ == '__main__':\n"
+                "    app.run(debug=True)\n"
+            )
+            subprocess.run(
+                ["bash", "-c", f"echo \"{run_py_content}\" > \"{os.path.join(project_folder_path, 'run.py')}\""],
+                check=True
+            )
+
             subprocess.run(["pip", "install", "flask"], check=True)
 
         elif project_type == "django":
             subprocess.run(["pip", "install", "django"], check=True)
-            subprocess.run(["django-admin", "startproject", "config", project_folder], check=True)
+            subprocess.run(["django-admin", "startproject", "config", project_folder_path], check=True)
 
-        print(f"{project_type.capitalize()} project set up successfully at {project_folder}.")
+        print(f"{project_type.capitalize()} project set up successfully at {project_folder_path}.")
 
     except subprocess.CalledProcessError as e:
         print(f"An error occurred during setup: {e}")
-
