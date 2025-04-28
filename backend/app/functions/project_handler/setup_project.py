@@ -123,17 +123,17 @@ def setup_existing_project(project_name, base_directory):
     try:
         base_directory = to_wsl_path(base_directory)
 
-        print(f"🔍 Searching for project: {project_name} in {base_directory}...")
+        print(f"Searching for project: {project_name} in {base_directory}...")
         project_folder = fuzzy_search_dir(project_name, base_directory)
 
         if not project_folder or not os.path.exists(project_folder):
-            print("❌ Project folder not found after fuzzy search. Exiting...")
+            print("Project folder not found after fuzzy search. Exiting...")
             return
 
-        print(f"✅ Project folder detected: {project_folder}")
+        print(f"Project folder detected: {project_folder}")
 
         project_type = detect_project_type(project_folder)
-        print(f"🛠 Detected project type: {project_type.upper()}")
+        print(f"Detected project type: {project_type.upper()}")
 
         if project_type != "unknown":
             install_dependencies(project_folder, project_type)
@@ -141,11 +141,11 @@ def setup_existing_project(project_name, base_directory):
             success, output = try_running_project(project_folder, project_type)
 
             if success:
-                print("✅ Project is running successfully! 🎉")
+                print("Project is running successfully! 🎉")
             else:
-                print(f"❌ Project failed to start. Error:\n{output}")
+                print(f"Project failed to start. Error:\n{output}")
         else:
-            print("⚠️ Could not detect project type. Manual setup may be needed.")
+            print("Could not detect project type. Manual setup may be needed.")
 
     except KeyboardInterrupt:
         print("\nSetup process interrupted by user. Exiting...")
