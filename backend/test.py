@@ -3,14 +3,18 @@
 #     user_prompt = input("Enter your query: ")
 #     cached_process_query(user_prompt)
 
-from app.functions.project_handler.create_project import setup_project
-from app.functions.project_handler.setup_project import setup_existing_project
+# from app.functions.project_handler.create_project import setup_project
+# from app.functions.project_handler.setup_project import setup_existing_project
 
-while(1):
-    path = "D://va_projects"
-    type = input()
-    setup_existing_project(type,path)
-    # setup_project(type,path)
+# while(1):
+#     path = "D://va_projects"
+#     type = input()
+#     setup_existing_project(type,path)
+#     # setup_project(type,path)
+
+from app.functions.github_handler import clone_github_repo
+target = input ()
+clone_github_repo(target,"D://va_projects")
 
 
 # import sys
