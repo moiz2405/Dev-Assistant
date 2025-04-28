@@ -43,7 +43,9 @@ def determine_function(structured_query):
         if subtask == SubTaskType.LIST_REPOS:
             list_github_repos()
             
-    # if query_type == QueryType.PROJECT_SETUP:
+    if query_type == QueryType.PROJECT_SETUP:
+        if subtask == SubTaskType.CREATE_PROJECT:
+            setup_project(target,"D://va_projects")
     
     # if query_type == QueryType.GENERAL_QUERY:
 
