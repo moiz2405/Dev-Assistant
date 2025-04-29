@@ -217,7 +217,6 @@ def search_repo_url(query, path="github_repos.json"):
     return matches[0]["url"]
 
 def clone_github_repo(repo_name, target_directory):
-    logger.info(f"Cloning {repo_name} in {target_directory}")
     """
     Clones a GitHub repository to the specified target directory.
     """
@@ -231,6 +230,7 @@ def clone_github_repo(repo_name, target_directory):
 
     target_directory = to_wsl_path(target_directory)
     print(f"Cloning {repo_url} into {target_directory}...")
+    logger.info(f"Cloning {repo_name} into {target_directory}")
 
     result = subprocess.run(["git", "clone", repo_url], cwd=target_directory)
     if result.returncode == 0:
