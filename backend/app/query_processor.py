@@ -46,6 +46,8 @@ def determine_function(structured_query):
     if query_type == QueryType.PROJECT_SETUP:
         if subtask == SubTaskType.CREATE_PROJECT:
             setup_project(target,"D://va_projects")
+        if subtask == SubTaskType.SETUP_PROJECT:
+            setup_existing_project(target, "D://va_projects")    
     
     # if query_type == QueryType.GENERAL_QUERY:
 
