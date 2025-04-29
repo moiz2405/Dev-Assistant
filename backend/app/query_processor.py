@@ -43,14 +43,17 @@ def determine_function(structured_query):
         if subtask == SubTaskType.LIST_REPOS:
             list_github_repos()
             
-    if query_type == QueryType.PROJECT_SETUP:
+    if query_type == QueryType.CREATE_PROJECT:
         if subtask == SubTaskType.CREATE_PROJECT:
             setup_project(target,"D://va_projects")
-        if subtask == SubTaskType.SETUP_PROJECT:
-            setup_existing_project(target, "D://va_projects")    
+   
     
-    # if query_type == QueryType.GENERAL_QUERY:
+    if query_type == QueryType.SETUP_PROJECT:
+        if subtask == SubTaskType.SETUP_PROJECT:
+            setup_existing_project(target,"D://va_projects")
 
+
+    # if query_type == QueryType.GENERAL_QUERY:
 
 # def determine_sub_type(structured_query):
     
