@@ -7,6 +7,8 @@ import threading
 import time
 indexed_dirs_cache = {}
 
+from app.functions.logger import logger
+
 # --- Utilities ---
 
 def run_command(command, cwd=None):
@@ -162,6 +164,7 @@ def setup_existing_project(project_name, base_directory):
         base_directory = to_wsl_path(base_directory)
 
         print(f"Searching for project: {project_name} in {base_directory}...")
+        logger.info(f"Searching for project: {project_name} in {base_directory}..")
         project_folder = fuzzy_search_dir(project_name, base_directory)
 
         if not project_folder or not os.path.exists(project_folder):
@@ -169,7 +172,7 @@ def setup_existing_project(project_name, base_directory):
             return
 
         print(f"Project folder detected: {project_folder}")
-
+        logger.info("")
         project_type = detect_project_type(project_folder)
         print(f"Detected project type: {project_type.upper()}")
 
