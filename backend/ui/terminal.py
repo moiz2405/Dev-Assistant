@@ -1,7 +1,7 @@
 from textual.app import App
 from screens.loading_screen import LoadingScreen
-from screens.main_screen import MainScreen
-
+# from screens.main_screen import MainScreen
+from screens.test import MainScreen
 class VoiceAssistantUI(App):
     TITLE = "V.I.S.I.O.N"
     SUB_TITLE = "At your service"
