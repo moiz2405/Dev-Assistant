@@ -118,7 +118,7 @@ def try_running_project(project_path, project_type):
         return False, "No known command to run this project."
 
     print(f"Running {project_type} project...")
-    logger.info(f"Running {project_type} project...")
+    logger.info(f"Trying to run the {project_type} project...")
 
     try:
         # Start the project process
