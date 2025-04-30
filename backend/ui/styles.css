@@ -118,3 +118,31 @@ Input {
 Button {
   margin-right: 1;
 }
+
+#main-vertical {
+  height: 100%;
+  width: 100%;
+}
+
+#logs-panel {
+  height: 80%;
+  border: solid white;
+  padding: 1;
+}
+
+#input-panel {
+  height: 20%;
+  border: solid white;
+  padding: 1;
+}
+
+#text-input {
+  width: 100%;
+  margin-top: 1;
+}
+
+#logs-label,
+#input-label {
+  text-align: center;
+  margin-bottom: 1;
+}
