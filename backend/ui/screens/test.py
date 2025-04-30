@@ -1,3 +1,4 @@
+#new design
 from textual.screen import Screen
 from textual.app import ComposeResult
 from textual.containers import Vertical
@@ -41,13 +42,15 @@ class MainScreen(Screen):
         logger.info(message)
 
     async def monitor_log_file(self) -> None:
+        """Monitor the log file for changes and update log widget."""
         LOG_FILE = "backend/ui/logs/assistant.log"
+        
         if not os.path.exists(LOG_FILE):
             self.log_widget.write_line("Waiting for log file to be created...")
             while not os.path.exists(LOG_FILE):
                 await asyncio.sleep(0.5)
             self.log_widget.write_line("Log file found, monitoring now")
-
+            
         position = os.path.getsize(LOG_FILE)
 
         while True:
@@ -59,17 +62,22 @@ class MainScreen(Screen):
                     continue
 
                 current_size = os.path.getsize(LOG_FILE)
+
                 if current_size > position:
                     with open(LOG_FILE, "r") as f:
                         f.seek(position)
-                        new_lines = f.read().splitlines()
+                        new_content = f.read()
+                        new_lines = new_content.splitlines()
+
                         for line in new_lines:
-                            if line.strip():
+                            if line.strip():  # Only check if line is not empty
                                 self.log_widget.write_line(line)
+
                     position = current_size
                     self.log_widget.scroll_end(animate=False)
 
                 elif current_size < position:
+                    # File was truncated or recreated
                     self.log_widget.write_line("Log file reset detected")
                     position = current_size
 
