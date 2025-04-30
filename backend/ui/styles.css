@@ -125,6 +125,7 @@ Button {
 }
 
 #logs-panel {
+  width: 100%;
   height: 80%;
   border: solid white;
   padding: 1;
