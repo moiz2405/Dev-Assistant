@@ -1,15 +1,15 @@
-# from app.models.groq_preprocess import cached_process_query
-# while(1):
-#     user_prompt = input("Enter your query: ")
-#     cached_process_query(user_prompt)
+from app.models.groq_preprocess import cached_process_query
+while(1):
+    user_prompt = input("Enter your query: ")
+    cached_process_query(user_prompt)
 
-from app.functions.project_handler.create_project import setup_project
-from app.functions.project_handler.setup_project import setup_existing_project
+# from app.functions.project_handler.create_project import setup_project
+# from app.functions.project_handler.setup_project import setup_existing_project
 
 
-path = "D://va_projects"
-name = input()
-setup_existing_project(name,path)
+# path = "D://va_projects"
+# name = input()
+# setup_existing_project(name,path)
 
 
     # setup_project(type,path)
