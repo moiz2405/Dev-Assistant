@@ -52,6 +52,7 @@ def fuzzy_search_dir(stt_dirname, search_path):
 
     if normalized_path not in indexed_dirs_cache:
         print(f"Indexing directories in: {search_path}")
+        logger.info(f"Indexing directories in: {search_path}")
         indexed_dirs_cache[normalized_path] = index_dirs_in_path(search_path)
 
     all_dirs = indexed_dirs_cache[normalized_path]
@@ -98,6 +99,7 @@ def install_dependencies(project_path, project_type):
     }
     if project_type in commands:
         print(f"Installing dependencies for {project_type}...")
+        logger.info(f"Installing dependencies for {project_type}...")
         run_command(commands[project_type], cwd=project_path)
     else:
         print("Unknown project type. Manual setup may be needed.")
@@ -116,6 +118,7 @@ def try_running_project(project_path, project_type):
         return False, "No known command to run this project."
 
     print(f"Running {project_type} project...")
+    logger.info(f"Running {project_type} project...")
 
     try:
         # Start the project process
@@ -147,14 +150,6 @@ def try_running_project(project_path, project_type):
     except Exception as e:
         return False, str(e)
 
-    command = "python main.py" if project_type == "python" and os.path.exists(os.path.join(project_path, "main.py")) else commands.get(project_type, None)
-
-    if not command:
-        return False, "No known command to run this project."
-
-    print(f"Running {project_type} project...")
-    result = run_command(command, cwd=project_path)
-    return True, result
 
 def setup_existing_project(project_name, base_directory):
     """
@@ -172,10 +167,10 @@ def setup_existing_project(project_name, base_directory):
             return
 
         print(f"Project folder detected: {project_folder}")
-        logger.info("")
+        logger.info(f"Project folder detected: {project_folder}")
         project_type = detect_project_type(project_folder)
         print(f"Detected project type: {project_type.upper()}")
-
+        logger.info(f"Detected project type: {project_type.upper()}")
         if project_type != "unknown":
             install_dependencies(project_folder, project_type)
 
@@ -183,6 +178,7 @@ def setup_existing_project(project_name, base_directory):
 
             if success:
                 print("Project is running successfully!")
+                logger.info("Project is running successfully!")
             else:
                 print(f"Project failed to start. Error:\n{output}")
         else:
