@@ -1,93 +1,45 @@
-#old file 
+#new design
 from textual.screen import Screen
-from textual.app import ComposeResult, on
-from textual.containers import Horizontal, Vertical
-from textual.widgets import Header, Footer, Input, Button, Label, Log
+from textual.app import ComposeResult
+from textual.containers import Vertical
+from textual.widgets import Header, Footer, Input, Label, Log
 
-from widgets.dynamic_element import DynamicVisualElement
-from widgets.status_indicator import StatusIndicator
 import asyncio
-import time
 import os
 import logging
 
-# Get the already configured logger instead of importing it
 logger = logging.getLogger("assistant")
 
 class MainScreen(Screen):
-    """Main application screen with split panels."""
+    """Redesigned main screen with two stacked panels: logs and input."""
 
     def compose(self) -> ComposeResult:
-        """Create child widgets for the screen."""
         yield Header()
 
-        with Horizontal(id="main-container"):
-            # Main panel with visual elements
-            with Vertical(id="main-panel"):
-                yield StatusIndicator(id="status-indicator")
-                yield DynamicVisualElement(id="dynamic-element")
-                yield Input(placeholder="Type your message here...", id="text-input")
-                
-                with Horizontal(id="voice-controls"):
-                    yield Button("Toggle Mic", variant="primary", id="toggle-mic")
-                    yield Button("Clear Input", variant="warning", id="clear-input")
-                    yield Button("Submit", variant="success", id="submit-message")
-
-            # Logs panel
+        with Vertical(id="main-vertical"):
+            # Logs panel (upper, takes most of the space)
             with Vertical(id="logs-panel"):
-                yield Label("Monitor Logs", id="logs-label")
+                yield Label("Vision LOGS", id="logs-label")
                 yield Log(highlight=True, id="log-widget")
+
+            # Input panel (bottom, fixed size)
+            with Vertical(id="input-panel"):
+                yield Label("Ask Vision", id="input-label")
+                yield Input(placeholder="Type your message here...", id="text-input")
 
         yield Footer()
 
     def on_mount(self) -> None:
-        """Called when the screen is mounted."""
-        # Query widgets
         self.log_widget = self.query_one("#log-widget", Log)
-        self.dynamic_element = self.query_one("#dynamic-element", DynamicVisualElement)
-        self.status_indicator = self.query_one("#status-indicator", StatusIndicator)
         self.text_input = self.query_one("#text-input", Input)
 
-        # Start monitoring logs
         asyncio.create_task(self.monitor_log_file())
 
-        # Log startup messages
         logger.info("Voice Assistant UI started")
         logger.info("Monitoring logs in real-time")
 
     def write_to_log(self, message: str) -> None:
-        """Use the standardized logger."""
         logger.info(message)
-
-    @on(Button.Pressed, "#toggle-mic")
-    def toggle_microphone(self) -> None:
-        """Toggle microphone state."""
-        self.status_indicator.toggle_mic()
-        self.dynamic_element.toggle_status()
-
-        status = "activated" if self.status_indicator.mic_active else "deactivated"
-        self.write_to_log(f"Microphone {status}")
-
-    @on(Button.Pressed, "#clear-input")
-    def clear_input(self) -> None:
-        """Clear the text input field."""
-        self.text_input.value = ""
-
-    @on(Button.Pressed, "#submit-message")
-    def submit_message(self) -> None:
-        """Handle message submission."""
-        message = self.text_input.value.strip()
-        if message:
-            self.write_to_log(f"User: {message}")
-            self.text_input.value = ""
-            asyncio.create_task(self.simulate_response(message))
-
-    async def simulate_response(self, message: str) -> None:
-        """Simulate an assistant response."""
-        self.write_to_log("Assistant: Processing...")
-        await asyncio.sleep(1)
-        response = f"You said: {message}"
-        self.write_to_log(f"Assistant: {response}")
 
     async def monitor_log_file(self) -> None:
         """Monitor the log file for changes and update log widget."""
