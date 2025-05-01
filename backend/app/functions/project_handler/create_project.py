@@ -90,7 +90,16 @@ def _setup_project_thread(project_type, parent_path, process_id):
                 # For Next.js, change to parent directory first
                 os.chdir(os.path.dirname(project_folder_path))
                 subprocess.run(
-                    ["npx", "create-next-app@latest", os.path.basename(project_folder_path), "--ts"],
+                    [
+                        "npx", "create-next-app@latest", 
+                        os.path.basename(project_folder_path),
+                        "--typescript", 
+                        "--eslint", 
+                        "--tailwind", 
+                        "--src-dir", 
+                        "--app-router", 
+                        "--turbopack"
+                    ],
                     check=True,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
