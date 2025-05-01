@@ -21,15 +21,6 @@
   "mini project from": "Certainly, sir. I am at your service to assist with your mini-project. How may I be of assistance?",
   "open mini project ppt from": "At once. The \"mini project PPT\" shall be opened directly.",
   "how many project ppt from document": "Certainly, sir. To determine the number of project PPTs from the document, I would require access to the document itself. Please provide it when you are ready.",
-  "open mini project from download": "Certainly, sir. I shall locate and open the specified mini project from your downloads promptly.",
-  "set up a react": "Very good, sir. I shall assist you with setting up a React project.\n\nWould you prefer to use Create React App, or another method?",
-  "set up a next day": "Certainly, sir. I shall arrange that for you at once. Please provide the necessary details, such as the time and any relevant context.",
-  "fatafat result": "At once. How may I assist you with obtaining your desired results with utmost haste?",
-  "tata power": "Very good, sir. Tata Power is indeed a prominent energy company based in India. Is there anything specific you wish to know about them?",
-  "set up a": "Certainly, sir. Please specify what you would like me to set up.",
-  "react project": "Very good. I understand you require assistance with a React project, sir. How may I be of further service?",
-  "set alarm": "Certainly, sir. May I inquire as to what time you wish the alarm to be set?",
-  "set": "Very good, sir. Set what, precisely?",
   "one project ppt from documents": "Very good, I shall compile a PowerPoint presentation from the provided documents forthwith.",
   "open project ppt from documents": "Very good, sir. The presentation shall be opened directly.",
   "open notes from documents": "Very good, I am accessing your notes from documents now. Please allow a moment.",
@@ -137,9 +128,6 @@
   "clone decentralized deposit": "At once.",
   "clone decentralized repository": "Very good, cloning decentralized repository.",
   "set alarm at 3:40": "Certainly, sir.",
-  "setup and react js project": "Very good, I shall prepare the necessary configurations.",
-  "set up a react js project": "At once.",
-  "set up a next js project": "At once.",
   "open whatsapp pay vision": "At once.",
   "open mini project ppt from documents": "Very good, sir.",
   "summarise many project ppt from documents": "Very good, I shall require access to the files, sir.",
@@ -187,10 +175,6 @@
   "set up the project portfolio": "Very good, sir.",
   "setup portfolio": "Very good, sir.",
   "set up portfolio": "At once.",
-  "occupation": "A butler, sir.",
-  "create a react js project": "Very good, sir.",
-  "ok vision": "Very good.",
-  "set up the project react": "At once.",
-  "shut up the project react": "At once.",
-  "set up the project next": "Very good."
+  "occupation": "A butler, sir."
+
 }
