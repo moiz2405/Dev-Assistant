@@ -79,7 +79,7 @@ def _setup_project_thread(project_type, parent_path, process_id):
                 # For React, we'll use create-react-app which needs to be run from parent directory
                 os.chdir(os.path.dirname(project_folder_path))
                 subprocess.run(
-                    ["npx", "create-react-app", os.path.basename(project_folder_path)],
+                    ["npx", "create-react-app", os.path.basename(project_folder_path), "--use-npm", "--yes"],
                     check=True,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
