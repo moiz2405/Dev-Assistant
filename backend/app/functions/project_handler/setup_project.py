@@ -35,12 +35,22 @@ def to_wsl_path(path):
 def normalize_filename(name):
     return name.lower().replace('_', ' ').replace('-', ' ').strip()
 
+# def index_dirs_in_path(root_path):
+#     dir_paths = []
+#     for root, dirs, _ in os.walk(root_path):
+#         for d in dirs:
+#             dir_paths.append(os.path.join(root, d))
+#     return dir_paths
 def index_dirs_in_path(root_path):
-    dir_paths = []
-    for root, dirs, _ in os.walk(root_path):
-        for d in dirs:
-            dir_paths.append(os.path.join(root, d))
-    return dir_paths
+    try:
+        return [
+            os.path.join(root_path, d)
+            for d in os.listdir(root_path)
+            if os.path.isdir(os.path.join(root_path, d))
+        ]
+    except Exception as e:
+        logger.error(f"Failed to index directories in {root_path}: {e}")
+        return []
 
 def fuzzy_search_dir(stt_dirname, search_path):
     global indexed_dirs_cache
