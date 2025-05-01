@@ -187,9 +187,8 @@
   "set up the project portfolio": "Very good, sir.",
   "setup portfolio": "Very good, sir.",
   "set up portfolio": "At once.",
-  "set up a new react js project": "Very good, sir. The project will be prepared directly.",
-  "create a new react js project": "Very good. Creating the project now.",
-  "create a next js project": "At once.",
-  "create a new next js project": "Very good.",
-  "occupation": "A butler, sir."
+  "occupation": "A butler, sir.",
+  "create a react js project": "Very good, sir.",
+  "ok vision": "Very good."
+
 }
