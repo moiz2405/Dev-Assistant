@@ -108,8 +108,9 @@ def install_dependencies(project_path, project_type):
         "go": "go mod tidy"
     }
     if project_type in commands:
-        print(f"Installing dependencies for {project_type}...")
-        logger.info(f"Installing dependencies for {project_type}...")
+        print(f"Installing dependencies for {project_type} using command {commands[project_type]}...")
+
+        logger.info(f"Installing dependencies for {project_type} using command {commands[project_type]}..")
         run_command(commands[project_type], cwd=project_path)
     else:
         print("Unknown project type. Manual setup may be needed.")
@@ -127,8 +128,8 @@ def try_running_project(project_path, project_type):
     if not command:
         return False, "No known command to run this project."
 
-    print(f"Running {project_type} project...")
-    logger.info(f"Trying to run the {project_type} project...")
+    print(f"Running {project_type} project using command {command}...")
+    logger.info(f"Trying to run the {project_type} project using command {command}...")
 
     try:
         # Start the project process
@@ -178,9 +179,12 @@ def setup_existing_project(project_name, base_directory):
 
         print(f"Project folder detected: {project_folder}")
         logger.info(f"Project folder detected: {project_folder}")
+
         project_type = detect_project_type(project_folder)
+        
         print(f"Detected project type: {project_type.upper()}")
         logger.info(f"Detected project type: {project_type.upper()}")
+
         if project_type != "unknown":
             install_dependencies(project_folder, project_type)
 
