@@ -3,7 +3,7 @@ import logging
 import os
 
 # Create a 'logs' directory if it doesn't exist
-os.makedirs("logs", exist_ok=True)
+os.makedirs("backend/ui/logs", exist_ok=True)
 
 LOG_FILE_PATH = "backend/ui/logs/assistant.log"
 
