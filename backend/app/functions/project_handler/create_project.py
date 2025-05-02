@@ -5,6 +5,8 @@ import threading
 import time
 import queue
 
+from app.functions.logger import logger
+
 PROJECT_TYPE_ALIASES = {
     "react": ["react", "react.js", "reactjs"],
     "next": ["next", "next.js", "nextjs", "nextjs app"],
@@ -82,7 +84,7 @@ def _setup_project_thread(project_type, parent_path, process_id):
         project_folder_path = get_available_path(project_folder_path)
         
         output_queue.put((process_id, f"Setting up {project_type} project at: {project_folder_path}"))
-
+        logger.info(f"Setting up {project_type} project at: {project_folder_path}")
         # Create the project directory
         os.makedirs(project_folder_path, exist_ok=True)
         
@@ -223,7 +225,7 @@ if __name__ == "__main__":
             "status": "RUNNING"
         }
         print(f"Started process {process_id} for {project_type} project")
-    
+        logger.info(f"Started process {process_id} for {project_type} project")
     # Main event loop
     try:
         while active_processes:
