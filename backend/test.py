@@ -1,8 +1,8 @@
 from app.functions.project_handler.create_project import setup_project
-
+from app.functions.project_handler.create_runner import run_project_setup
 while(1):
     target = input()
-    setup_project(target, "D://va_projects")
+    run_project_setup(target, "D://va_projects")
 
 # from app.models.groq_preprocess import cached_process_query
 # while(1):
