@@ -67,7 +67,7 @@ def _setup_project_thread(project_type, parent_path, process_id):
         os.makedirs(parent_path, exist_ok=True)
         
         # Project folder under the parent path
-        project_folder_name = f"{project_type}-project"
+        project_folder_name = f"{project_type}project"
         project_folder_path = os.path.join(parent_path, project_folder_name)
         project_folder_path = get_available_path(project_folder_path)
         
