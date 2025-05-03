@@ -52,7 +52,7 @@ def get_available_path(base_path: str) -> str:
 
     counter = 2
     while True:
-        new_path = f"{base_path} ({counter})"
+        new_path = f"{base_path}{counter}"
         if not os.path.exists(new_path):
             return new_path
         counter += 1
@@ -197,45 +197,3 @@ def check_project_status():
     except queue.Empty:
         return None, None
 
-# Example usage
-if __name__ == "__main__":
-    active_processes = {}
-    
-    # Start a process
-    project_type = "react"
-    parent_path = "D:/va_projects"
-    
-    process_id = setup_project(project_type, parent_path)
-    if process_id:
-        active_processes[process_id] = {
-            "type": project_type, 
-            "path": parent_path,
-            "status": "RUNNING"
-        }
-        print(f"Started process {process_id} for {project_type} project")
-        logger.info(f"Started process {process_id} for {project_type} project")
-    # Main event loop
-    try:
-        while active_processes:
-            # Check for updates
-            process_id, message = check_project_status()
-            
-            if process_id is not None:
-                if message in ["COMPLETED", "FAILED"]:
-                    active_processes[process_id]["status"] = message
-                    print(f"Process {process_id} {message}")
-                    # Remove completed/failed processes after some time
-                    # (In a real app, you might want to keep them for status reporting)
-                else:
-                    print(f"[{process_id}] {message}")
-            
-            # Clean up completed/failed processes
-            completed = [pid for pid, info in active_processes.items() 
-                        if info["status"] in ["COMPLETED", "FAILED"]]
-            for pid in completed:
-                del active_processes[pid]
-                
-            time.sleep(0.1)  # Small delay to prevent CPU hogging
-            
-    except KeyboardInterrupt:
-        print("Exiting... (background processes will continue)")
