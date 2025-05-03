@@ -7,7 +7,7 @@ from app.functions.summarizer import summarize_in_new_window
 from app.functions.app_handling import open_app, close_app
 from app.functions.project_handler.setup_project import setup_existing_project
 from app.functions.project_handler.create_project import setup_project
-
+from app.functions.project_handler.create_runner import run_project_setup
 from app.models.query_types import QueryType, SubTaskType
 
 def determine_function(structured_query):
@@ -45,7 +45,7 @@ def determine_function(structured_query):
             
     if query_type == QueryType.CREATE_PROJECT:
         if subtask == SubTaskType.CREATE_PROJECT:
-            setup_project(target,"D://va_projects")
+            run_project_setup(target,"D://va_projects")
    
     
     if query_type == QueryType.SETUP_PROJECT:
