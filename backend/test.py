@@ -1,7 +1,13 @@
-from app.models.groq_preprocess import cached_process_query
+from app.functions.project_handler.create_project import setup_project
+
 while(1):
-    user_prompt = input("Enter your query: ")
-    cached_process_query(user_prompt)
+    target = input()
+    setup_project(target, "D://va_projects")
+
+# from app.models.groq_preprocess import cached_process_query
+# while(1):
+#     user_prompt = input("Enter your query: ")
+#     cached_process_query(user_prompt)
 
 # from app.functions.project_handler.create_project import setup_project
 # from app.functions.project_handler.setup_project import setup_existing_project
