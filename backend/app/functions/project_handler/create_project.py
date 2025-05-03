@@ -97,13 +97,15 @@ def _setup_project_thread(project_type, parent_path, process_id):
                 subprocess.run(
                     [
                         "npx", "create-next-app@latest", 
-                        ".",
+                        os.path.basename(project_folder_path),
                         "--typescript", 
                         "--eslint", 
                         "--tailwind", 
                         "--src-dir", 
                         "--app-router", 
-                        "--turbopack"
+                        "--turbopack",
+                        "--yes",
+                        "--use-npm"
                     ],
                     check=True,
                     stdout=subprocess.PIPE,
