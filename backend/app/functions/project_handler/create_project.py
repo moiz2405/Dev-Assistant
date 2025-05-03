@@ -97,7 +97,7 @@ def _setup_project_thread(project_type, parent_path, process_id):
                 subprocess.run(
                     [
                         "npx", "create-next-app@latest", 
-                        os.path.basename(project_folder_path),
+                        ".",
                         "--typescript", 
                         "--eslint", 
                         "--tailwind", 
