@@ -1,4 +1,3 @@
-# create_runner.py
 import time
 from app.functions.project_handler.create_project import setup_project, check_project_status
 from app.functions.logger import logger
@@ -24,14 +23,23 @@ def run_project_setup(target, parent_path="D://va_projects"):
             pid, msg = check_project_status()
             if pid:
                 print(f"[{pid}] {msg}")
+                
                 if msg in ["COMPLETED", "FAILED"]:
                     active_processes[pid]["status"] = msg
+                    # Log final status
+                    if msg == "COMPLETED":
+                        logger.info(f"Process {pid} completed successfully.")
+                    else:
+                        logger.error(f"Process {pid} failed.")
 
+            # Clean up finished processes
             completed = [p for p, info in active_processes.items()
                          if info["status"] in ["COMPLETED", "FAILED"]]
             for p in completed:
                 del active_processes[p]
 
             time.sleep(0.1)
+
     except KeyboardInterrupt:
         print("Exiting... (background processes will continue)")
+        logger.warning("Process monitoring interrupted by user.")
