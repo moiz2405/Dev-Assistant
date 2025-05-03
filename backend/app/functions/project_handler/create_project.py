@@ -30,18 +30,6 @@ def to_wsl_path(path):
         return path.replace('\\', '/')
     return path
 
-# def normalize_filename(name):
-#     """Normalize filename for comparison"""
-#     return name.lower().replace('_', ' ').replace('-', ' ').strip()
-
-# def normalize_project_type(project_type: str) -> str:
-#     """Normalize project type string to a standard format"""
-#     project_type = normalize_filename(project_type).replace(" ", "")
-#     for standard, aliases in PROJECT_TYPE_ALIASES.items():
-#         if project_type in [normalize_filename(alias).replace(" ", "") for alias in aliases]:
-#             return standard
-#     raise ValueError(f"Unsupported project type '{project_type}'. Supported types: {list(PROJECT_TYPE_ALIASES.keys())}")
-
 def normalize_filename(name):
     """Normalize filename for comparison"""
     # Removing special characters and converting to lowercase
