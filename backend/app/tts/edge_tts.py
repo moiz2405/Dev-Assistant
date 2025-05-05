@@ -1,75 +1,53 @@
 import os
-import datetime
 import sys
 import io
-import edge_tts
+import tempfile
 import asyncio
-# import contextlib
-# with contextlib.redirect_stdout(None):
-#     import pygame
-import pygame    
+import edge_tts
+import pygame
+
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+
 voice_model = "en-US-AndrewNeural"
-responses_dir = "responses"
-
-os.makedirs(responses_dir, exist_ok=True)
-
 
 def suppress_stdout_stderr():
-    sys.stdout = io.StringIO()  # Redirect stdout to null
-    sys.stderr = io.StringIO()  # Redirect stderr to null
+    sys.stdout = io.StringIO()
+    sys.stderr = io.StringIO()
 
 def restore_stdout_stderr():
-    sys.stdout = sys.__stdout__  # Restore original stdout
-    sys.stderr = sys.__stderr__  # Restore original stderr
+    sys.stdout = sys.__stdout__
+    sys.stderr = sys.__stderr__
 
 async def speak(text):
-    """
-    Function to speak the given text using the hardcoded voice.
-    
-    Args:
-    - text (str): The text to be spoken.
-    """
-    # Suppress the pygame initialization message
     suppress_stdout_stderr()
 
-    # Create a timestamped filename for the new response
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"{responses_dir}/res_voice_{timestamp}.mp3"  # or ".wav" if you prefer
+    try:
+        # Create a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp_file:
+            filename = tmp_file.name
 
-    # Set the hardcoded voice for TTS
-    communicate = edge_tts.Communicate(text, voice=voice_model)
-    await communicate.save(filename)
+        communicate = edge_tts.Communicate(text, voice=voice_model)
+        await communicate.save(filename)
 
-    # Restore stdout and stderr after suppressing
-    restore_stdout_stderr()
+        restore_stdout_stderr()
 
-    # Delete the previous response if it exists
-    existing_files = sorted(
-        [f for f in os.listdir(responses_dir) if f.endswith(".mp3")], 
-        key=lambda f: os.path.getctime(os.path.join(responses_dir, f))
-    )
+        # Wait a bit to ensure file system flush (especially on Windows)
+        await asyncio.sleep(0.1)
 
-    if len(existing_files) > 1:  # If there's more than one file, delete the oldest
-        oldest_file = existing_files[0]
-        os.remove(os.path.join(responses_dir, oldest_file))  # Remove the oldest response
+        # Initialize pygame mixer
+        pygame.mixer.init()
+        pygame.mixer.music.load(filename)
+        pygame.mixer.music.play()
 
-    # Initialize the pygame mixer
-    pygame.mixer.init()
+        while pygame.mixer.music.get_busy():
+            pygame.time.Clock().tick(10)
 
-    # Load and play the saved audio file
-    pygame.mixer.music.load(filename)
-    pygame.mixer.music.play()
-
-    # Wait until the audio finishes playing
-    while pygame.mixer.music.get_busy():  
-        pygame.time.Clock().tick(10)
+    except Exception as e:
+        print(f"ERROR | Error in speaking text: {e}")
+    finally:
+        # Cleanup the temp file
+        if os.path.exists(filename):
+            os.remove(filename)
 
 async def speak_text(text):
-    """
-    Callable function that triggers the TTS for the given text.
-    
-    Args:
-    - text (str): The text to be spoken.
-    """
-    await speak(text)  # Make sure you await the speak() async function
+    await speak(text)
