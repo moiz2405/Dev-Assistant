@@ -11,6 +11,7 @@ import platform
 import os
 import getpass
 import diskcache
+import re
 # from query_types import QueryType, SubTaskType
 from app.models.query_types import QueryType,SubTaskType
 cache = diskcache.Cache(".query_cache")
@@ -22,7 +23,8 @@ class QueryProcessor(BaseModel):
         description=(
             "Correctly determine the type of query from:\n"
             "1) GITHUB_ACTIONS - LIST_REPOS, PUSH_REPO, CLONE_REPO.\n"
-            "2) PROJECT_SETUP - Setup a new/existing project environment (like Next.js, Flask).\n"
+            "2) SETUP_PROJECT - Setup a existing project environment (like Next.js, Flask).\n"
+            "3) CREATE_PROJECT - Create a new project\n"
             "3) FILE_HANDLING - Search, open, or close a file.\n"
             "4) APP_HANDLING - Open or close an application.\n"
             "5) SUMMARIZER - Summarize or answer questions using a given PDF/document."
@@ -33,7 +35,8 @@ class QueryProcessor(BaseModel):
         description=(
             "The specific sub-action within the main type:\n"
             "- GITHUB_ACTIONS: LIST_REPOS, CLONE_REPO, PUSH_REPO\n"
-            "- PROJECT_SETUP: NEW_PROJECT, EXISTING_PROJECT\n"
+            "- SETUP_PROJECT : SETUP_PROJECT"
+            "- CREATE_PROJECT - CREATE_PROJECT\n"
             "- FILE_HANDLING: SEARCH_FILE, OPEN_FILE, CLOSE_FILE\n"
             "- APP_HANDLING: OPEN_APP, CLOSE_APP\n"
             "- SUMMARIZER: SUMMARIZE"
@@ -46,7 +49,8 @@ class QueryProcessor(BaseModel):
             "- FILE_HANDLING: file name with extension (e.g., report.pdf, notes.txt)\n"
             "- APP_HANDLING: valid app name (e.g., Chrome, VS Code, WhatsApp)\n"
             "- GITHUB_ACTIONS: repo name (e.g., chat-bot)\n"
-            "- PROJECT_SETUP: project type or name (e.g., Flask, Next.js)\n"
+            "- SETUP_PROJECT: project type or name (e.g., Flask, Next.js)\n"
+            "- CREATE_PROJECT: project type or name (e.g., Flask, Next.js)\n"
             "- SUMMARIZER: filename (e.g., summary.pdf)"
         )
     )
@@ -93,7 +97,26 @@ def boost_prompt(prompt: str) -> str:
     # Summarizer route
     if any(kw in lowered for kw in summarizer_keywords):
         return "[TASK:SUMMARIZER] " + prompt
+    create_patterns = [
+        r"create (a )?(new )?.*project",
+        r"start (a )?.*project",
+        r"generate (a )?.*project",
+        r"build (a )?.*project",
+    ]
+    if any(re.search(p, lowered) for p in create_patterns):
+        return "[TASK:CREATE_PROJECT] " + prompt
 
+    # -- Setup Project patterns
+    setup_patterns = [
+        r"setup (the )?.*project",
+        r"set up (the )?.*project",
+        r"configure (the )?.*project",
+        r"initialize (the )?.*project",
+        r"install dependencies for.*project"
+    ]
+    if any(re.search(p, lowered) for p in setup_patterns):
+        return "[TASK:SETUP_PROJECT] " + prompt
+    
     return prompt
 
 def extract_path_hint(prompt: str, query_type: QueryType, subtask: SubTaskType) -> str:
