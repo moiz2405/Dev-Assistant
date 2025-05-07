@@ -29,5 +29,5 @@ from app.tts.edge_tts import speak_text
 # assistant.start_hotword_listener()
 
 while(1):
-    prompt = input()
+    prompt = input("Enter your prompt")
     determine_function(cached_process_query(prompt))
