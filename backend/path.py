@@ -10,11 +10,11 @@ from app.tts.edge_tts import speak_text
 # from app.functions.logger.logger_setup import logger\
 from app.logger.logger_setup import logger
 
-def suppress_stderr():
-    devnull = os.open(os.devnull, os.O_WRONLY)
-    os.dup2(devnull, sys.stderr.fileno())
+# def suppress_stderr():
+#     devnull = os.open(os.devnull, os.O_WRONLY)
+#     os.dup2(devnull, sys.stderr.fileno())
 
-suppress_stderr()
+# suppress_stderr()
 
 executor = ThreadPoolExecutor(max_workers=4)
 
