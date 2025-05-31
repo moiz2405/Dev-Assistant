@@ -7,8 +7,11 @@ from app.models.groq_preprocess import cached_process_query
 from app.query_processor import determine_function
 from app.tts.response_generator import generate_response
 from app.tts.edge_tts import speak_text
-# from app.functions.logger.logger_setup import logger\
 from app.logger.logger_setup import logger
+
+from shared_todo_queue import todo_queue
+
+# from app.functions.logger.logger_setup import logger\
 
 # def suppress_stderr():
 #     devnull = os.open(os.devnull, os.O_WRONLY)
@@ -17,6 +20,12 @@ from app.logger.logger_setup import logger
 # suppress_stderr()
 
 executor = ThreadPoolExecutor(max_workers=4)
+
+async def perform_queue_task():
+    while True:
+        curr_task = await todo_queue.get()
+        executor.submit(lambda: determine_function(cached_process_query(curr_task)))
+
 
 # Run the speech synthesis in a separate thread
 def run_speak_text(text):
@@ -48,5 +57,12 @@ async def start_voice_assistant():
     logger.info("Hotword listener started.")
     # Remove print statement and only use logger
 
+async def main():
+    # Start the background queue task
+    asyncio.create_task(perform_queue_task())
+    
+    # Start the voice assistant (this will block until stopped)
+    await start_voice_assistant()
+
 if __name__ == "__main__":
-    asyncio.run(start_voice_assistant())
+    asyncio.run(main())
