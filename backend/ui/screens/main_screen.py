@@ -1,8 +1,10 @@
-#new design
 from textual.screen import Screen
 from textual.app import ComposeResult
 from textual.containers import Vertical
 from textual.widgets import Header, Footer, Input, Label, Log
+# from textual.events import InputSubmitted
+
+from shared_todo_queue import todo_queue
 
 import asyncio
 import os
@@ -70,14 +72,13 @@ class MainScreen(Screen):
                         new_lines = new_content.splitlines()
 
                         for line in new_lines:
-                            if line.strip():  # Only check if line is not empty
+                            if line.strip():
                                 self.log_widget.write_line(line)
 
                     position = current_size
                     self.log_widget.scroll_end(animate=False)
 
                 elif current_size < position:
-                    # File was truncated or recreated
                     self.log_widget.write_line("Log file reset detected")
                     position = current_size
 
@@ -85,3 +86,11 @@ class MainScreen(Screen):
                 self.log_widget.write_line(f"Error monitoring log: {e}")
 
             await asyncio.sleep(0.2)
+
+    async def on_input_submitted(self, event: Input.Submitted) -> None:
+        """Handle Enter key submission from Input widget."""
+        message = event.value.strip()
+        if message:
+            await todo_queue.put(message)
+            self.log_widget.write_line(f"[Input] {message}")
+            self.text_input.value = ""
