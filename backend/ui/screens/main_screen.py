@@ -1,10 +1,13 @@
+import sys
+import os
 from textual.screen import Screen
 from textual.app import ComposeResult
 from textual.containers import Vertical
 from textual.widgets import Header, Footer, Input, Label, Log
 # from textual.events import InputSubmitted
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from shared_todo_queue import enqueue,dequeue
 
-from shared_todo_queue import todo_queue
 
 import asyncio
 import os
@@ -91,6 +94,7 @@ class MainScreen(Screen):
         """Handle Enter key submission from Input widget."""
         message = event.value.strip()
         if message:
-            await todo_queue.put(message)
+            enqueue(message)
+            logger.info(f"Inserted to queue : {message}")
             self.log_widget.write_line(f"[Input] {message}")
             self.text_input.value = ""
