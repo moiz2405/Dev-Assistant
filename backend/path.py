@@ -9,7 +9,8 @@ from app.tts.response_generator import generate_response
 from app.tts.edge_tts import speak_text
 from app.logger.logger_setup import logger
 
-from shared_todo_queue import todo_queue
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from shared_todo_queue import enqueue,dequeue
 
 # from app.functions.logger.logger_setup import logger\
 
@@ -23,8 +24,15 @@ executor = ThreadPoolExecutor(max_workers=4)
 
 async def perform_queue_task():
     while True:
-        curr_task = await todo_queue.get()
-        executor.submit(lambda: determine_function(cached_process_query(curr_task)))
+        curr_task = dequeue()
+        if curr_task is None:
+            await asyncio.sleep(0.5)  # wait half a second before checking again
+            continue
+        
+        logger.info(f"Executing the shared task {curr_task}")
+        handle_recognized_command(curr_task)
+        # determine_function(cached_process_query(curr_task))
+
 
 
 # Run the speech synthesis in a separate thread
