@@ -192,5 +192,18 @@
   "from documents summarise hall ticket": "Very good. A summarization of the hall ticket, at once.",
   "summarize the pdf hallticket from documents": "Very good, sir. I shall summarize the hall ticket.",
   "create a new textures project": "Very good.",
-  "set up the project next project": "Very good, sir."
+  "set up the project next project": "Very good, sir.",
+  "summarize labreports from documents": "Very good.",
+  "clone the repo backend": "Very good, cloning the repository now.",
+  "push the project nextproject to github": "Very good, sir. Pushing the project now.",
+  "push the project next project to get out": "Very good.",
+  "push the repository next project to get up": "At once.",
+  "create a new act js project": "Very good, sir. A new Act.js project will be created.",
+  "create a new react js project": "Very good.",
+  "push the project react project to github": "At once.",
+  "push the folder reactproject to github": "At once.",
+  "setup create a new nexus project": "At once.",
+  "push the project next project to github": "At once.",
+  "cddfadl,": "Acknowledged.",
+  "push nextpro to github": "Very good, sir."
 }
