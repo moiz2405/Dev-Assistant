@@ -2,13 +2,20 @@
 # import os
 # import sys
 # import atexit
+# from app.functions.file_handler import open_file,list_files_by_type
+# target = "hallticket"
+# path = "C:\\Users\\km866\\OneDrive\\Documents\\Documents"
+# open_file(target,path)
+from app.functions.app_handling import open_app, close_app
+target = "whatsapp"
+close_app(target)
 
-from app.functions.github_handler import clone_github_repo, push_folder_to_github,list_github_repos
+# from app.functions.github_handler import clone_github_repo, push_folder_to_github,list_github_repos
 
-# list_github_repos()
-target = input("Enter Project name to Push to Github:  " )
-# clone_github_repo(target,"D://va_projects")
-push_folder_to_github(target, "D://va_projects")
+# # list_github_repos()
+# target = input("Enter Project name to Push to Github:  " )
+# # clone_github_repo(target,"D://va_projects")
+# push_folder_to_github(target, "D://va_projects")
 # # from app.stt.voice_recognition import VoiceAssistant
 # # from app.models.groq_preprocess import cached_process_query
 # # from app.query_processor import determine_function
