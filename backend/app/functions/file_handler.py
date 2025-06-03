@@ -5,7 +5,7 @@ import difflib
 import subprocess
 # Global cache for indexed files
 indexed_files_cache = {}
-
+from app.functions.logger import logger
 def is_wsl():
     return 'microsoft' in platform.uname().release.lower()
 
@@ -93,6 +93,7 @@ def open_file(stt_filename, search_path):
     :param stt_filename: The (possibly typoed) filename to find and open.
     :param search_path: Where to search.
     """
+    logger.info(f"Searching for {stt_filename} in {search_path}")
     file_path = fuzzy_search_file(stt_filename, search_path)
 
     if not file_path:
@@ -121,6 +122,7 @@ def open_file(stt_filename, search_path):
         if os.path.exists(file_path):
             try:
                 os.startfile(file_path)
+                logger.info(f"Opening {file_path}")
             except Exception as e:
                 print(f"Error opening file: {e}")
         else:
