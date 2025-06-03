@@ -2,7 +2,7 @@
 # takes app name as input 
 import subprocess
 import os
-
+from app.functions.logger import logger
 # Microsoft Store (UWP) Apps
 uwp_apps = {
     "whatsapp": "5319275A.WhatsAppDesktop_cv1g1gvanyjgm!App",
@@ -35,16 +35,21 @@ def open_app(app_name: str):
         try:
             subprocess.Popen(["explorer.exe", f"shell:AppsFolder\\{uwp_apps[app_name]}"])
             print(f"[+] Opened UWP app: {app_name}")
+            logger.info(f"[+] Opened UWP app: {app_name}")
         except Exception as e:
             print(f"[!] Failed to open {app_name}: {e}")
+            logger.info(f"[!] Failed to open {app_name}: {e}")
     elif app_name in desktop_apps:
         try:
             subprocess.Popen(desktop_apps[app_name])
             print(f"[+] Opened Desktop app: {app_name}")
+            logger.info(f"[+] Opened Desktop app: {app_name}")
         except Exception as e:
             print(f"[!] Failed to open {app_name}: {e}")
+            logger.info(f"[!] Failed to open {app_name}: {e}")
     else:
         print(f"[!] App '{app_name}' not found.")
+        logger.info(f"[!] App '{app_name}' not found.")
 
 def close_app(app_name: str):
     exe_name = app_name + ".exe"
@@ -53,6 +58,8 @@ def close_app(app_name: str):
             "cmd.exe", "/c", "taskkill", "/f", "/im", exe_name
         ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         print(f"[-] Closed app: {exe_name}")
+        logger.info(f"[-] Closed app: {exe_name}")
     except Exception as e:
         print(f"[!] Failed to close {exe_name}: {e}")
+        logger.info(f"[!] Failed to close {exe_name}: {e}")
 
