@@ -5,7 +5,7 @@ import difflib
 import subprocess
 # Global cache for indexed files
 indexed_files_cache = {}
-from app.functions.logger import logger
+from logger import logger
 def is_wsl():
     return 'microsoft' in platform.uname().release.lower()
 
@@ -112,6 +112,7 @@ def open_file(stt_filename, search_path):
 
         if os.path.exists(file_path):
             try:
+                logger.info(f"Opening {windows_path}")
                 subprocess.run(["cmd.exe", "/C", "start", "", windows_path])
             except Exception as e:
                 print(f"Error opening file: {e}")
