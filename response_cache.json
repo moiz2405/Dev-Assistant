@@ -209,5 +209,9 @@
   "push the repository text project to github": "At once.",
   "set up create a new nexus project": "Very good.",
   "open hallticket from documents": "Very good, sir.",
-  "summarize linuxpapers from documents": "At once. I shall endeavor to summarize the provided Linux papers for you."
+  "summarize linuxpapers from documents": "At once. I shall endeavor to summarize the provided Linux papers for you.",
+  "open whatsapp open whatsapp": "Very good, sir.",
+  "clone the repo portfolio": "Very good, sir.",
+  "setup the project portfolio": "Very good, sir. The project portfolio shall be established immediately.",
+  "summarize linuxpapers": "Very good, sir. A summary of Linuxpapers: a resource for Linux documentation and how-to guides."
 }
