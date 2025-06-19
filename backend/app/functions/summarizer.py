@@ -8,7 +8,7 @@ from agno.models.groq import Groq
 from PyPDF2 import PdfReader
 from agno.agent import Agent, RunResponse
 from agno.utils.pprint import pprint_run_response
-from logger import logger
+# from logger import logger
 indexed_files_cache = {}
 
 def is_wsl():
@@ -135,7 +135,7 @@ def summarize_in_new_window(folder_path, spoken_filename):
     print(full_file_path)
     if not full_file_path:
         print(f"No match found for '{spoken_filename}' in {folder_path}")
-        logger.info(f"No match found for '{spoken_filename}' in {folder_path}")
+        # logger.info(f"No match found for '{spoken_filename}' in {folder_path}")
         return
 
     if is_wsl():
@@ -185,7 +185,7 @@ def run_summarizer(pdf_path=None):
     
     if pdf_path is None:
         pdf_path = sys.argv[1]
-    logger.info("Opening Summarizer In New Window")
+    # logger.info("Opening Summarizer In New Window")
     summarizer(pdf_path)
 
 
