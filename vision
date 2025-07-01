@@ -1,0 +1,26 @@
+
+#!/bin/bash
+cd /mnt/d/projects/MYPROJECTS/Dev-Assistant
+source venv/bin/activate
+
+export GROQ_API_KEY=$(grep '^GROQ_API_KEY=' .env.local | cut -d '=' -f2- | xargs)
+export GEMINI_API_KEY=$(grep '^GEMINI_API_KEY=' .env.local | cut -d '=' -f2- | xargs)
+
+echo "Activating V.I.S.I.O.N"
+
+# Function to handle script exit
+cleanup() {
+  echo "Cleaning up..."
+  pkill -P $$
+  exit 0
+}
+
+trap cleanup SIGINT SIGTERM EXIT
+
+# Run your main program
+python backend/path.py &
+
+# Optional UI script
+python backend/ui/terminal.py
+
+wait
